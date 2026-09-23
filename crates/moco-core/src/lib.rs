@@ -4,8 +4,11 @@
 pub mod account;
 pub mod crypto;
 pub mod error;
+pub mod generator;
 pub mod model;
 pub mod store;
+pub mod strength;
+pub mod totp;
 pub(crate) mod util;
 
 pub use error::{CoreError, Result};

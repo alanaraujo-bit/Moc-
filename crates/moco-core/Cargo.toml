@@ -28,6 +28,7 @@ subtle = "2.6"
 unicode-normalization = "=0.1.25"
 data-encoding = "2.9"
 rusqlite = { version = "0.40", features = ["bundled"] }
+zxcvbn = "3.1"
 
 [dev-dependencies]
 hex = "0.4"

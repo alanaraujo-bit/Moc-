@@ -44,7 +44,7 @@ Build do Cargo vai para `../moco-target` (caminho ASCII; a pasta do repo tem "ó
 **Escolha.** Derivação em duas partes, o desenho publicado e auditado do 1Password (2SKD):
 
 - `Chave Secreta`: 128 bits aleatórios gerados no dispositivo na criação do cofre
-  (formato `A1-XXXXXX-XXXXXX-XXXXX-XXXXX-XXXXX-XXXXX`, com versão e checksum). Guardada no
+  (formato `M1-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXX`, Crockford Base32 com checksum). Guardada no
   Windows protegida por DPAPI (ligada ao usuário do Windows). Nunca vai ao servidor.
 - `pw = Argon2id(NFKD(senha_mestra), salt, m=64 MiB, t=3, p=4)` (parâmetros salvos junto do
   salt; podem ser elevados depois).
