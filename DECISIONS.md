@@ -49,13 +49,21 @@ Build do Cargo vai para `../moco-target` (caminho ASCII; a pasta do repo tem "ó
 - `pw = Argon2id(NFKD(senha_mestra), salt, m=64 MiB, t=3, p=4)` (parâmetros salvos junto do
   salt; podem ser elevados depois).
 - `prk = HKDF-Extract(salt = chave_secreta, ikm = pw)`
-- `MUK = HKDF-Expand(prk, "moco/v1/unlock")` — desembrulha a Chave da Conta.
-- `AUTH = HKDF-Expand(prk, "moco/v1/auth")` — prova de login no servidor (futuro). Separação
-  total entre autenticação e criptografia: o servidor nunca recebe algo que decifre dados.
+- `MUK = HKDF-Expand(prk, "moco/v1/unlock" ‖ account_id)` — desembrulha a Chave da Conta.
+- Login no servidor (futuro): semente `HKDF-Expand(prk, "moco/v1/auth-ed25519" ‖ account_id)` →
+  par Ed25519; o servidor guarda só a chave pública e o cliente assina um desafio
+  (`"moco/v1/login" ‖ nonce ‖ account_id`). Nada que o servidor receba decifra dados, e não
+  existe token de portador reutilizável derivado da senha.
 
-Com isso, quem roubar só o arquivo do cofre (cenário 1) ou o banco do servidor (cenário 2)
-precisa adivinhar 128 bits aleatórios além da senha: força bruta impraticável mesmo para
-senhas fracas.
+Com isso, quem obtiver **só o arquivo do cofre** (backup, pasta sincronizada) ou **o banco do
+servidor** precisa adivinhar 128 bits aleatórios além da senha: força bruta impraticável mesmo
+para senhas fracas.
+
+*Limite honesto (revisão M5):* a Chave Secreta fica no mesmo computador protegida pela DPAPI,
+cuja força é a do login do Windows. Quem leva o disco **e** consegue o login do Windows (ou,
+em máquinas de domínio, a chave de backup DPAPI do domínio) não enfrenta os 128 bits — só o
+Argon2id. Evolução planejada: embrulhar a Chave Secreta com chave não exportável do TPM
+(Microsoft Platform Crypto Provider), com DPAPI por fora; DPAPI pura só sem TPM, e a UI diz isso.
 
 **Custo aceito.** Em um dispositivo novo o usuário precisa da Chave Secreta (Kit de
 Emergência ou QR code de outro dispositivo). No uso diário ela é invisível. Se a DPAPI falhar
@@ -64,9 +72,11 @@ Emergência ou QR code de outro dispositivo). No uso diário ela é invisível. 
 **Hierarquia.**
 - `Chave da Conta` (AK, 256 bits aleatórios) — raiz. Embrulhada por: MUK; Código de
   Recuperação (se ativo); chave derivada do Windows Hello (por dispositivo).
-- `Par X25519` da conta (compartilhamento futuro) — privada cifrada pela AK.
-- `Chave do Cofre` (VK, 256 bits por cofre) — embrulhada pela AK (cofres próprios) ou por
-  *sealed box* para a chave pública do destinatário (cofres compartilhados).
+- `Identidade` da conta: X25519 (receber chaves de cofre via HPKE) + Ed25519 (assinar) —
+  privadas cifradas pela AK, geradas já na criação da conta.
+- `Chave do Cofre` (VK, 256 bits por cofre, com geração `key_gen`) — embrulhada pela AK
+  (cofres próprios). Cofres compartilhados (futuro): HPKE (RFC 9180) com assinatura Ed25519 do
+  remetente; chaves de cofre pessoal só são aceitas como embrulho pela AK.
 - Itens cifrados com a VK. Cada item tem dois blobs: *overview* (título, subtítulo, URLs,
   tags, favorito — para lista e busca) e *details* (campos, notas, TOTP, histórico).
 
@@ -74,21 +84,34 @@ Emergência ou QR code de outro dispositivo). No uso diário ela é invisível. 
 
 - AEAD: XChaCha20-Poly1305 (nonce aleatório de 192 bits) — crate `chacha20poly1305`.
 - KDF de senha: Argon2id — crate `argon2`. KDF de chaves: HKDF-SHA256 — `hkdf`, `sha2`.
-- Assimétrico: X25519 + sealed box compatível com libsodium — `crypto_box`.
+- Assimétrico: X25519 (`x25519-dalek` 2) e Ed25519 (`ed25519-dalek` 2, `verify_strict`);
+  curve25519-dalek ≥ 4.1.3. HPKE (RFC 9180) entra com o compartilhamento.
 - Aleatoriedade: `OsRng` (BCryptGenRandom no Windows).
 - Segredos em memória: `zeroize`/`Zeroizing`; tipos secretos com `Debug` redigido.
-- **Dados associados (AD)** em todo AEAD: versão do formato + propósito + IDs (cofre, item,
-  revisão). Impede trocar o blob de um item por outro, reverter tipo, ou mover entre cofres.
-- Todo envelope cifrado começa com `versão || suite`, permitindo migração futura.
+- **Envelope autodescritivo** (revisão M3): todo ciphertext carrega um cabeçalho autenticado de
+  96 bytes — formato, suíte, propósito, flags, conta, contêiner, objeto, id/geração da chave,
+  versão do objeto e `write_id` — e o AD *é* esse cabeçalho. O leitor confere o cabeçalho
+  contra o contexto esperado antes de decifrar. Colunas de sincronização (sequência do servidor,
+  timestamps) nunca entram no AD: são cursores, não identidade.
+- **Compromisso de chave**: `k_enc ‖ commit = HKDF(ikm=K, salt=nonce, info="moco/v1/aead"‖hdr[0..4])`;
+  `commit` é verificado em tempo constante antes de decifrar.
+- **Overview e details** de uma escrita compartilham `write_id` e versão — misturar blobs de
+  escritas diferentes é rejeitado. A coluna `revision` é só cache da versão autenticada.
+- **Lixeira definitiva** gera *tombstone* autenticado (propósito próprio), não só uma flag.
+- **Padding**: plaintexts de itens vão para faixas de 256 B até 4 KiB, depois Padmé.
 - Crates escolhidos na geração estável e amplamente auditada (RustCrypto 0.10/0.12/0.5), não
   nas versões recém-lançadas.
 
 ## D-005 · Código de Recuperação e Kit de Emergência
 
-- O **Kit de Emergência** (PDF gerado localmente) contém a Chave Secreta e, se o usuário
-  mantiver ativo, o **Código de Recuperação** (160 bits, Base32 legível). O código embrulha
-  uma cópia da AK e permite redefinir a senha mestra.
-- O kit diz claramente: *com ele, dá para abrir seu Mocó — guarde como um passaporte*.
+- O **Kit de Emergência** contém a Chave Secreta (e espaço para anotar a senha à mão, se a
+  pessoa quiser). Sozinho, não abre nada.
+- O **Código de Recuperação** (144 bits + checksum, Crockford Base32) vai numa **folha
+  separada** (revisão M4). A chave que ele gera exige também a Chave Secreta:
+  `HKDF-Extract(salt = Chave Secreta, ikm = código)` → `"moco/v1/recovery-wrap"‖account_id`.
+  Assim a folha de recuperação perdida sozinha não abre nada.
+- O código é de uso único: após uma recuperação, um novo é gerado e o antigo deixa de valer.
+- Ao salvar PDFs, o Mocó avisa se a pasta é sincronizada com nuvem (OneDrive etc.).
 - Usuários mais cautelosos podem desativar o código: então esquecer a senha significa perder
   os dados, e o Mocó diz isso sem rodeios.
 - Nunca afirmamos que "o Mocó recupera sua senha". Não recupera; não consegue ver.
@@ -124,3 +147,25 @@ Não basta esconder a interface.
 
 Para QA visual no navegador existe um backend simulado em TypeScript, incluído somente com
 `VITE_MOCO_DEMO=1` em modo de desenvolvimento. Builds de produção não contêm esse código.
+
+## D-011 · Revisão de segurança do desenho (2026-09-23)
+
+Uma revisão independente do desenho criptográfico apontou 5 itens obrigatórios e 9
+recomendações. Estado:
+
+| Item | Decisão |
+|---|---|
+| M1 compartilhamento autenticado | Identidade Ed25519 criada já; HPKE + assinatura quando o compartilhamento chegar |
+| M2 rollback/remoção por servidor malicioso | Versão autenticada + tombstones autenticados agora; log encadeado por cofre (hash chain com MAC) e estado da conta com contador monotônico entram com a sincronização |
+| M3 AD a partir de cabeçalho autenticado | Feito (envelope v1) |
+| M4 kit com código de recuperação | Feito: folha separada + recuperação exige Chave Secreta + uso único |
+| M5 afirmação exagerada sobre DPAPI | Corrigido no texto; TPM planejado |
+| S1 login sem token de portador | Adotado (Ed25519 derivado); implementa com o servidor |
+| S2 TPM | Planejado para a fase do Windows Hello |
+| S3 compromisso de chave | Feito |
+| S4 armadilhas do Windows Hello | Checklist na implementação: assinar 2×, HKDF com salt do dispositivo, fallback de senha sempre, senha mestra a cada 14 dias |
+| S5 higiene de memória | Campo de senha não controlado e limpo após o IPC; ao bloquear, a webview é recarregada |
+| S6 fluxos de ciclo de chave | Troca de senha com salt novo e upgrade de KDF no desbloqueio: feitos |
+| S7 anexos e exportação | Chave por arquivo, streaming em blocos de 64 KiB; exportação cifrada por padrão |
+| S8 vazamento de tamanho | Padding feito; busca só em memória |
+| S9 crates | Ajustado (sem crypto_box; dalek 2; normalização fixada) |

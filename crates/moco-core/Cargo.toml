@@ -12,3 +12,22 @@ serde_json.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
 zeroize.workspace = true
+
+# Cryptography — stable, widely reviewed RustCrypto generation (see DECISIONS.md D-004).
+argon2 = { version = "0.5.3", features = ["zeroize"] }
+chacha20poly1305 = { version = "0.10.1", features = ["stream"] }
+hkdf = "0.12.4"
+sha2 = "0.10.9"
+sha1 = "0.10.6"
+hmac = "0.12.1"
+x25519-dalek = { version = "2.0.1", features = ["static_secrets", "zeroize"] }
+ed25519-dalek = { version = "2.1", features = ["zeroize", "rand_core"] }
+rand = "0.8.5"
+subtle = "2.6"
+
+unicode-normalization = "=0.1.25"
+data-encoding = "2.9"
+rusqlite = { version = "0.40", features = ["bundled"] }
+
+[dev-dependencies]
+hex = "0.4"
