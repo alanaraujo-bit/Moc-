@@ -1,0 +1,5 @@
+# The repository folder name contains a non-ASCII character ("Mocó").
+# Keeping build output on an ASCII path avoids encoding issues in native
+# toolchains (NSIS, linkers, C build scripts). Relative to the repo root's parent.
+[build]
+target-dir = "../moco-target"

@@ -1,0 +1,20 @@
+[package]
+name = "moco-desktop"
+description = "Mocó para Windows"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[lib]
+name = "moco_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+moco-core = { path = "../../../crates/moco-core" }
+tauri = { version = "2", features = [] }
+serde.workspace = true
+serde_json.workspace = true

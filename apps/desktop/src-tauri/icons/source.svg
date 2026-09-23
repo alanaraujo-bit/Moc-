@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <mask id="door">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <path d="M422 960 V668 a90 90 0 0 1 180 0 V960 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <path mask="url(#door)" fill="#B85A34" d="M512 96C770 96 928 250 928 522C928 790 780 928 512 928C244 928 96 790 96 522C96 250 254 96 512 96Z"/>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "name": "moco",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mocó — seu cantinho seguro para senhas, documentos e tudo que importa.",
+  "packageManager": "pnpm@11.20.0",
+  "scripts": {
+    "dev": "pnpm --filter @moco/desktop tauri dev",
+    "build": "pnpm --filter @moco/desktop tauri build",
+    "web:dev": "pnpm --filter @moco/desktop dev",
+    "test": "cargo test --workspace && pnpm --filter @moco/desktop test",
+    "typecheck": "pnpm --filter @moco/desktop typecheck"
+  }
+}

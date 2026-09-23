@@ -1,0 +1,47 @@
+# Build output
+/target
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# Tauri
+apps/desktop/src-tauri/gen/schemas/
+apps/desktop/src-tauri/target/
+
+# Secrets — never commit (public repository)
+*.key
+*.key.pub.bak
+*.pem
+*.pfx
+*.p12
+.env
+.env.*
+!.env.example
+secrets/
+
+# Local vault data used while developing
+*.moco-vault
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
