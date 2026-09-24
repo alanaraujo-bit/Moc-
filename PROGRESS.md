@@ -40,16 +40,24 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
   vivo), editor por tipo com máscaras BR (CPF/CNPJ/CEP/telefone/cartão com validação),
   gerador, Central de Segurança, Configurações, importação guiada, exportação.
 
+- Sincronização real: servidor Rust (axum + Postgres) no Railway
+  (`https://server-production-975b.up.railway.app`), login por assinatura Ed25519, 2FA TOTP,
+  dispositivos, anexos cifrados na nuvem; motor de sync no núcleo com proteção contra
+  rollback/forja e resolução de conflito sem perda. Validado entre dois dispositivos reais.
+- Releases: v0.1.0 publicada pelo pipeline (instalador assinado + latest.json). v0.2.0 em build.
+- Escala: 10 mil itens — criar 0,26 s, desbloquear 0,13 s, listar 6 ms.
+- Revisão de design independente aplicada (parede vidrada, estrutura por rejunte, azulejos
+  bicolores, cobalto real no escuro).
+
 ### Próximos (ordem)
-1. QA: tema escuro, Acesso Rápido, estados vazios, janela estreita; paleta de comandos.
-2. Instalador com identidade (imagens NSIS), atualizações automáticas assinadas,
-   "Novidades no Mocó", pipeline de release no GitHub Actions.
-3. Anexos cifrados; QR code do Wi-Fi; favicons opcionais.
-4. Servidor de sincronização (Railway) + contas + dispositivos + 2FA.
-5. Compartilhamento (HPKE), famílias/equipes, planos.
-6. Site/downloads/changelog (Vercel). Whitepaper de segurança em `docs/`.
-7. Revisão de acessibilidade, performance com 10 mil itens, DESIGN.md.
+1. Teste real de atualização 0.1.0 → 0.2.0 pelo updater.
+2. DESIGN.md (documentador) após o veredito da revisão.
+3. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
+4. Site/downloads/changelog (Vercel). Whitepaper de segurança em `docs/`.
+5. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
+6. Recuperação por código em dispositivo novo (verificador no servidor).
 
 ## Log
 - 2026-09-23 — Repositório criado, pipeline de build/instalador validado, núcleo cripto.
 - 2026-09-24 — UI completa do cofre, Hello, importação/exportação, segurança, acesso rápido.
+- 2026-09-24 — Atualizações assinadas, instalador com identidade, sincronização na nuvem, anexos, v0.1.0/v0.2.0.

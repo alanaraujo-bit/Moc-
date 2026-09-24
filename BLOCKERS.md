@@ -47,3 +47,17 @@ subdomínio da Vercel) até lá.
 
 **O que fazer.** Copie a pasta `moco-secrets` para um lugar seguro offline (ou guarde no
 próprio Mocó, numa nota segura). Nunca commite esses arquivos.
+
+## 6. Provedor de e-mail transacional
+
+**O que falta.** Uma conta num provedor de e-mail (ex.: Resend, Postmark, Amazon SES) com
+domínio verificado — depende do item 4 (domínio).
+
+**Impacto.** A conta de sincronização ainda não confirma o e-mail e não envia avisos de
+segurança por e-mail (novo dispositivo, troca de senha). O e-mail serve só como
+identificador. Tudo já está desenhado para plugar a verificação quando houver provedor.
+
+## 7. Railway: plano e limites
+
+O servidor e o Postgres rodam no projeto `moco` do seu Railway. Revise o plano/limites de
+uso e ative backups do Postgres antes de convidar usuários reais.
