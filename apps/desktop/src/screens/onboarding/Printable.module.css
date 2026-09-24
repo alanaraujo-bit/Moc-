@@ -1,0 +1,83 @@
+.sheet {
+  font-family: var(--font-ui);
+  color: #111726;
+  background: #fff;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8mm 4mm;
+  display: flex;
+  flex-direction: column;
+  gap: 9mm;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 6mm;
+  border-bottom: 1px solid #cbd1da;
+}
+
+.head h1 {
+  font-size: 22pt;
+  letter-spacing: -0.02em;
+}
+
+.head p {
+  color: #454e60;
+  font-size: 10pt;
+}
+
+.block h2 {
+  font-size: 12pt;
+  margin-bottom: 3mm;
+}
+
+.code {
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 17pt;
+  letter-spacing: 0.04em;
+  padding: 5mm 6mm;
+  border: 1.5px solid #111726;
+  border-radius: 3mm;
+  word-break: break-all;
+}
+
+.note {
+  margin-top: 3mm;
+  font-size: 10pt;
+  color: #454e60;
+  line-height: 1.5;
+}
+
+.writeLine {
+  height: 14mm;
+  border-bottom: 1.5px dashed #8e96a5;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8mm;
+}
+
+.cols h3 {
+  font-size: 11pt;
+  margin-bottom: 2mm;
+}
+
+.cols p {
+  font-size: 10pt;
+  color: #454e60;
+  line-height: 1.5;
+}
+
+.foot {
+  margin-top: 4mm;
+  padding-top: 5mm;
+  border-top: 1px solid #cbd1da;
+  font-size: 9pt;
+  color: #636c7d;
+  line-height: 1.5;
+}

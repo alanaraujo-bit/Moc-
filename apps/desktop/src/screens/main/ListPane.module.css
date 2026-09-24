@@ -1,0 +1,236 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--grout);
+}
+
+.searchBar {
+  padding: 10px 12px 6px;
+  flex: none;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 4px 0 10px;
+  border-radius: var(--r-sm);
+  background: var(--bg-sunken);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-fast) var(--ease-out);
+}
+
+.search:hover {
+  border-color: var(--grout-strong);
+}
+
+.search:focus-within {
+  background: var(--bg-surface);
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px var(--cobalt-soft);
+}
+
+.searchIcon {
+  color: var(--ink-3);
+  flex: none;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: var(--text-md);
+  height: 100%;
+}
+
+.search input::placeholder {
+  color: var(--ink-3);
+}
+
+.searchHint {
+  padding-right: 6px;
+  opacity: 0.8;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 6px 16px;
+  flex: none;
+}
+
+.headerText {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.notice {
+  margin: 0 12px 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: var(--bg-app);
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0 6px;
+  outline: none;
+}
+
+.scroll:focus-visible .row[data-selected="true"] {
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  margin: 2px 0;
+  padding: 0 10px;
+  border-radius: var(--r-md);
+  transition: background-color var(--t-fast) var(--ease-out);
+}
+
+.row[data-compact="true"] {
+  height: 40px;
+  gap: 10px;
+}
+
+.row:hover {
+  background: var(--bg-hover);
+}
+
+/* Selection inverts the tile's calm: cobalt ground, white ink. */
+.row[data-selected="true"] {
+  background: var(--cobalt);
+  color: var(--ink-inverse);
+}
+
+.row[data-selected="true"] .rowSub,
+.row[data-selected="true"] .rowMeta {
+  color: color-mix(in srgb, var(--ink-inverse) 78%, transparent);
+}
+
+.row[data-selected="true"] .star {
+  color: var(--ink-inverse);
+}
+
+.row[data-selected="true"] mark {
+  background: color-mix(in srgb, var(--ink-inverse) 22%, transparent);
+  color: inherit;
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rowTitle {
+  font-weight: 600;
+  font-size: var(--text-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSub {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowTitle mark,
+.rowSub mark {
+  background: var(--cobalt-soft-2);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.rowMeta {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--ink-4);
+  flex: none;
+}
+
+.star {
+  color: var(--glaze-ochre);
+}
+
+.meta {
+  flex: none;
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  padding: 6px 16px 8px;
+  border-top: 1px solid var(--grout);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 28px 16px;
+}
+
+.emptyTitle {
+  font-weight: 650;
+  font-size: var(--text-md);
+}
+
+.emptyText {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.emptyText code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-sunken);
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}

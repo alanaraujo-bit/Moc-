@@ -10,5 +10,8 @@
     "web:dev": "pnpm --filter @moco/desktop dev",
     "test": "cargo test --workspace && pnpm --filter @moco/desktop test",
     "typecheck": "pnpm --filter @moco/desktop typecheck"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0"
   }
 }

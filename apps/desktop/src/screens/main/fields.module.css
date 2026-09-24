@@ -1,0 +1,159 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--grout);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 550;
+  color: var(--ink-3);
+}
+
+.valueLine {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 4px 8px;
+  margin-left: -8px;
+  border-radius: var(--r-sm);
+  font-size: var(--text-md);
+  color: var(--ink);
+  transition: background-color var(--t-fast) var(--ease-out);
+  cursor: copy;
+}
+
+.value:hover {
+  background: var(--bg-hover);
+}
+
+.value[data-multiline="true"] {
+  align-items: flex-start;
+}
+
+.text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.row[data-prominent="true"] .value {
+  font-size: var(--text-xl);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.dots {
+  letter-spacing: 0.18em;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.pw {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  word-break: break-all;
+  letter-spacing: 0.02em;
+}
+
+.pw [data-c="d"] {
+  color: var(--pw-digit);
+}
+
+.pw [data-c="s"] {
+  color: var(--pw-symbol);
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+
+.row:hover .actions,
+.row:focus-within .actions {
+  opacity: 1;
+}
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.totp {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--t-base) var(--ease-out);
+}
+
+.totp[data-ending="true"] {
+  color: var(--danger);
+}
+
+.totpGap {
+  width: 0.5em;
+}
+
+.ring {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--grout);
+  stroke-width: 2.5;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--cobalt);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 250ms linear;
+}
+
+.ringFill[data-ending="true"] {
+  stroke: var(--danger);
+}
+
+.secs {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  width: 24px;
+}
+
+.invalid {
+  color: var(--danger);
+  font-size: var(--text-sm);
+  padding: 4px 0;
+}

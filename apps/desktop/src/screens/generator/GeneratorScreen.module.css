@@ -1,0 +1,57 @@
+.root {
+  max-width: 720px;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  font-size: var(--text-3xl);
+  letter-spacing: -0.025em;
+}
+
+.sub {
+  color: var(--ink-2);
+  max-width: 60ch;
+  line-height: 1.55;
+}
+
+.panel {
+  max-width: 560px;
+}
+
+.tips {
+  max-width: 560px;
+  border-top: 1px solid var(--grout);
+  padding-top: 20px;
+}
+
+.tips h2 {
+  font-size: var(--text-md);
+  margin-bottom: 10px;
+}
+
+.tips dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 16px;
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.tips dt {
+  font-weight: 600;
+}
+
+.tips dd {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: 1.5;
+}

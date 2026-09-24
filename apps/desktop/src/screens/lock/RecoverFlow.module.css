@@ -1,0 +1,67 @@
+.root {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  background: var(--wall-ground);
+}
+
+.panel {
+  position: relative;
+  width: min(460px, calc(100vw - 64px));
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 32px 0;
+  animation: rise var(--t-slow) var(--ease-out);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.back {
+  align-self: flex-start;
+  margin-left: -10px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--cobalt-soft);
+  color: var(--cobalt);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.error {
+  color: var(--danger);
+  font-size: var(--text-sm);
+}

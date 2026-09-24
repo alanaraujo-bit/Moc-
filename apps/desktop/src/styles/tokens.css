@@ -1,0 +1,190 @@
+/*
+  Mocó — "Painel" visual world.
+  An azulejo panel in the tradition of Athos Bulcão: glazed cool white, oxide cobalt,
+  blue-black ink, 1px grout lines as the only structure, and quarter-arc tile motifs
+  that give every item its own tile. Restrained color: the accent marks actions,
+  selection and state — never decoration.
+*/
+
+@font-face {
+  font-family: "Moco Mono";
+  src: local("Cascadia Mono"), local("CascadiaMono-Regular");
+  font-weight: 400;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Type — native Windows 11 faces; Cascadia Mono for secrets and codes. */
+  --font-ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "Moco Mono", "Consolas", ui-monospace, monospace;
+
+  --text-2xs: 0.6875rem; /* 11 */
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-md: 0.875rem; /* 14 — body */
+  --text-lg: 1rem; /* 16 */
+  --text-xl: 1.25rem; /* 20 */
+  --text-2xl: 1.5rem; /* 24 */
+  --text-3xl: 1.75rem; /* 28 */
+  --text-4xl: 2.125rem; /* 34 */
+
+  /* Spacing — 4px grid. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* Corners — tiles are square with a softened edge. */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+
+  /* Motion — short, state-carrying, exponential ease-out. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 120ms;
+  --t-base: 180ms;
+  --t-slow: 260ms;
+
+  /* ---- Light: glazed tile in daylight ---- */
+  --bg-app: #f2f4f7; /* sidebar, toolbar: the second neutral layer */
+  --bg-surface: #ffffff; /* list and detail panes */
+  --bg-raised: #ffffff; /* popovers, dialogs */
+  --bg-sunken: #eceff3; /* wells, inputs at rest */
+  --bg-hover: #e9ecf1;
+  --bg-active: #e1e5ec;
+  --grout: #e2e5eb;
+  --grout-strong: #cbd1da;
+
+  --ink: #111726;
+  --ink-2: #454e60;
+  --ink-3: #636c7d; /* ≥ 4.5:1 on white */
+  --ink-4: #8e96a5; /* decorative only (icons at rest, dividers text) */
+  --ink-inverse: #ffffff;
+
+  --cobalt: #2340a8;
+  --cobalt-hover: #1c3591;
+  --cobalt-press: #172c78;
+  --cobalt-soft: #e7ecfb;
+  --cobalt-soft-2: #d6defa;
+  --cobalt-ink: #1a2d77;
+  --focus: #2f53d6;
+
+  --danger: #b3261e;
+  --danger-hover: #971f18;
+  --danger-soft: #fcebea;
+  --danger-ink: #8c1d17;
+  --warn: #9a5b00;
+  --warn-soft: #fff2d9;
+  --warn-ink: #7a4800;
+  --ok: #1d7a4b;
+  --ok-soft: #e4f3ea;
+  --ok-ink: #155c38;
+
+  /* Tile palette — azulejo glazes. Ground (soft) + motif (solid). */
+  --glaze-cobalt: #2340a8;
+  --glaze-cobalt-g: #e3e9fb;
+  --glaze-sky: #2f74b5;
+  --glaze-sky-g: #e1eef9;
+  --glaze-moss: #2c6e4c;
+  --glaze-moss-g: #e2f0e8;
+  --glaze-ochre: #b07513;
+  --glaze-ochre-g: #fbefd8;
+  --glaze-clay: #b1452d;
+  --glaze-clay-g: #f9e5df;
+  --glaze-plum: #6e3f84;
+  --glaze-plum-g: #f0e6f5;
+  --glaze-slate: #4d5870;
+  --glaze-slate-g: #e7eaf0;
+  --glaze-ink: #1b2233;
+  --glaze-ink-g: #e4e6eb;
+
+  /* Password character classes */
+  --pw-digit: #2340a8;
+  --pw-symbol: #b1452d;
+
+  --shadow-1: 0 1px 2px rgb(17 23 38 / 6%), 0 1px 1px rgb(17 23 38 / 4%);
+  --shadow-2: 0 4px 12px rgb(17 23 38 / 8%), 0 1px 3px rgb(17 23 38 / 6%);
+  --shadow-3: 0 16px 40px rgb(17 23 38 / 14%), 0 4px 12px rgb(17 23 38 / 8%);
+  --scrim: rgb(17 23 38 / 32%);
+
+  --wall-ground: #f5f6f9;
+  --wall-relief: #eaedf2;
+}
+
+/* ---- Dark: the same panel at night ---- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-app: #0c0f15;
+  --bg-surface: #11151d;
+  --bg-raised: #171c26;
+  --bg-sunken: #0a0d12;
+  --bg-hover: #1a202b;
+  --bg-active: #212836;
+  --grout: #222937;
+  --grout-strong: #313a4b;
+
+  --ink: #e9ecf3;
+  --ink-2: #b1b8c7;
+  --ink-3: #8e97a9; /* ≥ 4.5:1 on surface */
+  --ink-4: #5f687b;
+  --ink-inverse: #0c0f15;
+
+  --cobalt: #8aa0f5;
+  --cobalt-hover: #a3b4f8;
+  --cobalt-press: #7389e0;
+  --cobalt-soft: #1b2340;
+  --cobalt-soft-2: #243058;
+  --cobalt-ink: #c3cffb;
+  --focus: #9fb2ff;
+
+  --danger: #f08a80;
+  --danger-hover: #f4a39b;
+  --danger-soft: #3a1714;
+  --danger-ink: #f7b7b0;
+  --warn: #e7b25a;
+  --warn-soft: #34260e;
+  --warn-ink: #f2cf92;
+  --ok: #6dcb97;
+  --ok-soft: #10291c;
+  --ok-ink: #a6e3c0;
+
+  --glaze-cobalt: #93a8f7;
+  --glaze-cobalt-g: #1c2544;
+  --glaze-sky: #7cb6e8;
+  --glaze-sky-g: #132737;
+  --glaze-moss: #77c49b;
+  --glaze-moss-g: #13281d;
+  --glaze-ochre: #e2ae55;
+  --glaze-ochre-g: #2e2210;
+  --glaze-clay: #ec9179;
+  --glaze-clay-g: #331a14;
+  --glaze-plum: #c79ade;
+  --glaze-plum-g: #2a1a33;
+  --glaze-slate: #a9b3c8;
+  --glaze-slate-g: #1d2230;
+  --glaze-ink: #dfe3ec;
+  --glaze-ink-g: #1f2430;
+
+  --pw-digit: #93a8f7;
+  --pw-symbol: #ec9179;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 6px 16px rgb(0 0 0 / 45%), 0 1px 3px rgb(0 0 0 / 35%);
+  --shadow-3: 0 20px 48px rgb(0 0 0 / 55%), 0 4px 12px rgb(0 0 0 / 40%);
+  --scrim: rgb(0 0 0 / 55%);
+
+  --wall-ground: #0e1219;
+  --wall-relief: #161b25;
+}

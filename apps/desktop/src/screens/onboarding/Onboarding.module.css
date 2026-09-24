@@ -1,0 +1,287 @@
+.root {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(460px, 1.15fr) minmax(0, 1fr);
+  background: var(--bg-surface);
+}
+
+@media (max-width: 960px) {
+  .root {
+    grid-template-columns: 1fr 200px;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 28px clamp(32px, 6vw, 88px) 24px;
+  overflow: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 40px 0;
+  animation: stepIn var(--t-slow) var(--ease-out);
+}
+
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+.step {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.center {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.hero {
+  font-size: var(--text-4xl);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.title {
+  font-size: var(--text-3xl);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+}
+
+.lede {
+  color: var(--ink-2);
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
+.lede strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.points {
+  list-style: none;
+  margin: 4px 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.points li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 14px;
+  align-items: start;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.points li svg {
+  color: var(--cobalt);
+  margin-top: 1px;
+}
+
+.points strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.error {
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+
+.fit {
+  align-self: flex-start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stack > button:last-of-type {
+  align-self: flex-start;
+}
+
+.codeBlock {
+  border: 1px solid var(--grout-strong);
+  border-radius: var(--r-md);
+  background: var(--bg-app);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.codeBlock::after {
+  /* The panel's quarter-arc signature, quietly in the corner. */
+  content: "";
+  position: absolute;
+  right: -34px;
+  top: -34px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 6px solid var(--cobalt-soft-2);
+  pointer-events: none;
+}
+
+.codeText {
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: var(--ink);
+  word-break: break-all;
+  position: relative;
+  z-index: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.check {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.45;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--cobalt);
+}
+
+.linkBtn {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--grout-strong);
+}
+
+.linkBtn:hover {
+  color: var(--ink-2);
+}
+
+.starters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.starter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--grout);
+  background: var(--bg-surface);
+  text-align: left;
+  transition:
+    border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out),
+    transform var(--t-fast) var(--ease-out);
+}
+
+.starter:hover {
+  border-color: var(--grout-strong);
+  background: var(--bg-app);
+}
+
+.starter:active {
+  transform: translateY(1px);
+}
+
+.starter > span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.starter strong {
+  font-weight: 600;
+}
+
+.starter > span > span {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+
+.stepLabel {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--grout);
+  transition: background-color var(--t-slow) var(--ease-out);
+}
+
+.dot[data-on="true"] {
+  background: var(--cobalt);
+}
+
+.wall {
+  position: relative;
+  border-left: 1px solid var(--grout);
+  overflow: hidden;
+  background: var(--wall-ground);
+}

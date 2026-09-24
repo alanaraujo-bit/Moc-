@@ -4,9 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mocó</title>
+    <style>
+      /* First paint matches the theme before any script runs. */
+      html { background: #ffffff; }
+      @media (prefers-color-scheme: dark) { html { background: #11151d; } }
+      #print-root { display: none; }
+      @media print {
+        #root { display: none !important; }
+        #print-root { display: block !important; }
+        html, body { background: #fff !important; overflow: visible !important; height: auto !important; }
+        @page { size: A4; margin: 16mm; }
+      }
+    </style>
   </head>
   <body>
+    <!--
+      THESIS: Mocó is an azulejo panel — every item is a tile set by hand into a calm glazed wall;
+      you find things by rhythm and search, not by a dashboard of padlocks. Refuses the navy
+      security dashboard with shields and the cream-serif-terracotta "cozy" default.
+      OWN-WORLD: glazed cool white and oxide cobalt over blue-black ink; 1px grout lines as the only
+      structure; Athos Bulcão quarter-arc/arch/band motifs; each item a two-tone tile with a hashed
+      corner arc; native Segoe UI Variable type, Cascadia Mono for secrets; a white-on-white relief
+      tile wall behind lock and onboarding.
+      STORY: the person sees their things laid in order, finds anything in a few keystrokes, copies
+      with one gesture, and feels it is kept safe without being told so loudly.
+      FIRST VIEWPORT: lock screen — relief wall edge to edge with a plain opening; 52px Mocó tile,
+      "Seu Mocó está trancado." at 24px, a 42px password field with the unlock action inside it;
+      "Esqueci a senha mestra" below. Unlocked: sidebar | list of tiles | item detail.
+      FORM: Athos Bulcão azulejo panel, candidate 5 of 7 on the grounded list; seed c1afc502.
+      Raises — ticket wallet: states stamp themselves (explicit lifecycle vocabulary); one-bit desktop:
+      selection inverts; darkroom: destructive actions state consequences first; bitmap specimen: the
+      tile grammar holds from 16px to hero; cyclorama: lock states are named, never color alone.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
     <div id="root"></div>
+    <div id="print-root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

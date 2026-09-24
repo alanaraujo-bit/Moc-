@@ -1,0 +1,45 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 18px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 22px);
+  gap: 3px;
+}
+
+.root[data-compact="true"] .tiles {
+  grid-template-columns: repeat(4, 12px);
+  gap: 2px;
+}
+
+.tile {
+  height: 6px;
+  border-radius: 2px;
+  background: var(--grout);
+  transition: background-color var(--t-base) var(--ease-out);
+}
+
+.tiles[data-tone="danger"] .tile[data-on="true"] {
+  background: var(--danger);
+}
+.tiles[data-tone="warn"] .tile[data-on="true"] {
+  background: var(--warn);
+}
+.tiles[data-tone="ok"] .tile[data-on="true"] {
+  background: var(--ok);
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 550;
+  color: var(--ink-2);
+}
+
+.time {
+  font-weight: 400;
+  color: var(--ink-3);
+}

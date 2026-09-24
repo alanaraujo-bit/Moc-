@@ -1,0 +1,85 @@
+.root {
+  height: 100%;
+  display: grid;
+  grid-template-columns: clamp(208px, 19vw, 248px) clamp(290px, 29vw, 380px) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.loading {
+  height: 100%;
+  background: var(--bg-surface);
+}
+
+.detail {
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.wide {
+  grid-column: 2 / -1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg-surface);
+}
+
+.empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+}
+
+.emptyTiles {
+  width: 96px;
+  height: 96px;
+}
+
+.emptyTiles rect {
+  fill: var(--wall-ground);
+  stroke: var(--grout);
+}
+
+.emptyTiles .center {
+  fill: var(--cobalt-soft);
+  stroke: var(--cobalt-soft-2);
+}
+
+.arc {
+  fill: none;
+  stroke: var(--grout-strong);
+  stroke-width: 3;
+}
+
+.door {
+  fill: var(--cobalt);
+}
+
+.emptyTitle {
+  color: var(--ink-2);
+  font-size: var(--text-md);
+}
+
+.shortcuts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  align-items: flex-start;
+}
+
+.shortcuts li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

@@ -1,0 +1,341 @@
+.root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: in var(--t-base) var(--ease-out);
+}
+
+@keyframes in {
+  from {
+    opacity: 0.5;
+  }
+}
+
+.loading {
+  padding: 40px;
+  color: var(--danger);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 28px 18px;
+}
+
+.headFields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.titleInput {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  border: 0;
+  border-bottom: 1px dashed var(--grout-strong);
+  background: transparent;
+  padding: 2px 0 4px;
+  width: 100%;
+  color: var(--ink);
+}
+
+.titleInput:focus {
+  border-bottom: 1px solid var(--cobalt);
+}
+
+.titleInput::placeholder {
+  color: var(--ink-4);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  padding-top: 4px;
+}
+
+.dot {
+  color: var(--ink-4);
+}
+
+.vaultPick {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vaultPick select {
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--ink-2);
+  padding: 2px 2px;
+  border-radius: 4px;
+}
+
+.vaultPick select:hover {
+  background: var(--bg-hover);
+}
+
+.error {
+  margin: 0 28px 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+  font-size: var(--text-sm);
+}
+
+.body {
+  padding: 0 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 680px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 650;
+  color: var(--ink-2);
+  letter-spacing: 0;
+  margin-bottom: -4px;
+}
+
+.secret {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.urlRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.urlRow > div {
+  flex: 1;
+}
+
+.addBtn {
+  align-self: flex-start;
+  margin-left: -6px;
+}
+
+.customRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customLabel {
+  border: 0;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 550;
+  color: var(--ink-2);
+  padding: 2px 0;
+  width: 100%;
+}
+
+.customLabel::placeholder {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.customValue {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.customValue > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selectLabel {
+  font-size: var(--text-sm);
+  font-weight: 550;
+  color: var(--ink-2);
+}
+
+.select {
+  height: 34px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--grout-strong);
+  box-shadow: inset 0 -1px 0 var(--grout-strong);
+  background: var(--bg-surface);
+  padding: 0 8px;
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+
+.select:focus-visible {
+  outline: none;
+  border-color: var(--cobalt);
+  box-shadow:
+    inset 0 -2px 0 var(--cobalt),
+    0 0 0 3px var(--cobalt-soft);
+}
+
+.noteArea {
+  min-height: 260px;
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.hintText {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.tagBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 6px;
+  border: 1px solid var(--grout-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-surface);
+}
+
+.tagBox:focus-within {
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px var(--cobalt-soft);
+}
+
+.tagBox input {
+  flex: 1;
+  min-width: 120px;
+  border: 0;
+  background: transparent;
+  height: 24px;
+  font-size: var(--text-md);
+}
+
+.tagBox input::placeholder {
+  color: var(--ink-3);
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 4px 0 9px;
+  border-radius: 999px;
+  background: var(--cobalt-soft);
+  color: var(--cobalt-ink);
+  font-size: var(--text-sm);
+}
+
+.tagChip button {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+}
+
+.tagChip button:hover {
+  background: var(--cobalt-soft-2);
+}
+
+.tagSuggest {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tagSuggest button {
+  border: 1px dashed var(--grout-strong);
+  background: transparent;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.tagSuggest button:hover {
+  border-style: solid;
+  color: var(--ink);
+}
+
+.footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 28px;
+  border-top: 1px solid var(--grout);
+  background: var(--bg-surface);
+}
+
+.footHint {
+  margin-right: auto;
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.genPop {
+  width: 360px;
+  padding: 16px;
+  background: var(--bg-raised);
+  border: 1px solid var(--grout);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  z-index: 70;
+  animation: pop var(--t-base) var(--ease-out);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
