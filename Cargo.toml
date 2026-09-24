@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/moco-core", "apps/desktop/src-tauri"]
+members = ["crates/moco-core", "apps/desktop/src-tauri", "apps/server"]
 
 [workspace.package]
 version = "0.1.0"
