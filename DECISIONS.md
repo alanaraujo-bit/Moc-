@@ -214,3 +214,26 @@ recomendações. Estado:
   guardados como hash. O segredo TOTP fica cifrado no servidor com a chave do servidor.
 - **Pendente:** verificação de e-mail (precisa de provedor de e-mail — BLOCKERS), anexos na
   nuvem, recuperação por código em dispositivo novo (hoje a recuperação é local).
+
+## D-015 · Cofres compartilhados
+
+- **Onde ficam os dados:** o cofre e os itens continuam na conta de quem criou. Cada pessoa
+  recebe um convite (`ShareGrant`): a chave do cofre selada para a chave X25519 dela (HPKE
+  simples: X25519 efêmero + HKDF + envelope) e assinada com a Ed25519 de quem compartilhou.
+  O servidor guarda e repassa o convite, mas não consegue abri-lo nem forjá-lo.
+- **Chaves fixadas no primeiro uso:** o servidor poderia entregar a chave pública errada.
+  O app fixa a chave de cada pessoa na primeira vez e bloqueia o compartilhamento se ela
+  mudar, até o usuário confirmar; os dois lados podem comparar o número de segurança.
+- **Papéis:** editor e leitor. Todo membro lê (tem a chave); **a proibição de escrita do
+  leitor é garantida pelo servidor**, que confere a assinatura do convite para aplicar
+  exatamente o papel que o dono assinou.
+- **Remover alguém troca a chave do cofre** (geração +1): tudo é cifrado de novo e quem fica
+  recebe convite novo. O servidor recusa envios selados com geração abaixo da atual
+  (cabeçalho do envelope, bytes 52..72) e convites antigos reenviados.
+- **Mover item para o cofre de outra pessoa** cria uma cópia lá e apaga o original (os
+  cabeçalhos ligam cada objeto à conta dona).
+- **Servidor** (`apps/server/src/sharing.rs`): `GET /v1/people?email=` (revela se o e-mail
+  tem conta — só logado, limitado por conta e por IP), membros em `/v1/vaults/{v}/members`,
+  `GET /v1/shared` e `/v1/shared/{dono}/{cofre}/{pull,push,attachments}` autorizados por
+  participação. Anexos só de itens do próprio cofre, na cota do dono. Apagar o cofre apaga
+  as participações. Regras de referência: `FakeCloud` no núcleo.

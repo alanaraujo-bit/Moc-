@@ -45,6 +45,14 @@ Quando a sincronização está ativa, o servidor conhece:
 - quantos itens você tem, identificadores aleatórios, datas de alteração e tamanhos aproximados;
 - registros de acesso (entradas, troca de senha, dispositivos removidos).
 
+Se você compartilha cofres, ele também sabe com quem (contas e papéis) e guarda os convites
+cifrados. Para achar alguém pelo e-mail, o servidor informa se aquele e-mail tem conta no
+Mocó — essa busca exige estar logado e tem limite de tentativas.
+
+Quem só pode **ver** um cofre compartilhado recebe a chave para ler; a proibição de alterar
+é aplicada pelo servidor. Ao remover alguém, a chave do cofre é trocada: a pessoa não lê nada
+escrito depois — mas o que ela já viu pode ter sido copiado.
+
 O servidor **não** consegue ver: nomes dos itens, sites, usuários, senhas, notas, anexos,
 etiquetas ou nomes de cofres. Ele também não recebe nada que permita testar senhas — o
 login é feito com uma assinatura digital de uso único, derivada da senha e da Chave Secreta.
@@ -73,6 +81,7 @@ login é feito com uma assinatura digital de uso único, derivada da senha e da 
 | Perdi o celular do autenticador (2FA) | Use um dos códigos de emergência entregues ao ativar a verificação em duas etapas. |
 | O servidor do Mocó vazou | Os invasores levam dados cifrados que não conseguem abrir, porque não têm sua Chave Secreta. |
 | O servidor tentar me enganar | Itens adulterados, trocados ou antigos são recusados pelo aplicativo. |
+| O servidor tentar se passar por quem compartilha comigo | O Mocó guarda a chave de cada pessoa na primeira vez que a vê. Se ela mudar, o compartilhamento para até você confirmar — de preferência comparando o número de segurança com a pessoa. |
 
 ## Atualizações
 
