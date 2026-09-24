@@ -9,7 +9,14 @@ import s from "./Onboarding.module.css";
 export function CodeBlock({ value, label }: { value: string; label: string }) {
   return (
     <div className={s.codeBlock} aria-label={label}>
-      <span className={`${s.codeText} mono selectable`}>{value}</span>
+      <span className={`${s.codeText} mono selectable`}>
+        {value.split("-").map((g, i, all) => (
+          <span key={i} className={s.codeGroup}>
+            {g}
+            {i < all.length - 1 && <span className={s.codeDash}>-</span>}
+          </span>
+        ))}
+      </span>
     </div>
   );
 }

@@ -158,3 +158,16 @@ kbd {
     transition-duration: 1ms !important;
   }
 }
+
+/* WebView2 draws its own password reveal/clear buttons; ours replace them. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Fields show focus on their wrapper; the bare input must not draw a second ring. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}

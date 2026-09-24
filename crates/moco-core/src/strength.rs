@@ -17,6 +17,9 @@ const BR_COMMON: &[&str] = &[
     "francisco", "raimundo", "sebastiao", "abcd1234", "qwerty123", "asdfgh", "cachorro", "gatinho", "princesa",
     "estrela", "sol", "lua", "flor", "chocolate", "futebol", "cerveja", "caipirinha", "saudades", "obrigado",
     "bomdia", "boanoite", "novasenha", "minhasenha", "trocar", "acesso", "administrador", "admin123",
+    "netflix", "spotify", "google", "gmail", "facebook", "instagram", "whatsapp", "nubank", "itau", "bradesco",
+    "caixa", "santander", "ifood", "uber", "mercadolivre", "amazon", "hotmail", "outlook", "microsoft", "apple",
+    "samsung", "steam", "tiktok", "twitter", "linkedin", "picpay", "shopee", "magalu",
 ];
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

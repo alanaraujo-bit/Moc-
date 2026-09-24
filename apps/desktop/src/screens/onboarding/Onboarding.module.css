@@ -164,9 +164,19 @@
   letter-spacing: 0.04em;
   line-height: 1.5;
   color: var(--ink);
-  word-break: break-all;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.codeGroup {
+  white-space: nowrap;
+}
+
+.codeDash {
+  color: var(--ink-4);
 }
 
 .actions {

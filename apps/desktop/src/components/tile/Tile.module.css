@@ -16,8 +16,8 @@
   height: 100%;
   fill: none;
   stroke: var(--t-ink);
-  stroke-opacity: 0.28;
-  stroke-width: 9;
+  stroke-opacity: 0.2;
+  stroke-width: 7;
   z-index: -1;
 }
 

@@ -133,11 +133,12 @@ export function KindGlyph({ kind, size = 18, className }: { kind: ItemKind; size
   );
 }
 
+// Quarter arcs centered on a tile corner — the azulejo motif, one per item.
 const ARC_PATHS = [
-  "M0 55 A55 55 0 0 1 55 0", // top-left
-  "M45 0 A55 55 0 0 1 100 55", // top-right
-  "M100 45 A55 55 0 0 1 45 100", // bottom-right
-  "M55 100 A55 55 0 0 1 0 45", // bottom-left
+  "M0 64 A64 64 0 0 0 64 0", // top-left
+  "M36 0 A64 64 0 0 0 100 64", // top-right
+  "M100 36 A64 64 0 0 0 36 100", // bottom-right
+  "M64 100 A64 64 0 0 0 0 36", // bottom-left
 ];
 
 interface ItemTileProps {
