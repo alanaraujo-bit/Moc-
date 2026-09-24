@@ -256,3 +256,13 @@ recomendações. Estado:
 - **Fora desta etapa:** biometria (precisa ser ligada à chave com CryptoObject, como o
   Hello, nunca um sim/não), preenchimento automático (Autofill Service), anexos e
   importação/exportação no celular.
+- **Barras do sistema:** o app desenha de ponta a ponta e lê do Android as medidas reais da
+  barra de status, da barra de navegação (gestos ou três botões), do recorte da câmera e do
+  teclado (o WebView não informa as de baixo nem encolhe para o teclado). Ícones das barras
+  seguem o tema do Mocó. Validado nas duas navegações, claro e escuro, com teclado aberto.
+- **Área de transferência:** o Android só deixa ler ou limpar a área de transferência com o
+  app em primeiro plano. Se o tempo de limpar vence com o Mocó em segundo plano, a limpeza
+  roda quando ele volta; o próprio Android apaga depois de uma hora e esconde a prévia
+  (conteúdo marcado como sensível). A tela de configurações diz isso.
+- **Anexos no celular** ficam escondidos por enquanto: o seletor do Android devolve
+  `content://`, que `files.rs` ainda não lê.

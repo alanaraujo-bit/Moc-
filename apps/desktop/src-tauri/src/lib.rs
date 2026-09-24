@@ -222,6 +222,7 @@ pub fn run() {
             commands::app_background,
             commands::app_insets,
             commands::app_print,
+            commands::app_bar_style,
             devseed::dev_seed,
             native::quick_hide,
             cloud::cloud_status,

@@ -137,9 +137,9 @@
 
 /* Selection inverts: the current filter is a cobalt ground with white ink. */
 .chip[data-on] {
-  background: var(--cobalt);
-  border-color: var(--cobalt);
-  color: #fff;
+  background: var(--cobalt-fill);
+  border-color: var(--cobalt-fill);
+  color: var(--cobalt-fill-ink, #fff);
 }
 
 /* ---- list ---- */
@@ -229,8 +229,8 @@
   place-items: center;
   border: 0;
   border-radius: 14px;
-  background: var(--cobalt);
-  color: #fff;
+  background: var(--cobalt-fill);
+  color: var(--cobalt-fill-ink, #fff);
   box-shadow: 0 10px 22px rgb(17 23 38 / 18%), 0 2px 5px rgb(17 23 38 / 12%);
 }
 

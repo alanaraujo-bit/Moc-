@@ -720,10 +720,26 @@ pub async fn open_url(app: AppHandle, url: String) -> AppResult<()> {
 /// The window went to the background or came back (phones: leaving the app). Background
 /// time counts toward the auto-lock timeout even though nothing is "idle" on a phone.
 #[tauri::command]
-pub async fn app_visibility(state: State<'_, Arc<AppState>>, visible: bool) -> AppResult<()> {
+pub async fn app_visibility(app: AppHandle, state: State<'_, Arc<AppState>>, visible: bool) -> AppResult<()> {
     if let Ok(mut g) = state.hidden_since.lock() {
         *g = if visible { None } else { Some(std::time::Instant::now()) };
     }
+    // A clipboard clear that came due while we were away runs now (Android allows it only
+    // from the front; give the window a moment to take focus).
+    #[cfg(target_os = "android")]
+    if visible {
+        let seq = platform::take_deferred_clear();
+        if seq != 0 {
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(600)).await;
+                if platform::clear_clipboard_if(0, seq) {
+                    let _ = app.emit("moco://clipboard-cleared", ());
+                }
+            });
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    let _ = app;
     Ok(())
 }
 
@@ -737,11 +753,21 @@ pub async fn app_background() -> AppResult<()> {
 
 /// Status/navigation bar sizes in CSS px on phones (None elsewhere).
 #[tauri::command]
-pub async fn app_insets() -> AppResult<Option<(f64, f64)>> {
+pub async fn app_insets() -> AppResult<Option<serde_json::Value>> {
     #[cfg(target_os = "android")]
-    return Ok(platform::insets().map(|i| (i.top, i.bottom)));
+    return Ok(platform::insets().and_then(|i| serde_json::to_value(i).ok()));
     #[cfg(not(target_os = "android"))]
     Ok(None)
+}
+
+/// Status/navigation bar icon color to match the app's theme (phones).
+#[tauri::command]
+pub async fn app_bar_style(dark: bool) -> AppResult<()> {
+    #[cfg(target_os = "android")]
+    platform::bar_style(dark);
+    #[cfg(not(target_os = "android"))]
+    let _ = dark;
+    Ok(())
 }
 
 /// Opens the system print dialog on phones (WebViews there ignore window.print()).

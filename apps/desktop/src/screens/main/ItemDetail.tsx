@@ -26,6 +26,7 @@ import { CardFace } from "./CardFace";
 import { copyField, FieldRow } from "./fields";
 import { HistoryDialog } from "./HistoryDialog";
 import { Attachments, WifiShare } from "./Attachments";
+import { isMobile } from "../../lib/platform";
 import s from "./ItemDetail.module.css";
 
 /** The field copied by Enter in search and Ctrl+C in the list, per kind. */
@@ -291,7 +292,8 @@ export function ItemDetail({ id }: { id: string }) {
           </section>
         )}
 
-        <Attachments item={item} />
+        {/* Picking and saving files on Android needs content:// support in files.rs — desktop only for now. */}
+        {!isMobile && <Attachments item={item} />}
 
         {item.passwordHistory.length > 0 && <PasswordHistory item={item} />}
 

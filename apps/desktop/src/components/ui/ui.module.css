@@ -558,3 +558,10 @@
   fill: none;
   stroke-width: 2.5;
 }
+
+/* Phones: dialogs center in the space between the status bar and the navigation bar (or
+   the keyboard, when it's up), never under them. */
+:global(html[data-platform="mobile"]) .dialog {
+  top: calc(var(--safe-top, 0px) + (100vh - var(--safe-top, 0px) - var(--safe-bottom, 0px)) / 2);
+  max-height: calc(100vh - var(--safe-top, 0px) - var(--safe-bottom, 0px) - 32px);
+}

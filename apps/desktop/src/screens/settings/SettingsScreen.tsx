@@ -14,7 +14,7 @@ import { HelloSetting } from "./HelloSetting";
 import { DataSection } from "./DataSection";
 import { SyncSection } from "./SyncSection";
 import { useUpdates } from "../main/Updates";
-import { isMobile } from "../../lib/platform";
+import { deviceNoun, isMobile } from "../../lib/platform";
 import s from "./SettingsScreen.module.css";
 
 const ALL_SECTIONS = [
@@ -167,7 +167,7 @@ export function SettingsScreen() {
 </>)}
           <Row
             title="Limpar a área de transferência"
-            detail={isMobile ? "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. O teclado não mostra a prévia delas." : "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. Elas nunca vão para o histórico (Win+V) nem para a nuvem."}
+            detail={isMobile ? "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. Se você sair do Mocó antes, o Android só deixa limpar quando você voltar a ele (e apaga sozinho depois de uma hora). O teclado não mostra a prévia delas." : "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. Elas nunca vão para o histórico (Win+V) nem para a nuvem."}
           >
             <Select<number>
               label="Tempo para limpar"
@@ -252,10 +252,11 @@ export function SettingsScreen() {
           <h2>Privacidade</h2>
           <div className={s.privacy}>
             <div>
-              <h3>O que fica neste computador</h3>
+              <h3>O que fica neste {deviceNoun}</h3>
               <p>
                 Seu cofre, cifrado com XChaCha20-Poly1305 — incluindo nomes, endereços e etiquetas, não só as senhas. A Chave Secreta,
-                protegida pelo Windows (DPAPI). As configurações do app, que não contêm segredos.
+                {" "}
+                {isMobile ? "protegida pelo Keystore do Android (fica no chip de segurança do aparelho)" : "protegida pelo Windows (DPAPI)"}. As configurações do app, que não contêm segredos.
               </p>
             </div>
             <div>

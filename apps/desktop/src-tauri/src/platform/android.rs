@@ -80,6 +80,8 @@ struct ClearIf {
 #[derive(Deserialize)]
 struct Cleared {
     cleared: bool,
+    #[serde(default)]
+    deferred: bool,
 }
 
 pub fn copy_text(_owner: isize, text: &str, sensitive: bool) -> Result<u32, String> {
@@ -91,8 +93,23 @@ pub fn clipboard_sequence() -> u32 {
     0
 }
 
+/// A clear that came due while the app was in the background (Android refuses it there).
+static DEFERRED_CLEAR: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
 pub fn clear_clipboard_if(_owner: isize, sequence: u32) -> bool {
-    call::<Cleared>("clearIf", ClearIf { seq: sequence }).map(|c| c.cleared).unwrap_or(false)
+    match call::<Cleared>("clearIf", ClearIf { seq: sequence }) {
+        Ok(c) if c.deferred => {
+            DEFERRED_CLEAR.store(sequence, std::sync::atomic::Ordering::SeqCst);
+            false
+        }
+        Ok(c) => c.cleared,
+        Err(_) => false,
+    }
+}
+
+/// The pending clear to run now that the app is back in front (0 = none).
+pub fn take_deferred_clear() -> u32 {
+    DEFERRED_CLEAR.swap(0, std::sync::atomic::Ordering::SeqCst)
 }
 
 pub fn idle_millis() -> u64 {
@@ -115,6 +132,9 @@ pub fn move_to_background() {
 pub struct Insets {
     pub top: f64,
     pub bottom: f64,
+    pub left: f64,
+    pub right: f64,
+    pub keyboard: f64,
 }
 
 pub fn insets() -> Option<Insets> {
@@ -128,4 +148,13 @@ struct Print<'a> {
 
 pub fn print(title: &str) -> Result<(), String> {
     call::<Empty>("print", Print { title }).map(|_| ())
+}
+
+#[derive(Serialize)]
+struct BarStyle {
+    dark: bool,
+}
+
+pub fn bar_style(dark: bool) {
+    let _ = call::<Empty>("barStyle", BarStyle { dark });
 }

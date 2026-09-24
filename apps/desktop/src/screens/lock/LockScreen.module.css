@@ -99,8 +99,8 @@
 
 .corner {
   position: absolute;
-  left: 16px;
-  bottom: 12px;
+  left: calc(16px + var(--safe-left, 0px));
+  bottom: calc(12px + var(--safe-bottom, 0px));
   font-size: var(--text-xs);
   color: var(--ink-3);
 }

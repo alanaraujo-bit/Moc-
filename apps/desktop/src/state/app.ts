@@ -24,6 +24,8 @@ function resolveTheme(pref: Settings["theme"] | undefined): "light" | "dark" {
 }
 
 export function applyTheme(theme: "light" | "dark") {
+  // Phones: status/navigation bar icons follow the app theme, not only the system one.
+  if (document.documentElement.dataset.platform === "mobile") void api.appBarStyle(theme === "dark").catch(() => {});
   document.documentElement.dataset.theme = theme;
 }
 

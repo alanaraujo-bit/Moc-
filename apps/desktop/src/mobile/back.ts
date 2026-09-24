@@ -80,12 +80,71 @@ export async function installAndroidBack() {
   });
 }
 
-/** Pads the UI clear of the status and gesture bars, using the sizes Android reports. */
-export async function applyInsets() {
+/**
+ * Keeps the UI clear of the status bar, the navigation bar (gestures or three buttons), the
+ * camera cutout and the keyboard, using the sizes Android reports. Edge to edge, the
+ * WebView reports none of the bottom ones itself and may not shrink for the keyboard.
+ */
+let baseHeight = window.innerHeight;
+
+async function measure() {
   const { api } = await import("../lib/ipc");
   const r = await api.appInsets().catch(() => null);
   if (!r) return;
+  // If the WebView already shrank for the keyboard, only pad what it didn't cover.
+  if (r.keyboard === 0) baseHeight = window.innerHeight;
+  const shrunk = Math.max(0, baseHeight - window.innerHeight);
+  const keyboard = Math.max(0, r.keyboard - shrunk);
   const root = document.documentElement.style;
-  root.setProperty("--safe-top", `${r[0]}px`);
-  root.setProperty("--safe-bottom", `${r[1]}px`);
+  root.setProperty("--safe-top", `${r.top}px`);
+  root.setProperty("--safe-left", `${r.left}px`);
+  root.setProperty("--safe-right", `${r.right}px`);
+  // With the keyboard up, the navigation bar is under it: pad for whichever is taller.
+  root.setProperty("--safe-bottom", `${keyboard > 0 ? keyboard : r.bottom}px`);
+  document.documentElement.dataset.keyboard = keyboard > 0 ? "open" : "closed";
+  if (keyboard > 0) {
+    const el = document.activeElement as HTMLElement | null;
+    if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) el.scrollIntoView({ block: "center" });
+  }
+}
+
+/** The keyboard animates in and out; look again as it settles. */
+let polling = 0;
+function measureSoon() {
+  for (const ms of [0, 120, 350, 700]) window.setTimeout(() => void measure(), ms);
+  // Closing the keyboard with Back fires no event in the page: keep checking while it's up.
+  const started = Date.now();
+  if (!polling) {
+    polling = window.setInterval(() => {
+      if (document.documentElement.dataset.keyboard !== "open" && Date.now() - started > 1000) {
+        window.clearInterval(polling);
+        polling = 0;
+        return;
+      }
+      void measure();
+    }, 300);
+  }
+}
+
+export async function applyInsets() {
+  await measure();
+  window.addEventListener("resize", measureSoon);
+  window.addEventListener("orientationchange", measureSoon);
+  document.addEventListener("focusin", measureSoon);
+  document.addEventListener("focusout", measureSoon);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") measureSoon();
+  });
+}
+
+/**
+ * Leaving and coming back to the app, on every screen: background time counts toward the
+ * auto-lock, and a clipboard clear that came due meanwhile runs on return (autolock.rs,
+ * commands::app_visibility).
+ */
+export async function trackVisibility() {
+  const { api } = await import("../lib/ipc");
+  document.addEventListener("visibilitychange", () => {
+    void api.appVisibility(document.visibilityState === "visible").catch(() => {});
+  });
 }

@@ -10,7 +10,7 @@ import { isMobile } from "./lib/platform";
 
 if (isMobile) {
   document.documentElement.dataset.platform = "mobile";
-  void import("./mobile/back").then((m) => Promise.all([m.installAndroidBack(), m.applyInsets()])).catch(() => {});
+  void import("./mobile/back").then((m) => Promise.all([m.installAndroidBack(), m.applyInsets(), m.trackVisibility()])).catch(() => {});
 }
 
 // A desktop app, not a web page: no browser context menu or reload shortcuts outside

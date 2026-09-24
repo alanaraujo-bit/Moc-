@@ -233,3 +233,9 @@ html[data-platform="mobile"] * {
 html[data-platform="mobile"] ::-webkit-scrollbar {
   display: none;
 }
+
+/* Landscape and camera cutouts: keep everything inside the usable area. */
+html[data-platform="mobile"] #root {
+  padding-left: var(--safe-left, 0px);
+  padding-right: var(--safe-right, 0px);
+}

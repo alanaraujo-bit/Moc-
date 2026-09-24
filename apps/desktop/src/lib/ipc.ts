@@ -150,7 +150,8 @@ export const api = {
   openUrl: (url: string) => call<void>("open_url", { url }),
   appVisibility: (visible: boolean) => call<void>("app_visibility", { visible }),
   appBackground: () => call<void>("app_background"),
-  appInsets: () => call<[number, number] | null>("app_insets"),
+  appInsets: () => call<{ top: number; bottom: number; left: number; right: number; keyboard: number } | null>("app_insets"),
+  appBarStyle: (dark: boolean) => call<void>("app_bar_style", { dark }),
   appPrint: (title: string) => call<void>("app_print", { title }),
 };
 

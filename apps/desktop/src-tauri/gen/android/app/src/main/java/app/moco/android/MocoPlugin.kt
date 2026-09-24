@@ -28,7 +28,8 @@ import javax.crypto.spec.GCMParameterSpec
  *   backed where available, never exported). Only usable while the phone is unlocked.
  *   Replaces DPAPI for keeping the Secret Key on this device.
  * - copy/clearIf: clipboard marked sensitive (hidden from the paste preview on Android 13+),
- *   cleared later only if it still holds what we copied.
+ *   cleared later if it still holds our copy — Android only allows that from the front,
+ *   so a clear that comes due in the background runs when the app is back in front.
  */
 @TauriPlugin
 class MocoPlugin(private val activity: Activity) : Plugin(activity) {
@@ -63,12 +64,23 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
     private fun b64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
     private fun b64(b: ByteArray): String = Base64.encodeToString(b, Base64.NO_WRAP)
 
+    /** An encrypting cipher; a key the system invalidated (e.g. screen lock removed) is replaced. */
+    private fun encryptCipher(): Cipher {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, key())
+        } catch (e: Exception) {
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(alias)
+            cipher.init(Cipher.ENCRYPT_MODE, key())
+        }
+        return cipher
+    }
+
     @Command
     fun protect(invoke: Invoke) {
         try {
             val args = invoke.getArgs()
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, key())
+            val cipher = encryptCipher()
             cipher.updateAAD(b64(args.getString("aad")))
             val ct = cipher.doFinal(b64(args.getString("data")))
             invoke.resolve(JSObject().put("blob", b64(cipher.iv + ct)))
@@ -122,12 +134,16 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
     fun clearIf(invoke: Invoke) {
         val seq = invoke.getArgs().getInt("seq")
         activity.runOnUiThread {
+            // Android only lets the app in front read or clear the clipboard. In the
+            // background we report "not yet" and the app clears when it comes back.
+            if (!activity.hasWindowFocus()) {
+                invoke.resolve(JSObject().put("cleared", false).put("deferred", true))
+                return@runOnUiThread
+            }
             val cb = clipboard()
-            // The label is ours ("moco-N"); reading it doesn't need clipboard access.
-            val label = cb.primaryClipDescription?.label?.toString()
-            val cleared = label == "moco-$seq"
+            val cleared = cb.primaryClipDescription?.label?.toString() == "moco-$seq"
             if (cleared) cb.clearPrimaryClip()
-            invoke.resolve(JSObject().put("cleared", cleared))
+            invoke.resolve(JSObject().put("cleared", cleared).put("deferred", false))
         }
     }
 
@@ -138,19 +154,37 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
         invoke.resolve()
     }
 
-    /** System bar and cutout insets in CSS px (the WebView doesn't report the bottom one). */
+    /**
+     * System bar, cutout and keyboard insets in CSS px (the WebView reports none at the
+     * bottom and doesn't resize for the keyboard when drawing edge to edge).
+     */
     @Command
     fun insets(invoke: Invoke) {
         activity.runOnUiThread {
-            val root = activity.window.decorView
             val density = activity.resources.displayMetrics.density
-            val ins = androidx.core.view.ViewCompat.getRootWindowInsets(root)
-                ?.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars() or androidx.core.view.WindowInsetsCompat.Type.displayCutout())
+            val all = androidx.core.view.ViewCompat.getRootWindowInsets(activity.window.decorView)
+            val bars = all?.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars() or androidx.core.view.WindowInsetsCompat.Type.displayCutout())
+            val ime = all?.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())
             invoke.resolve(
                 JSObject()
-                    .put("top", (ins?.top ?: 0) / density)
-                    .put("bottom", (ins?.bottom ?: 0) / density)
+                    .put("top", (bars?.top ?: 0) / density)
+                    .put("bottom", (bars?.bottom ?: 0) / density)
+                    .put("left", (bars?.left ?: 0) / density)
+                    .put("right", (bars?.right ?: 0) / density)
+                    .put("keyboard", (ime?.bottom ?: 0) / density)
             )
+        }
+    }
+
+    /** Status and navigation bar icons dark on a light Mocó, light on a dark one. */
+    @Command
+    fun barStyle(invoke: Invoke) {
+        val dark = invoke.getArgs().optBoolean("dark", false)
+        activity.runOnUiThread {
+            val c = androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+            c.isAppearanceLightStatusBars = !dark
+            c.isAppearanceLightNavigationBars = !dark
+            invoke.resolve()
         }
     }
 
