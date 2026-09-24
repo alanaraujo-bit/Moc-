@@ -10,6 +10,9 @@ pnpm install
 pnpm dev            # app desktop (Tauri) em modo desenvolvimento
 pnpm build          # instalador NSIS em ../moco-target/release/bundle/nsis/
 cargo test --workspace
+# testes de ponta a ponta do servidor (sem a variável, são pulados em silêncio):
+D:/pg/pgsql/bin/pg_ctl -D D:/pg/data -o "-p 55432" start   # Postgres portátil local
+TEST_DATABASE_URL=postgres://postgres@localhost:55432/moco_test cargo test -p moco-server
 ```
 
 ### QA automatizado do app real
@@ -57,7 +60,16 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 - DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
-1. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
+1. Compartilhamento: núcleo e servidor prontos (no ar). Falta o desktop — cuidados:
+   - anexos de itens compartilhados vão por `/v1/shared/{dono}/{cofre}/attachments` (hoje
+     `cloud.rs` usa sempre `/v1/attachments`); cofre de leitor não envia nem apaga anexos;
+   - erros por cofre (409 chave antiga, Integrity entre rotação e novo convite, chave mudou,
+     404 `not_member` → esquecer) não podem derrubar a sync da própria conta;
+   - reemitir convites no laço do dono: membro com `keyGen` < `vault_key_gen` ganha convite
+     novo (sobrevive a fechar o app entre rotação e convites); papel vindo do que o app sabe;
+   - `/v1/people` tem limite de 30/h por conta: buscar só ao confirmar, nunca ao digitar;
+   - validar com duas instâncias reais (`MOCO_DATA_DIR`) contra produção, com capturas.
+   Depois: famílias/equipes, planos/billing (bloqueado: provedor).
 2. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
 3. Recuperação por código em dispositivo novo (verificador no servidor).
 
