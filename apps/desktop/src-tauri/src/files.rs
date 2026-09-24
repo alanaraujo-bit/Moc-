@@ -34,6 +34,18 @@ fn mime_of(path: &Path) -> &'static str {
     }
 }
 
+/// Reads an attachment, fetching its encrypted blob from the server first if it was added
+/// on another device.
+fn read(st: &AppState, item_id: Uuid, att_id: Uuid) -> AppResult<(moco_core::model::AttachmentMeta, zeroize::Zeroizing<Vec<u8>>)> {
+    match st.with_account(|a| Ok(a.read_attachment(item_id, att_id)?)) {
+        Err(e) if e.code == "not_found" && e.message.contains("anexo-local") => {
+            crate::cloud::fetch_attachment(st, item_id, att_id)?;
+            st.with_account(|a| Ok(a.read_attachment(item_id, att_id)?))
+        }
+        other => other,
+    }
+}
+
 async fn blocking<T: Send + 'static>(f: impl FnOnce() -> AppResult<T> + Send + 'static) -> AppResult<T> {
     tauri::async_runtime::spawn_blocking(f).await.map_err(|e| AppError::internal(e.to_string()))?
 }
@@ -86,7 +98,7 @@ pub async fn attachment_add_paths(state: S<'_>, item_id: Uuid, paths: Vec<String
 pub async fn attachment_save(app: AppHandle, state: S<'_>, item_id: Uuid, attachment_id: Uuid) -> AppResult<Option<String>> {
     let st = state.inner().clone();
     blocking(move || {
-        let (meta, bytes) = st.with_account(|a| Ok(a.read_attachment(item_id, attachment_id)?))?;
+        let (meta, bytes) = read(&st, item_id, attachment_id)?;
         let target = if cfg!(debug_assertions) && std::env::var("MOCO_QA_SAVE_DIR").is_ok() {
             Some(PathBuf::from(std::env::var("MOCO_QA_SAVE_DIR").unwrap()).join(&meta.name))
         } else {
@@ -109,7 +121,7 @@ pub async fn attachment_save(app: AppHandle, state: S<'_>, item_id: Uuid, attach
 pub async fn attachment_preview(state: S<'_>, item_id: Uuid, attachment_id: Uuid) -> AppResult<String> {
     let st = state.inner().clone();
     blocking(move || {
-        let (meta, bytes) = st.with_account(|a| Ok(a.read_attachment(item_id, attachment_id)?))?;
+        let (meta, bytes) = read(&st, item_id, attachment_id)?;
         if !meta.mime.starts_with("image/") || meta.mime == "image/heic" || bytes.len() > 8 * 1024 * 1024 {
             return Err(AppError::new("unsupported", "Sem pré-visualização para este arquivo. Use “Salvar como…”."));
         }

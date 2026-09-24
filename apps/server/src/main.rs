@@ -7,6 +7,7 @@
 mod account;
 mod auth;
 mod error;
+mod files;
 mod ratelimit;
 mod secrets;
 mod sync;
@@ -46,6 +47,8 @@ pub fn router(state: Shared) -> Router {
         .route("/v1/2fa/disable", post(account::totp_disable))
         .route("/v1/sync/pull", get(sync::pull))
         .route("/v1/sync/push", post(sync::push))
+        .route("/v1/attachments/{id}", put(files::put).get(files::get).delete(files::delete))
+        .layer(axum::extract::DefaultBodyLimit::max(64 * 1024 * 1024))
         .layer(RequestBodyLimitLayer::new(64 * 1024 * 1024))
         .layer(CorsLayer::new()) // desktop and mobile clients don't need CORS; deny browsers
         .layer(TraceLayer::new_for_http())

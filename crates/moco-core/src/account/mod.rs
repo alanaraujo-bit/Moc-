@@ -1158,7 +1158,7 @@ impl Account {
     pub fn read_attachment(&self, item_id: Uuid, att_id: Uuid) -> Result<(AttachmentMeta, Zeroizing<Vec<u8>>)> {
         let item = self.item(item_id)?;
         let meta = item.details.attachments.iter().find(|a| a.id == att_id).cloned().ok_or_else(|| CoreError::NotFound("anexo".into()))?;
-        let (owner, vault_id, blob) = self.store.attachment(att_id)?.ok_or_else(|| CoreError::NotFound("anexo".into()))?;
+        let (owner, vault_id, blob) = self.store.attachment(att_id)?.ok_or(CoreError::NotFound("anexo-local".into()))?;
         if owner != item_id || vault_id != item.vault_id {
             return Err(CoreError::Integrity);
         }

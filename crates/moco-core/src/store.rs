@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::error::{CoreError, Result};
 use crate::model::Timestamp;
 
-const SCHEMA_VERSION: i64 = 3;
+const SCHEMA_VERSION: i64 = 4;
 
 impl From<rusqlite::Error> for CoreError {
     fn from(e: rusqlite::Error) -> Self {
@@ -183,6 +183,16 @@ impl Store {
                    PRIMARY KEY (entity, id)
                  );
                  PRAGMA user_version = 3;
+                 COMMIT;",
+            )?;
+        }
+        if version < 4 {
+            // Attachment blobs sync separately from items (large, fetched on demand).
+            self.conn.execute_batch(
+                "BEGIN;
+                 ALTER TABLE attachments ADD COLUMN uploaded INTEGER NOT NULL DEFAULT 0;
+                 CREATE TABLE attachment_deletes (id TEXT PRIMARY KEY);
+                 PRAGMA user_version = 4;
                  COMMIT;",
             )?;
         }
@@ -480,10 +490,42 @@ impl Store {
     // ---- attachments ------------------------------------------------------------------
 
     pub fn put_attachment(&self, id: Uuid, item_id: Uuid, vault_id: Uuid, blob: &[u8], at: Timestamp) -> Result<()> {
+        self.put_attachment_state(id, item_id, vault_id, blob, at, false)
+    }
+
+    /// `uploaded` = the server already has exactly this blob (downloaded from it).
+    pub fn put_attachment_state(&self, id: Uuid, item_id: Uuid, vault_id: Uuid, blob: &[u8], at: Timestamp, uploaded: bool) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO attachments(id, item_id, vault_id, blob, added_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![id.to_string(), item_id.to_string(), vault_id.to_string(), blob, at],
+            "INSERT OR REPLACE INTO attachments(id, item_id, vault_id, blob, added_at, uploaded) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![id.to_string(), item_id.to_string(), vault_id.to_string(), blob, at, uploaded as i64],
         )?;
+        Ok(())
+    }
+
+    pub fn has_attachment(&self, id: Uuid) -> Result<bool> {
+        Ok(self.conn.query_row("SELECT EXISTS(SELECT 1 FROM attachments WHERE id = ?1)", [id.to_string()], |r| r.get::<_, i64>(0))? != 0)
+    }
+
+    /// Blobs not yet on the server: (id, item_id, blob).
+    pub fn attachments_to_upload(&self) -> Result<Vec<(Uuid, Uuid, Vec<u8>)>> {
+        let mut st = self.conn.prepare("SELECT id, item_id, blob FROM attachments WHERE uploaded = 0 LIMIT 20")?;
+        let rows = st.query_map([], |r| Ok((uuid_of(r.get(0)?)?, uuid_of(r.get(1)?)?, r.get(2)?)))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    pub fn mark_attachment_uploaded(&self, id: Uuid) -> Result<()> {
+        self.conn.execute("UPDATE attachments SET uploaded = 1 WHERE id = ?1", [id.to_string()])?;
+        Ok(())
+    }
+
+    pub fn attachment_deletes(&self) -> Result<Vec<Uuid>> {
+        let mut st = self.conn.prepare("SELECT id FROM attachment_deletes LIMIT 100")?;
+        let rows = st.query_map([], |r| uuid_of(r.get(0)?))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    pub fn clear_attachment_delete(&self, id: Uuid) -> Result<()> {
+        self.conn.execute("DELETE FROM attachment_deletes WHERE id = ?1", [id.to_string()])?;
         Ok(())
     }
 
@@ -502,12 +544,18 @@ impl Store {
         Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
+    /// Removes a blob locally and queues its removal from the server.
     pub fn delete_attachment(&self, id: Uuid) -> Result<()> {
         self.conn.execute("DELETE FROM attachments WHERE id = ?1", [id.to_string()])?;
+        self.conn.execute("INSERT OR IGNORE INTO attachment_deletes(id) VALUES (?1)", [id.to_string()])?;
         Ok(())
     }
 
     pub fn delete_attachments_of(&self, item_id: Uuid) -> Result<()> {
+        self.conn.execute(
+            "INSERT OR IGNORE INTO attachment_deletes(id) SELECT id FROM attachments WHERE item_id = ?1",
+            [item_id.to_string()],
+        )?;
         self.conn.execute("DELETE FROM attachments WHERE item_id = ?1", [item_id.to_string()])?;
         Ok(())
     }

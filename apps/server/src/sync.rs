@@ -150,6 +150,9 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
             .bind(seq)
             .execute(&mut *tx)
             .await?;
+            if r.deleted {
+                sqlx::query("DELETE FROM attachments WHERE account_id = $1 AND item_id = $2").bind(acct).bind(r.id).execute(&mut *tx).await?;
+            }
             resp.accepted.push(("item".into(), r.id, r.version));
         } else if let Some(c) = current {
             resp.conflict_items.push(item_of(c).0);

@@ -113,6 +113,58 @@ fn call(method: &str, path: &str, token: Option<&str>, body: Option<Value>) -> A
     Err(AppError::new(code, message))
 }
 
+fn call_bytes(method: &str, path: &str, token: &str, body: Option<&[u8]>) -> AppResult<Vec<u8>> {
+    let url = format!("{}{}", server_url(), path);
+    let a = agent();
+    let auth = format!("Bearer {token}");
+    let mut resp = match method {
+        "PUT" => a.put(&url).header("Authorization", &auth).header("Content-Type", "application/octet-stream").send(body.unwrap_or(&[])),
+        "DELETE" => a.delete(&url).header("Authorization", &auth).call(),
+        _ => a.get(&url).header("Authorization", &auth).call(),
+    }
+    .map_err(|_| offline())?;
+    let status = resp.status().as_u16();
+    let bytes = resp.body_mut().with_config().limit(40 * 1024 * 1024).read_to_vec().map_err(|_| offline())?;
+    match status {
+        200..=299 => Ok(bytes),
+        404 => Err(AppError::new("not_found", "Este anexo ainda não chegou ao servidor. Abra o Mocó no outro dispositivo para ele terminar de enviar.")),
+        401 => Err(AppError::new("cloud_unauthorized", "Sessão expirada.")),
+        413 => Err(AppError::new("quota", "O espaço para anexos da sua conta acabou.")),
+        _ => Err(AppError::new("server", "O servidor recusou o anexo.")),
+    }
+}
+
+/// Uploads new attachment blobs and applies attachment removals.
+fn sync_attachments(st: &AppState, tok: &str) -> AppResult<()> {
+    for id in st.with_account(|a| Ok(a.store().attachment_deletes()?))? {
+        match call_bytes("DELETE", &format!("/v1/attachments/{id}"), tok, None) {
+            Ok(_) | Err(AppError { code: "not_found", .. }) => st.with_account(|a| Ok(a.store().clear_attachment_delete(id)?))?,
+            Err(e) => return Err(e),
+        }
+    }
+    loop {
+        let batch = st.with_account(|a| Ok(a.store().attachments_to_upload()?))?;
+        if batch.is_empty() {
+            break;
+        }
+        for (id, item, blob) in batch {
+            call_bytes("PUT", &format!("/v1/attachments/{id}?item={item}"), tok, Some(&blob))?;
+            st.with_account(|a| Ok(a.store().mark_attachment_uploaded(id)?))?;
+        }
+    }
+    Ok(())
+}
+
+/// Downloads an attachment blob synced from another device (it stays encrypted here).
+pub fn fetch_attachment(st: &AppState, item_id: Uuid, att_id: Uuid) -> AppResult<()> {
+    let tok = st.with_account(|a| token(a))?.ok_or_else(|| AppError::new("not_found", "Este anexo não está neste computador."))?;
+    let blob = call_bytes("GET", &format!("/v1/attachments/{att_id}"), &tok, None)?;
+    st.with_account(|a| {
+        let vault = a.item(item_id)?.vault_id;
+        Ok(a.store().put_attachment_state(att_id, item_id, vault, &blob, now_ms(), true)?)
+    })
+}
+
 fn device_info(st: &AppState) -> AppResult<Value> {
     let mut d = st.device();
     if d.device_id.is_nil() {
@@ -186,6 +238,7 @@ pub fn sync_once(st: &AppState) -> AppResult<SyncOutcome> {
             break;
         }
     }
+    sync_attachments(st, &tok)?;
     st.with_account(|a| {
         if let Some(mut c) = config(a)? {
             c.last_sync_at = now_ms();
@@ -251,7 +304,12 @@ pub fn spawn_loop(app: AppHandle) {
                 if !ready {
                     continue;
                 }
-                let dirty = st.with_account(|a| Ok(a.store().outbox_len()? > 0)).unwrap_or(false);
+                let dirty = st
+                    .with_account(|a| {
+                        let st = a.store();
+                        Ok(st.outbox_len()? > 0 || !st.attachments_to_upload()?.is_empty() || !st.attachment_deletes()?.is_empty())
+                    })
+                    .unwrap_or(false);
                 if dirty || last_full.elapsed() > Duration::from_secs(20) {
                     last_full = std::time::Instant::now();
                     let _ = run_sync(&app);
