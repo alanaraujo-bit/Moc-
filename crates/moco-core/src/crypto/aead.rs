@@ -69,6 +69,7 @@ pub enum Purpose {
     Export = 0x0E,
     Attachment = 0x0F,
     AuthKey = 0x10,
+    SyncToken = 0x11,
 }
 
 impl Purpose {
@@ -91,6 +92,7 @@ impl Purpose {
             0x0E => Export,
             0x0F => Attachment,
             0x10 => AuthKey,
+            0x11 => SyncToken,
             _ => return None,
         })
     }

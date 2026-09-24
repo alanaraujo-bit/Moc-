@@ -423,7 +423,13 @@ impl Account {
         };
         let weak = kdf_is_weaker(&record.kdf, &KdfParams::recommended());
         self.finish_unlock(record, ak, "unlock.password")?;
+        let login_pub = keys.login.public().to_vec();
         self.remember_login(keys.login)?;
+        // Records created before login keys existed get theirs now.
+        if self.session()?.record.auth_public_key.as_deref() != Some(&login_pub[..]) {
+            self.session_mut()?.record.auth_public_key = Some(login_pub);
+            self.save_record()?;
+        }
         if weak && self.upgrade_kdf_on_unlock {
             self.set_password(password, secret_key)?;
             self.store.log_event("kdf.upgraded", None)?;

@@ -253,7 +253,12 @@ pub async fn password_change(state: S<'_>, args: ChangePasswordArgs) -> AppResul
     let st = state.inner().clone();
     blocking(move || {
         let sk = device_secret_key(&st)?;
-        st.with_account(|a| Ok(a.change_password(args.current.expose(), args.next.expose(), &sk)?))
+        st.with_account(|a| Ok(a.change_password(args.current.expose(), args.next.expose(), &sk)?))?;
+        // Keep the server in step: new wrapped key + login key, other sessions revoked.
+        if let Err(e) = crate::cloud::push_record(&st) {
+            eprintln!("record push failed: {}", e.message);
+        }
+        Ok(())
     })
     .await
 }

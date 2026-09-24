@@ -1,4 +1,5 @@
 mod autolock;
+mod cloud;
 mod breach;
 mod commands;
 mod devseed;
@@ -74,12 +75,17 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+    let mut builder = tauri::Builder::default();
+    // Debug runs with their own profile (QA of multi-device sync) may run side by side.
+    let isolated_profile = cfg!(debug_assertions) && std::env::var("MOCO_DATA_DIR").is_ok();
+    if !isolated_profile {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if !argv.iter().any(|a| a == native::HIDDEN_ARG) {
                 show_main(app)
             }
-        }))
+        }));
+    }
+    builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -123,6 +129,7 @@ pub fn run() {
             apply_settings(app.handle(), &state.settings());
             build_tray(app.handle())?;
             autolock::spawn(app.handle().clone());
+            cloud::spawn_loop(app.handle().clone());
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -192,6 +199,17 @@ pub fn run() {
             commands::open_url,
             devseed::dev_seed,
             native::quick_hide,
+            cloud::cloud_status,
+            cloud::cloud_signup,
+            cloud::cloud_signin,
+            cloud::cloud_sync_now,
+            cloud::cloud_signout,
+            cloud::cloud_me,
+            cloud::cloud_revoke_device,
+            cloud::cloud_totp_setup,
+            cloud::cloud_totp_enable,
+            cloud::cloud_totp_disable,
+            cloud::cloud_delete_account,
             files::attachment_add,
             files::attachment_add_paths,
             files::attachment_save,

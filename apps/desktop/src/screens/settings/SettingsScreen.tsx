@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { Desktop, Eye, Fingerprint, HardDrives, Info, Key, Palette, ShieldCheck, UserCircle } from "@phosphor-icons/react";
+import { CloudArrowUp, Desktop, Eye, Fingerprint, HardDrives, Info, Key, Palette, ShieldCheck, UserCircle } from "@phosphor-icons/react";
 import { MasterPasswordForm, type MasterPasswordState } from "../../components/strength/MasterPasswordForm";
 import { Confirm, Dialog } from "../../components/ui/overlays";
 import { Button, PasswordField, Segmented, Switch } from "../../components/ui/primitives";
@@ -12,6 +12,7 @@ import { EmergencyKitSheet, PrintPortal, RecoverySheetPrint } from "../onboardin
 import { CodeBlock, printNow } from "../onboarding/RecoverySheet";
 import { HelloSetting } from "./HelloSetting";
 import { DataSection } from "./DataSection";
+import { SyncSection } from "./SyncSection";
 import { useUpdates } from "../main/Updates";
 import s from "./SettingsScreen.module.css";
 
@@ -20,6 +21,7 @@ const SECTIONS = [
   { id: "seguranca", label: "Segurança", icon: <ShieldCheck size={16} /> },
   { id: "desbloqueio", label: "Desbloqueio", icon: <Fingerprint size={16} /> },
   { id: "conta", label: "Conta e recuperação", icon: <UserCircle size={16} /> },
+  { id: "sync", label: "Sincronização", icon: <CloudArrowUp size={16} /> },
   { id: "windows", label: "Windows", icon: <Desktop size={16} /> },
   { id: "dados", label: "Importar e exportar", icon: <HardDrives size={16} /> },
   { id: "privacidade", label: "Privacidade", icon: <Eye size={16} /> },
@@ -209,6 +211,11 @@ export function SettingsScreen() {
           <AccountActions status={status} onChange={reloadStatus} />
         </section>
 
+        <section id="sync" className={s.section}>
+          <h2>Sincronização e dispositivos</h2>
+          <SyncSection />
+        </section>
+
         <section id="windows" className={s.section}>
           <h2>Windows</h2>
           <Row title="Abrir com o Windows" detail="O Mocó começa trancado, na bandeja do sistema.">
@@ -247,8 +254,10 @@ export function SettingsScreen() {
             <div>
               <h3>O que sai daqui</h3>
               <p>
-                Nada, a menos que você peça: a verificação de vazamentos (anônima) e a busca de atualizações (só a versão do app).
-                Não há telemetria de uso nem anúncios.
+                Com a sincronização ativa, seus itens vão para o servidor do Mocó já cifrados, junto com o mínimo para funcionar:
+                seu e-mail, identificadores aleatórios, datas de alteração, tamanhos aproximados e a lista de dispositivos. Fora
+                isso, só o que você pedir: a verificação de vazamentos (anônima) e a busca de atualizações. Não há telemetria de uso
+                nem anúncios.
               </p>
             </div>
           </div>

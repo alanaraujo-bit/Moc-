@@ -4,6 +4,9 @@
 
 import type {
   AppInfo,
+  CloudMe,
+  CloudStatus,
+  SyncOutcome,
   BreachReport,
   ExportResult,
   ImportPreview,
@@ -128,6 +131,19 @@ export const api = {
   attachmentPreview: (itemId: Uuid, attachmentId: Uuid) => call<string>("attachment_preview", { itemId, attachmentId }),
   attachmentRemove: (itemId: Uuid, attachmentId: Uuid) => call<ItemView>("attachment_remove", { itemId, attachmentId }),
   wifiQr: (itemId: Uuid) => call<string>("wifi_qr", { itemId }),
+
+  cloudStatus: () => call<CloudStatus>("cloud_status"),
+  cloudSignup: (email: string, password: string) => call<void>("cloud_signup", { args: { email, password } }),
+  cloudSignin: (email: string, password: string, secretKey: string, totp?: string) =>
+    call<void>("cloud_signin", { args: { email, password, secretKey, totp: totp || null } }),
+  cloudSyncNow: () => call<SyncOutcome>("cloud_sync_now"),
+  cloudSignout: () => call<void>("cloud_signout"),
+  cloudMe: () => call<CloudMe>("cloud_me"),
+  cloudRevokeDevice: (id: Uuid) => call<void>("cloud_revoke_device", { id }),
+  cloudTotpSetup: () => call<{ secret: string; uri: string }>("cloud_totp_setup"),
+  cloudTotpEnable: (secret: string, code: string) => call<{ recoveryCodes: string[] }>("cloud_totp_enable", { secret, code }),
+  cloudTotpDisable: (code: string) => call<void>("cloud_totp_disable", { code }),
+  cloudDeleteAccount: (password: string) => call<void>("cloud_delete_account", { password }),
 
   settings: () => call<Settings>("settings_get"),
   updateSettings: (settings: Settings) => call<Settings>("settings_update", { settings }),

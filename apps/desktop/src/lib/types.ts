@@ -327,3 +327,39 @@ export interface UpdateInfo {
   date: string | null;
   critical: boolean;
 }
+
+export interface CloudStatus {
+  connected: boolean;
+  email: string | null;
+  server: string;
+  lastSyncAt: number;
+  lastError: string | null;
+  pending: number;
+  syncing: boolean;
+}
+
+export interface SyncOutcome {
+  pushed: number;
+  pulled: number;
+  conflictsResolved: number;
+  rejected: number;
+}
+
+export interface CloudDevice {
+  id: Uuid;
+  name: string;
+  platform: string;
+  createdAt: number;
+  lastSeenAt: number;
+  current: boolean;
+}
+
+export interface CloudMe {
+  email: string;
+  plan: string;
+  twoFactor: boolean;
+  recoveryCodesLeft: number;
+  createdAt: number;
+  devices: CloudDevice[];
+  items: number;
+}

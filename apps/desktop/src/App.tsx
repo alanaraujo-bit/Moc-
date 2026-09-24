@@ -39,6 +39,10 @@ export function App() {
         st.setQuery("");
         st.select(String(id));
       }),
+      on("moco://synced", () => {
+        if (useVault.getState().loaded) void useVault.getState().refresh();
+      }),
+      on("moco://cloud-signed-out", (msg) => toast(String(msg ?? "A sincronização foi desconectada."), { tone: "danger", duration: 8000 })),
       on("moco://unlocked", () => {
         if (useApp.getState().phase === "locked") useApp.getState().setPhase("unlocked");
       }),

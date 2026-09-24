@@ -192,3 +192,25 @@ recomendações. Estado:
 - "Abrir com o Windows" registra o app com `--hidden`: começa trancado, na bandeja.
 - Fechar a janela esconde na bandeja (configurável); a bandeja oferece Abrir, Acesso rápido,
   Trancar agora e Sair.
+
+## D-014 · Servidor de sincronização
+
+- `apps/server` (Rust, axum + Postgres) no Railway: `https://server-production-975b.up.railway.app`
+  (provisório até ter domínio). Guarda só o que os dispositivos já cifraram.
+- **Login sem segredo reutilizável:** o cliente deriva, do mesmo Argon2id que abre o cofre, uma
+  chave Ed25519; o servidor guarda a pública e o cliente assina um desafio de uso único. O
+  token de sessão é aleatório, guardado no servidor só como hash, ligado a um dispositivo e
+  revogável; no computador ele fica selado sob a Chave da Conta.
+- **Pré-login** responde a e-mails inexistentes com valores falsos estáveis (não revela quem
+  tem conta). Limites de taxa por IP e por conta.
+- **Sincronização** por concorrência otimista (versão base) e cursor de sequência por conta;
+  o cliente autentica cada linha antes de aplicar e recusa versões menores que a maior já
+  vista (proteção contra rollback). Conflito: a edição mais recente vence, a outra vai para o
+  histórico; edição vence exclusão.
+- **Troca de senha** envia registro + nova chave de login numa transação e derruba as outras
+  sessões. **Remover dispositivo** corta a sincronização dele — o que já estava salvo nele
+  continua lá, cifrado (a interface diz isso).
+- **2FA (TOTP)** opcional para entrar em dispositivos novos, com 8 códigos de emergência
+  guardados como hash. O segredo TOTP fica cifrado no servidor com a chave do servidor.
+- **Pendente:** verificação de e-mail (precisa de provedor de e-mail — BLOCKERS), anexos na
+  nuvem, recuperação por código em dispositivo novo (hoje a recuperação é local).

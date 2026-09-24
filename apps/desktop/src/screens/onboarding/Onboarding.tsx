@@ -12,12 +12,13 @@ import type { CreatedAccount, ItemKind } from "../../lib/types";
 import { useApp } from "../../state/app";
 import { useVault } from "../../state/vault";
 import { EmergencyKitSheet, PrintPortal } from "./Printable";
+import { SignIn } from "./SignIn";
 import { CodeBlock, printNow, RecoverySheet } from "./RecoverySheet";
 import s from "./Onboarding.module.css";
 
-type Step = "welcome" | "password" | "creating" | "kit" | "recovery" | "done";
+type Step = "welcome" | "signin" | "password" | "creating" | "kit" | "recovery" | "done";
 
-const PROGRESS: Record<Step, number> = { welcome: 0.04, password: 0.18, creating: 0.34, kit: 0.52, recovery: 0.72, done: 1 };
+const PROGRESS: Record<Step, number> = { welcome: 0.04, signin: 0.3, password: 0.18, creating: 0.34, kit: 0.52, recovery: 0.72, done: 1 };
 
 export function Onboarding() {
   const setPhase = useApp((st) => st.setPhase);
@@ -113,8 +114,13 @@ export function Onboarding() {
                 </Button>
                 <span className={s.muted}>Leva uns dois minutos.</span>
               </div>
+              <button className={s.linkBtn} onClick={() => setStep("signin")}>
+                Já uso o Mocó em outro computador
+              </button>
             </div>
           )}
+
+          {step === "signin" && <SignIn onBack={() => setStep("welcome")} />}
 
           {step === "password" && (
             <div className={s.step}>

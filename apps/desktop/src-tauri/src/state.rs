@@ -33,6 +33,7 @@ pub struct AppState {
     pub retry_after: Mutex<Option<Instant>>,
     pub pending_import: crate::transfer::Pending,
     pub pending_update: crate::updates::PendingUpdate,
+    pub cloud: crate::cloud::CloudRuntime,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -62,6 +63,8 @@ pub struct DeviceState {
     #[serde(with = "b64")]
     pub hello_salt: Vec<u8>,
     pub last_password_unlock_at: i64,
+    /// Stable id of this installation for the sync server's device list.
+    pub device_id: Uuid,
 }
 
 impl AppState {
@@ -113,6 +116,7 @@ impl AppState {
             retry_after: Mutex::new(None),
             pending_import: Mutex::new(None),
             pending_update: Mutex::new(None),
+            cloud: Default::default(),
         }
     }
 
