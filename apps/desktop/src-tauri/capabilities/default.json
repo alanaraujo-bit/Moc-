@@ -2,6 +2,11 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Least-privilege capability set for the main Mocó window.",
-  "windows": ["main"],
-  "permissions": ["core:default"]
+  "windows": [
+    "main",
+    "quick"
+  ],
+  "permissions": [
+    "core:default"
+  ]
 }

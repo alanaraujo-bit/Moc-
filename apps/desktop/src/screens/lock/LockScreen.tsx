@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, Key, Question } from "@phosphor-icons/react";
+import { ArrowRight, Fingerprint, Key, Question } from "@phosphor-icons/react";
 import { MocoMark } from "../../components/brand/Brand";
 import { Button, IconButton, PasswordField, Spinner, TextField } from "../../components/ui/primitives";
 import { TileWall } from "../../components/wall/TileWall";
@@ -27,6 +27,31 @@ export function LockScreen({ reason }: { reason?: string | null }) {
   const [shake, setShake] = useState(0);
   const [turning, setTurning] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  const helloReady = !!info?.helloEnrolled && !info?.passwordDue && !needSecretKey;
+  const helloTried = useRef(false);
+  const [helloBusy, setHelloBusy] = useState(false);
+
+  const tryHello = useCallback(async () => {
+    setHelloBusy(true);
+    setError(null);
+    try {
+      await api.unlockHello();
+      setTurning(true);
+    } catch (e) {
+      const code = errorCode(e);
+      if (code !== "hello_canceled") setError(errorMessage(e));
+      pwRef.current?.focus();
+    } finally {
+      setHelloBusy(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (helloReady && !helloTried.current && reason !== "manual") {
+      helloTried.current = true;
+      void tryHello();
+    }
+  }, [helloReady, tryHello, reason]);
 
   useEffect(() => {
     pwRef.current?.focus();
@@ -83,7 +108,13 @@ export function LockScreen({ reason }: { reason?: string | null }) {
         <MocoMark size={52} />
         <div className={s.copy}>
           <h1 className={s.title}>Seu Mocó está trancado.</h1>
-          <p className={s.sub}>{reason && REASONS[reason] ? REASONS[reason] : "Digite sua senha mestra para abrir."}</p>
+          <p className={s.sub}>
+            {reason && REASONS[reason]
+              ? REASONS[reason]
+              : info?.helloEnrolled && info.passwordDue
+                ? "Hoje é dia de digitar a senha mestra — para você nunca esquecê-la."
+                : "Digite sua senha mestra para abrir."}
+          </p>
         </div>
 
         <div className={s.fields} key={shake} data-shake={shake > 0 || undefined}>
@@ -127,6 +158,11 @@ export function LockScreen({ reason }: { reason?: string | null }) {
           )}
         </div>
 
+        {helloReady && (
+          <Button variant="secondary" size="lg" full icon={<Fingerprint size={18} />} loading={helloBusy} onClick={tryHello}>
+            Usar o Windows Hello
+          </Button>
+        )}
         <div className={s.foot}>
           <Button variant="ghost" size="sm" icon={<Question size={15} />} onClick={() => setRecovering(true)} disabled={busy}>
             Esqueci a senha mestra

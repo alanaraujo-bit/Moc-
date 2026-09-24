@@ -4,6 +4,11 @@
 
 import type {
   AppInfo,
+  BreachReport,
+  ExportResult,
+  ImportPreview,
+  ImportSource,
+  HealthReport,
   CopyResult,
   CreatedAccount,
   Generated,
@@ -45,6 +50,9 @@ export const api = {
     call<CreatedAccount>("account_create", { args: { password, vaultName } }),
   unlock: (password: string, secretKey?: string) => call<void>("account_unlock", { args: { password, secretKey } }),
   lock: () => call<void>("account_lock"),
+  unlockHello: () => call<void>("account_unlock_hello"),
+  helloEnable: (password: string) => call<void>("hello_enable", { args: { password } }),
+  helloDisable: () => call<void>("hello_disable"),
   recover: (recoveryCode: string, newPassword: string, secretKey?: string) =>
     call<string>("account_recover", { args: { recoveryCode, newPassword, secretKey } }),
   security: () => call<SecurityStatus>("account_security"),
@@ -84,6 +92,21 @@ export const api = {
   generate: (recipe: Recipe) => call<Generated>("generator_generate", { recipe }),
   strength: (password: string, context: string[] = []) =>
     call<Strength>("strength_estimate", { args: { password, context } }),
+
+  health: () => call<HealthReport>("health_report"),
+  breachCheck: () => call<BreachReport>("breach_check"),
+
+  importPick: (source: ImportSource) => call<ImportPreview | null>("import_pick", { source }),
+  importBackupPick: (password: string) => call<ImportPreview | null>("import_backup_pick", { args: { password } }),
+  importCommit: (args: { vaultId: Uuid; skipDuplicates: boolean; foldersAsTags: boolean; tag: string | null; exclude: number[] }) =>
+    call<{ imported: number; skipped: number }>("import_commit", { args }),
+  importCancel: () => call<void>("import_cancel"),
+  exportBackup: (masterPassword: string, exportPassword: string) =>
+    call<ExportResult | null>("export_backup", { args: { masterPassword, exportPassword } }),
+  exportCsv: (password: string) => call<ExportResult | null>("export_csv", { args: { password } }),
+
+  quickHide: () => call<void>("quick_hide"),
+  quickOpenInMain: (itemId: Uuid) => call<void>("quick_open_in_main", { itemId }),
 
   settings: () => call<Settings>("settings_get"),
   updateSettings: (settings: Settings) => call<Settings>("settings_update", { settings }),

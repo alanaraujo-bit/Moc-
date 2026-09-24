@@ -1,0 +1,163 @@
+.root {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.index {
+  padding: 32px 12px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid var(--grout);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.02em;
+  margin: 0 0 16px 8px;
+}
+
+.indexItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink-2);
+  text-align: left;
+  font-size: var(--text-md);
+}
+
+.indexItem svg {
+  color: var(--ink-3);
+}
+
+.indexItem:hover {
+  background: var(--bg-hover);
+  color: var(--ink);
+}
+
+.indexItem[data-active="true"] {
+  background: var(--bg-app);
+  color: var(--ink);
+  font-weight: 550;
+}
+
+.indexItem[data-active="true"] svg {
+  color: var(--cobalt);
+}
+
+.scroll {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 24px 40px 80px;
+  scroll-padding-top: 20px;
+}
+
+.section {
+  max-width: 720px;
+  padding: 10px 0 28px;
+}
+
+.section h2 {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--grout);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--grout);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-weight: 550;
+}
+
+.rowDetail {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  line-height: 1.45;
+  max-width: 56ch;
+}
+
+.control {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.select {
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--grout-strong);
+  background: var(--bg-surface);
+  padding: 0 8px;
+  min-width: 150px;
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.shortcut {
+  font-size: var(--text-sm);
+  padding: 4px 8px;
+}
+
+.muted {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.privacy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 14px;
+}
+
+.privacy h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.privacy p {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.footnote {
+  margin-top: 20px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}

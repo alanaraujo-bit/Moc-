@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import "@fontsource/cascadia-mono/400.css";
 import "./styles/base.css";
 import { App } from "./App";
+import { QuickAccess } from "./screens/quick/QuickAccess";
+import { api, on } from "./lib/ipc";
+import { applyTheme } from "./state/app";
 import { initBridge } from "./lib/ipc";
 
 // A desktop app, not a web page: no browser context menu or reload shortcuts outside
@@ -20,10 +23,19 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("dragover", (e) => e.preventDefault());
 window.addEventListener("drop", (e) => e.preventDefault());
 
-initBridge().then(() => {
-  createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
+const isQuick = new URLSearchParams(window.location.search).get("w") === "quick";
+
+initBridge().then(async () => {
+  if (isQuick) {
+    const theme = (pref: string) =>
+      pref === "light" || pref === "dark" ? pref : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    try {
+      applyTheme(theme((await api.settings()).theme));
+    } catch {
+      applyTheme(theme("system"));
+    }
+    void on("moco://settings", (st) => applyTheme(theme((st as { theme: string }).theme)));
+    void on("moco://locked", () => window.location.reload());
+  }
+  createRoot(document.getElementById("root")!).render(<StrictMode>{isQuick ? <QuickAccess /> : <App />}</StrictMode>);
 });

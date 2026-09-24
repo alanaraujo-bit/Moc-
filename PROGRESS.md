@@ -1,7 +1,7 @@
 # Progresso do Mocó
 
-Diário de bordo para retomar o trabalho a qualquer momento. Leia também `DECISIONS.md` e
-`BLOCKERS.md`.
+Diário de bordo para retomar o trabalho a qualquer momento. Leia também `DECISIONS.md`,
+`BLOCKERS.md` e `PRODUCT.md`.
 
 ## Como rodar
 
@@ -12,30 +12,44 @@ pnpm build          # instalador NSIS em ../moco-target/release/bundle/nsis/
 cargo test --workspace
 ```
 
-QA visual do app real: `pwsh scripts/dev/capture-window.ps1 -Process moco -Out shot.png`.
+### QA automatizado do app real
+`bash ../moco-qa/run-dev.sh` sobe o app com DevTools (porta 9222), perfil descartável
+(`MOCO_DATA_DIR`) e caminhos fixos para os diálogos nativos (`MOCO_QA_PICK`,
+`MOCO_QA_SAVE_DIR`, só em debug). Depois: `node scripts/dev/qa.mjs <script.mjs>` —
+scripts de exemplo em `../moco-qa/s*.mjs`, capturas em `../moco-qa/shots/`.
+Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em debug; cria
+38 itens pelas APIs reais, com criptografia real).
 
 ## Estado
 
-### Feito
-- [x] Pipeline provado: build release → instalador NSIS → instala em `%LOCALAPPDATA%\Mocó`
-      → abre → IPC com o núcleo Rust → desinstala limpo (nome com "ó" ok em tudo).
-
-### Em andamento
-- [ ] Núcleo criptográfico (`moco-core`): KDF, AEAD, hierarquia de chaves, armazenamento.
+### Feito (validado no app real)
+- Núcleo `moco-core`: 2SKD (Argon2id + Chave Secreta), envelope autenticado com
+  compromisso de chave, hierarquia de chaves, SQLite cifrado, histórico de versões,
+  lixeira com tombstone, outbox, gerador (caracteres/frase PT-BR/PIN), zxcvbn PT-BR, TOTP
+  (vetores RFC 6238), saúde do cofre, importadores (Chrome, Firefox, Bitwarden JSON/CSV,
+  1Password 1PUX, LastPass, Proton Pass, KeePass, CSV genérico PT/EN), backup `.moco`
+  cifrado, CSV à prova de injeção de fórmula. 51 testes.
+- Desktop: DPAPI para a Chave Secreta, clipboard fora do histórico/nuvem com limpeza
+  condicional, auto-lock (inatividade, bloqueio do Windows, suspensão, minimizar),
+  bandeja, instância única, proteção contra captura de tela, throttling de tentativas,
+  Windows Hello (TPM, assinatura dupla na ativação, senha a cada N dias), atalho global
+  + janela de Acesso Rápido, iniciar com o Windows (na bandeja), verificação HIBP opcional.
+- UI (mundo "Painel"/azulejo): onboarding com Kit de Emergência e folha de recuperação
+  separada, tela de bloqueio com parede de azulejos, recuperação, três painéis com lista
+  virtualizada e busca tolerante a erros, detalhe por tipo (cartão como objeto, TOTP ao
+  vivo), editor por tipo com máscaras BR (CPF/CNPJ/CEP/telefone/cartão com validação),
+  gerador, Central de Segurança, Configurações, importação guiada, exportação.
 
 ### Próximos (ordem)
-1. Fatia vertical: criar cofre → bloquear → desbloquear → adicionar login → buscar → copiar
-   senha (Rust, com exclusão do histórico) → limpeza automática → auto-bloqueio.
-2. Identidade visual + design system + shell (titlebar, sidebar, lista, item).
-3. Onboarding completo + Kit de Emergência.
-4. Todos os tipos de item, editor por tipo, campos personalizados, anexos.
-5. Gerador de senhas, TOTP, busca avançada, paleta de comandos, Acesso Rápido global.
-6. Central de Segurança, importação/exportação, configurações, Windows Hello, bandeja.
-7. Instalador com identidade, atualizações automáticas, Novidades, pipeline de release.
-8. Servidor de sincronização (Railway), contas, dispositivos, 2FA, compartilhamento.
-9. Site/downloads/changelog (Vercel).
-10. QA completo, acessibilidade, performance com milhares de itens.
+1. QA: tema escuro, Acesso Rápido, estados vazios, janela estreita; paleta de comandos.
+2. Instalador com identidade (imagens NSIS), atualizações automáticas assinadas,
+   "Novidades no Mocó", pipeline de release no GitHub Actions.
+3. Anexos cifrados; QR code do Wi-Fi; favicons opcionais.
+4. Servidor de sincronização (Railway) + contas + dispositivos + 2FA.
+5. Compartilhamento (HPKE), famílias/equipes, planos.
+6. Site/downloads/changelog (Vercel). Whitepaper de segurança em `docs/`.
+7. Revisão de acessibilidade, performance com 10 mil itens, DESIGN.md.
 
 ## Log
-
-- 2026-09-23 — Repositório criado, pipeline de build/instalador validado.
+- 2026-09-23 — Repositório criado, pipeline de build/instalador validado, núcleo cripto.
+- 2026-09-24 — UI completa do cofre, Hello, importação/exportação, segurança, acesso rápido.

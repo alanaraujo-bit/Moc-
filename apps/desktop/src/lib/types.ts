@@ -78,7 +78,9 @@ export interface AppInfo {
   storageError: AppError | null;
   settings: Settings;
   debug: boolean;
-  demo?: boolean;
+  helloAvailable: boolean;
+  helloEnrolled: boolean;
+  passwordDue: boolean;
 }
 
 export interface CreatedAccount {
@@ -266,4 +268,54 @@ export interface SecurityStatus {
   passwordChangedAt: Timestamp | null;
   createdAt: Timestamp | null;
   deviceKeys: string[];
+}
+
+export interface HealthItemRef {
+  id: Uuid;
+  title: string;
+  kind: ItemKind;
+  subtitle: string;
+  urls: string[];
+}
+
+export interface HealthFinding {
+  item: HealthItemRef;
+  detail: string;
+  field: string;
+  days: number | null;
+}
+
+export interface HealthReport {
+  checkedAt: Timestamp;
+  totalItems: number;
+  passwords: number;
+  weak: HealthFinding[];
+  reused: { items: HealthItemRef[] }[];
+  insecureSites: HealthFinding[];
+  expiring: HealthFinding[];
+  old: HealthFinding[];
+}
+
+export interface BreachReport {
+  checked: number;
+  hits: { itemId: Uuid; title: string; field: string; count: number }[];
+}
+
+export type ImportSource = "auto" | "chrome" | "firefox" | "bitwarden" | "onePassword" | "lastPass" | "protonPass" | "keePass" | "genericCsv";
+
+export interface ImportPreview {
+  fileName: string;
+  source: string;
+  total: number;
+  duplicates: number;
+  withoutPassword: number;
+  folders: string[];
+  skipped: [string, string][];
+  rows: { index: number; title: string; subtitle: string; kind: ItemKind; folder: string | null; issue: string | null; duplicate: boolean }[];
+}
+
+export interface ExportResult {
+  path: string;
+  count: number;
+  cloudSynced: boolean;
 }

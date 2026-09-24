@@ -41,22 +41,27 @@ pub struct AppInfo {
     pub storage_error: Option<AppError>,
     pub settings: Settings,
     pub debug: bool,
+    pub hello_available: bool,
+    pub hello_enrolled: bool,
+    /// Policy asks for the master password now even though Hello is enrolled.
+    pub password_due: bool,
 }
 
 #[tauri::command]
 pub async fn app_info(app: AppHandle, state: S<'_>) -> AppResult<AppInfo> {
     let settings = state.settings();
     let version = app.package_info().version.to_string();
-    let (initialized, unlocked, account_id) = match state.account.lock() {
+    let (initialized, unlocked, account_id, hello_enrolled) = match state.account.lock() {
         Ok(g) => match g.as_ref() {
             Some(a) => {
                 let st = a.status()?;
-                (st.initialized, st.unlocked, st.account_id)
+                (st.initialized, st.unlocked, st.account_id, st.device_keys.iter().any(|k| k == crate::hello::LABEL))
             }
-            None => (false, false, None),
+            None => (false, false, None, false),
         },
-        Err(_) => (false, false, None),
+        Err(_) => (false, false, None, false),
     };
+    let hello_available = tauri::async_runtime::spawn_blocking(crate::hello::available).await.unwrap_or(false);
     Ok(AppInfo {
         version,
         initialized,
@@ -65,6 +70,9 @@ pub async fn app_info(app: AppHandle, state: S<'_>) -> AppResult<AppInfo> {
         storage_error: state.open_error.as_ref().map(|e| AppError::new(e.code, e.message.clone())),
         settings,
         debug: cfg!(debug_assertions),
+        hello_available,
+        hello_enrolled,
+        password_due: state.password_due(),
     })
 }
 
@@ -160,6 +168,7 @@ pub async fn account_unlock(app: AppHandle, state: S<'_>, args: UnlockArgs) -> A
                 ),
             };
             st.with_account(|a| Ok(a.unlock(args.password.expose(), &sk)?))?;
+            st.note_password_unlock();
             if typed {
                 // Remember it on this device so it's never asked again here.
                 st.store_secret_key(account_id, &sk)?;
@@ -210,7 +219,7 @@ pub struct PasswordArgs {
     pub password: SecretString,
 }
 
-fn device_secret_key(st: &AppState) -> AppResult<SecretKey> {
+pub(crate) fn device_secret_key(st: &AppState) -> AppResult<SecretKey> {
     let id = account_id_of(st)?;
     st.load_secret_key(id)
         .ok_or_else(|| AppError::new("secret_key_missing", "A Chave Secreta não está guardada neste computador."))
@@ -316,6 +325,61 @@ pub async fn account_security(state: S<'_>) -> AppResult<SecurityStatus> {
             device_keys: s.device_keys,
         })
     })
+}
+
+// ---- Windows Hello ------------------------------------------------------------------
+
+#[tauri::command]
+pub async fn hello_enable(state: S<'_>, args: PasswordArgs) -> AppResult<()> {
+    let st = state.inner().clone();
+    blocking(move || {
+        let sk = device_secret_key(&st)?;
+        let account = account_id_of(&st)?;
+        st.with_account(|a| Ok(a.verify_password(args.password.expose(), &sk)?))?;
+        let mut dev = st.device();
+        let salt = crate::hello::new_salt();
+        let key = crate::hello::enroll(account, &salt)?;
+        st.with_account(|a| Ok(a.enroll_device_key(crate::hello::LABEL, &key)?))?;
+        dev.hello_salt = salt.to_vec();
+        st.save_device(&dev)
+    })
+    .await
+}
+
+#[tauri::command]
+pub async fn hello_disable(state: S<'_>) -> AppResult<()> {
+    let st = state.inner().clone();
+    blocking(move || {
+        let account = account_id_of(&st)?;
+        st.with_account(|a| Ok(a.remove_device_key(crate::hello::LABEL)?))?;
+        crate::hello::remove(account);
+        Ok(())
+    })
+    .await
+}
+
+#[tauri::command]
+pub async fn account_unlock_hello(app: AppHandle, state: S<'_>) -> AppResult<()> {
+    let st = state.inner().clone();
+    if st.password_due() {
+        return Err(AppError::new("password_due", "Faz um tempo que você não digita a senha mestra. Digite-a desta vez, para não esquecê-la."));
+    }
+    blocking(move || {
+        let account = account_id_of(&st)?;
+        let salt = st.device().hello_salt;
+        if salt.is_empty() {
+            return Err(AppError::new("hello_missing", "O Windows Hello não está ativado neste computador."));
+        }
+        let key = crate::hello::unlock_key(account, &salt)?;
+        st.with_account(|a| {
+            a.unlock_with_device_key(crate::hello::LABEL, &key).map_err(|_| {
+                AppError::new("hello_failed", "O Windows Hello não conseguiu abrir o Mocó. Use a senha mestra e ative de novo.")
+            })
+        })
+    })
+    .await?;
+    let _ = app.emit("moco://unlocked", ());
+    Ok(())
 }
 
 // ---- vaults -------------------------------------------------------------------------
@@ -591,6 +655,19 @@ pub async fn health_report(state: S<'_>) -> AppResult<moco_core::health::HealthR
     blocking(move || {
         let items = st.with_account(|a| Ok(a.all_items()?))?;
         Ok(moco_core::health::analyze(&items))
+    })
+    .await
+}
+
+#[tauri::command]
+pub async fn breach_check(state: S<'_>) -> AppResult<crate::breach::BreachReport> {
+    let st = state.inner().clone();
+    if !st.settings().breach_check {
+        return Err(AppError::new("disabled", "A verificação de vazamentos está desligada."));
+    }
+    blocking(move || {
+        let items = st.with_account(|a| Ok(a.all_items()?))?;
+        crate::breach::check(&items)
     })
     .await
 }

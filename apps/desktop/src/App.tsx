@@ -7,6 +7,7 @@ import { LockScreen } from "./screens/lock/LockScreen";
 import { Onboarding } from "./screens/onboarding/Onboarding";
 import { Main } from "./screens/main/Main";
 import { toast } from "./components/ui/toast";
+import { useVault } from "./state/vault";
 
 const LOCK_REASON_KEY = "moco.lockReason";
 
@@ -32,6 +33,15 @@ export function App() {
         window.location.reload();
       }),
       on("moco://clipboard-cleared", () => toast("Área de transferência limpa")),
+      on("moco://open-item", (id) => {
+        const st = useVault.getState();
+        st.setView({ type: "all" });
+        st.setQuery("");
+        st.select(String(id));
+      }),
+      on("moco://unlocked", () => {
+        if (useApp.getState().phase === "locked") useApp.getState().setPhase("unlocked");
+      }),
     ];
     return () => {
       unsubs.forEach((p) => p.then((u) => u()));

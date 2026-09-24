@@ -1,11 +1,15 @@
 mod autolock;
+mod breach;
 mod commands;
 mod devseed;
 mod dto;
 mod error;
+mod hello;
+mod native;
 mod platform;
 mod settings;
 mod state;
+mod transfer;
 
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
@@ -32,13 +36,16 @@ pub(crate) fn apply_settings(app: &AppHandle, s: &Settings) {
     for (_, w) in app.webview_windows() {
         let _ = w.set_content_protected(protect);
     }
+    native::apply_shortcut(app, s);
+    native::apply_autostart(app, s);
 }
 
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Abrir o Mocó", true, None::<&str>)?;
+    let quick = MenuItem::with_id(app, "quick", "Acesso rápido", true, Some("CommandOrControl+Shift+Space"))?;
     let lock = MenuItem::with_id(app, "lock", "Trancar agora", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Sair do Mocó", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &lock, &PredefinedMenuItem::separator(app)?, &quit])?;
+    let menu = Menu::with_items(app, &[&open, &quick, &lock, &PredefinedMenuItem::separator(app)?, &quit])?;
     TrayIconBuilder::with_id("main")
         .icon(app.default_window_icon().cloned().expect("app icon"))
         .tooltip("Mocó")
@@ -46,6 +53,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "open" => show_main(app),
+            "quick" => native::toggle_quick(app),
             "lock" => commands::lock_now(app, "manual"),
             "quit" => {
                 commands::lock_now(app, "quit");
@@ -65,8 +73,18 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| show_main(app)))
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if !argv.iter().any(|a| a == native::HIDDEN_ARG) {
+                show_main(app)
+            }
+        }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec![native::HIDDEN_ARG]),
+        ))
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(
@@ -93,7 +111,11 @@ pub fn run() {
                 if let Ok(h) = w.hwnd() {
                     state.main_hwnd.store(h.0 as isize, Ordering::Relaxed);
                 }
-                let _ = w;
+                // Started by Windows at login: stay in the tray until asked.
+                if !std::env::args().any(|a| a == native::HIDDEN_ARG) {
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                }
             }
             apply_settings(app.handle(), &state.settings());
             build_tray(app.handle())?;
@@ -124,6 +146,9 @@ pub fn run() {
             commands::account_create,
             commands::account_unlock,
             commands::account_lock,
+            commands::account_unlock_hello,
+            commands::hello_enable,
+            commands::hello_disable,
             commands::account_recover,
             commands::account_security,
             commands::secret_key_reveal,
@@ -158,10 +183,19 @@ pub fn run() {
             commands::generator_generate,
             commands::strength_estimate,
             commands::health_report,
+            commands::breach_check,
             commands::settings_get,
             commands::settings_update,
             commands::open_url,
             devseed::dev_seed,
+            native::quick_hide,
+            native::quick_open_in_main,
+            transfer::import_pick,
+            transfer::import_backup_pick,
+            transfer::import_commit,
+            transfer::import_cancel,
+            transfer::export_backup,
+            transfer::export_csv,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Mocó");

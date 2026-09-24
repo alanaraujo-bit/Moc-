@@ -19,7 +19,8 @@
         "height": 760,
         "minWidth": 880,
         "minHeight": 560,
-        "center": true
+        "center": true,
+        "visible": false
       }
     ],
     "security": {
@@ -28,7 +29,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": [
+      "nsis"
+    ],
     "publisher": "Mocó",
     "copyright": "© 2026 Mocó",
     "category": "Utility",
@@ -43,7 +46,9 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["PortugueseBR"],
+        "languages": [
+          "PortugueseBR"
+        ],
         "displayLanguageSelector": false
       }
     }

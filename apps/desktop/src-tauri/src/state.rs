@@ -31,6 +31,7 @@ pub struct AppState {
     pub clipboard_generation: AtomicU64,
     pub failed_unlocks: AtomicU32,
     pub retry_after: Mutex<Option<Instant>>,
+    pub pending_import: crate::transfer::Pending,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -53,7 +54,46 @@ mod b64 {
     }
 }
 
+/// Non-secret per-device state (Hello salt, last time the master password was typed).
+#[derive(Serialize, Deserialize, Default, Clone)]
+#[serde(rename_all = "camelCase", default)]
+pub struct DeviceState {
+    #[serde(with = "b64")]
+    pub hello_salt: Vec<u8>,
+    pub last_password_unlock_at: i64,
+}
+
 impl AppState {
+    pub fn device(&self) -> DeviceState {
+        std::fs::read(self.dir.join("device.json"))
+            .ok()
+            .and_then(|raw| serde_json::from_slice(&raw).ok())
+            .unwrap_or_default()
+    }
+
+    pub fn save_device(&self, d: &DeviceState) -> AppResult<()> {
+        let tmp = self.dir.join("device.json.tmp");
+        std::fs::write(&tmp, serde_json::to_vec(d).expect("serializes"))?;
+        std::fs::rename(tmp, self.dir.join("device.json"))?;
+        Ok(())
+    }
+
+    /// True when the policy asks for the master password instead of Hello right now.
+    pub fn password_due(&self) -> bool {
+        let days = self.settings().require_password_days as i64;
+        if days == 0 {
+            return false;
+        }
+        let last = self.device().last_password_unlock_at;
+        last == 0 || moco_core::model::now_ms() - last > days * 86_400_000
+    }
+
+    pub fn note_password_unlock(&self) {
+        let mut d = self.device();
+        d.last_password_unlock_at = moco_core::model::now_ms();
+        let _ = self.save_device(&d);
+    }
+
     pub fn new(dir: PathBuf) -> Self {
         let settings = Settings::load(&dir);
         let (account, open_error) = match Store::open(&dir.join("vault.db")) {
@@ -70,6 +110,7 @@ impl AppState {
             clipboard_generation: AtomicU64::new(0),
             failed_unlocks: AtomicU32::new(0),
             retry_after: Mutex::new(None),
+            pending_import: Mutex::new(None),
         }
     }
 
