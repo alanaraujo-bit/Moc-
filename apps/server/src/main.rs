@@ -10,7 +10,10 @@ mod error;
 mod files;
 mod ratelimit;
 mod secrets;
+mod sharing;
 mod sync;
+#[cfg(test)]
+mod tests;
 
 use axum::routing::{delete, get, post, put};
 use axum::Router;
@@ -48,6 +51,16 @@ pub fn router(state: Shared) -> Router {
         .route("/v1/sync/pull", get(sync::pull))
         .route("/v1/sync/push", post(sync::push))
         .route("/v1/attachments/{id}", put(files::put).get(files::get).delete(files::delete))
+        .route("/v1/people", get(sharing::people))
+        .route("/v1/vaults/{vault}/members", get(sharing::list_members))
+        .route("/v1/vaults/{vault}/members/{member}", put(sharing::put_member).delete(sharing::delete_member))
+        .route("/v1/shared", get(sharing::shared))
+        .route("/v1/shared/{owner}/{vault}/pull", get(sharing::shared_pull))
+        .route("/v1/shared/{owner}/{vault}/push", post(sharing::shared_push))
+        .route(
+            "/v1/shared/{owner}/{vault}/attachments/{id}",
+            put(sharing::shared_attachment_put).get(sharing::shared_attachment_get).delete(sharing::shared_attachment_delete),
+        )
         .layer(axum::extract::DefaultBodyLimit::max(64 * 1024 * 1024))
         .layer(RequestBodyLimitLayer::new(64 * 1024 * 1024))
         .layer(CorsLayer::new()) // desktop and mobile clients don't need CORS; deny browsers

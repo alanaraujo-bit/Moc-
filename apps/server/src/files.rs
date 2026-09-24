@@ -21,11 +21,17 @@ pub struct PutQuery {
 }
 
 pub async fn put(State(state): State<Shared>, session: Session, Path(id): Path<Uuid>, Query(q): Query<PutQuery>, body: Bytes) -> ApiResult<StatusCode> {
+    store(&state, session.account_id, id, q.item, &body).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Stores a blob in `account` (counted against that account's quota).
+pub(crate) async fn store(state: &Shared, account: Uuid, id: Uuid, item: Uuid, body: &[u8]) -> ApiResult<()> {
     if body.len() > MAX_BLOB || body.is_empty() {
         return Err(ApiError::bad_request("Arquivo grande demais."));
     }
     let (used,): (Option<i64>,) = sqlx::query_as("SELECT sum(size)::bigint FROM attachments WHERE account_id = $1 AND id <> $2")
-        .bind(session.account_id)
+        .bind(account)
         .bind(id)
         .fetch_one(&state.db)
         .await?;
@@ -36,14 +42,14 @@ pub async fn put(State(state): State<Shared>, session: Session, Path(id): Path<U
         "INSERT INTO attachments(account_id, id, item_id, blob, size) VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (account_id, id) DO UPDATE SET item_id = $3, blob = $4, size = $5",
     )
-    .bind(session.account_id)
+    .bind(account)
     .bind(id)
-    .bind(q.item)
-    .bind(body.as_ref())
+    .bind(item)
+    .bind(body)
     .bind(body.len() as i64)
     .execute(&state.db)
     .await?;
-    Ok(StatusCode::NO_CONTENT)
+    Ok(())
 }
 
 pub async fn get(State(state): State<Shared>, session: Session, Path(id): Path<Uuid>) -> ApiResult<impl IntoResponse> {

@@ -54,7 +54,7 @@ impl KdfParams {
         }
     }
 
-    #[cfg(test)]
+    #[cfg(any(test, feature = "fake-server"))]
     pub fn fast_for_tests() -> Self {
         Self { memory_kib: 19 * 1024, iterations: 1, parallelism: 1, ..Self::recommended() }
     }

@@ -44,6 +44,10 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
   (`https://server-production-975b.up.railway.app`), login por assinatura Ed25519, 2FA TOTP,
   dispositivos, anexos cifrados na nuvem; motor de sync no núcleo com proteção contra
   rollback/forja e resolução de conflito sem perda. Validado entre dois dispositivos reais.
+- Compartilhamento no servidor: busca por e-mail, membros (convite assinado conferido pelo servidor,
+  papel e geração de chave), cofres compartilhados com pull/push/anexos por participação; leitor não
+  escreve, escrita com chave antiga é recusada, anexos presos ao cofre, apagar o cofre encerra o
+  compartilhamento. 7 testes de ponta a ponta contra Postgres real (`TEST_DATABASE_URL`).
 - Releases: v0.1.0 publicada pelo pipeline (instalador assinado + latest.json). v0.2.0 em build.
 - Escala: 10 mil itens — criar 0,26 s, desbloquear 0,13 s, listar 6 ms.
 - Revisão de design independente aplicada (parede vidrada, estrutura por rejunte, azulejos

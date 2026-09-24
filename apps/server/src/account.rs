@@ -19,7 +19,7 @@ use crate::Shared;
 
 const MINUTE: Duration = Duration::from_secs(60);
 
-fn normalize_email(e: &str) -> ApiResult<String> {
+pub(crate) fn normalize_email(e: &str) -> ApiResult<String> {
     let e = e.trim().to_lowercase();
     if e.len() < 5 || e.len() > 200 || !e.contains('@') || !e.split('@').nth(1).is_some_and(|d| d.contains('.')) {
         return Err(ApiError::bad_request("Confira o e-mail."));

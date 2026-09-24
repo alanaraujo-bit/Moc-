@@ -7,14 +7,15 @@ use axum::extract::{Query, State};
 use axum::Json;
 use moco_core::account::sync::{PullResponse, PushRequest, PushResponse, WireItem, WireVault};
 use serde::Deserialize;
+use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::auth::Session;
 use crate::error::{ApiError, ApiResult};
 use crate::Shared;
 
-const MAX_ROWS_PER_PUSH: usize = 5_000;
-const MAX_ROWS_PER_PULL: i64 = 2_000;
+pub(crate) const MAX_ROWS_PER_PUSH: usize = 5_000;
+pub(crate) const MAX_ROWS_PER_PULL: i64 = 2_000;
 
 #[derive(Deserialize)]
 pub struct PullQuery {
@@ -23,17 +24,17 @@ pub struct PullQuery {
     record_version: i64,
 }
 
-type VaultTuple = (Uuid, i64, Vec<u8>, Vec<u8>, bool, i64, i64, i64);
-type ItemTuple = (Uuid, Uuid, i64, Vec<u8>, Vec<u8>, bool, i64, i64, i64);
+pub(crate) type VaultTuple = (Uuid, i64, Vec<u8>, Vec<u8>, bool, i64, i64, i64);
+pub(crate) type ItemTuple = (Uuid, Uuid, i64, Vec<u8>, Vec<u8>, bool, i64, i64, i64);
 
-fn vault_of(t: VaultTuple) -> (WireVault, i64) {
+pub(crate) fn vault_of(t: VaultTuple) -> (WireVault, i64) {
     (
         WireVault { id: t.0, version: t.1 as u64, wrapped_key: t.2, attrs: t.3, deleted: t.4, created_at: t.5, updated_at: t.6 },
         t.7,
     )
 }
 
-fn item_of(t: ItemTuple) -> (WireItem, i64) {
+pub(crate) fn item_of(t: ItemTuple) -> (WireItem, i64) {
     (
         WireItem { id: t.0, vault_id: t.1, version: t.2 as u64, overview: t.3, details: t.4, deleted: t.5, created_at: t.6, updated_at: t.7 },
         t.8,
@@ -42,25 +43,29 @@ fn item_of(t: ItemTuple) -> (WireItem, i64) {
 
 pub async fn pull(State(state): State<Shared>, session: Session, Query(q): Query<PullQuery>) -> ApiResult<Json<PullResponse>> {
     let acct = session.account_id;
+    // Cursor first: every row at or below it is already committed (seq is assigned under
+    // the account lock), so a push landing mid-pull can't slip behind the cursor.
+    let (acct_seq, record, record_version): (i64, String, i64) =
+        sqlx::query_as("SELECT seq, record, record_version FROM accounts WHERE id = $1").bind(acct).fetch_one(&state.db).await?;
     let vaults: Vec<VaultTuple> = sqlx::query_as(
         "SELECT id, version, wrapped_key, attrs, deleted, created_at, updated_at, seq FROM vaults
-         WHERE account_id = $1 AND seq > $2 ORDER BY seq",
+         WHERE account_id = $1 AND seq > $2 AND seq <= $3 ORDER BY seq",
     )
     .bind(acct)
     .bind(q.since)
+    .bind(acct_seq)
     .fetch_all(&state.db)
     .await?;
     let items: Vec<ItemTuple> = sqlx::query_as(
         "SELECT id, vault_id, version, overview, details, deleted, created_at, updated_at, seq FROM items
-         WHERE account_id = $1 AND seq > $2 ORDER BY seq LIMIT $3",
+         WHERE account_id = $1 AND seq > $2 AND seq <= $3 ORDER BY seq LIMIT $4",
     )
     .bind(acct)
     .bind(q.since)
+    .bind(acct_seq)
     .bind(MAX_ROWS_PER_PULL)
     .fetch_all(&state.db)
     .await?;
-    let (acct_seq, record, record_version): (i64, String, i64) =
-        sqlx::query_as("SELECT seq, record, record_version FROM accounts WHERE id = $1").bind(acct).fetch_one(&state.db).await?;
 
     // If items were truncated, the cursor stops at the last item returned so the client
     // pulls the rest next round (vaults are few and always complete).
@@ -80,10 +85,17 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
     if req.vaults.len() + req.items.len() > MAX_ROWS_PER_PUSH {
         return Err(ApiError::bad_request("Muitas alterações de uma vez."));
     }
-    let acct = session.account_id;
     let mut tx = state.db.begin().await?;
+    let resp = apply_push(&mut tx, session.account_id, &req).await?;
+    tx.commit().await?;
+    Ok(Json(resp))
+}
+
+/// Writes pushed rows into one account (the caller's own, or a vault owner's for a shared
+/// vault — the caller has already authorized that), inside the caller's transaction.
+pub(crate) async fn apply_push(tx: &mut Transaction<'_, Postgres>, acct: Uuid, req: &PushRequest) -> ApiResult<PushResponse> {
     // Serialize writers per account (sequence numbers must be gap-free and ordered).
-    let (mut seq,): (i64,) = sqlx::query_as("SELECT seq FROM accounts WHERE id = $1 FOR UPDATE").bind(acct).fetch_one(&mut *tx).await?;
+    let (mut seq,): (i64,) = sqlx::query_as("SELECT seq FROM accounts WHERE id = $1 FOR UPDATE").bind(acct).fetch_one(&mut **tx).await?;
     let mut resp = PushResponse::default();
 
     for p in &req.vaults {
@@ -93,7 +105,7 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
         )
         .bind(acct)
         .bind(r.id)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&mut **tx)
         .await?;
         let cur_version = current.as_ref().map(|c| c.1 as u64).unwrap_or(0);
         if p.base == cur_version && r.version > cur_version {
@@ -112,8 +124,12 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
             .bind(r.created_at)
             .bind(r.updated_at)
             .bind(seq)
-            .execute(&mut *tx)
+            .execute(&mut **tx)
             .await?;
+            if r.deleted {
+                // A deleted vault is no longer shared with anyone.
+                sqlx::query("DELETE FROM vault_members WHERE owner_id = $1 AND vault_id = $2").bind(acct).bind(r.id).execute(&mut **tx).await?;
+            }
             resp.accepted.push(("vault".into(), r.id, r.version));
         } else if let Some(c) = current {
             resp.conflict_vaults.push(vault_of(c).0);
@@ -127,7 +143,7 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
         )
         .bind(acct)
         .bind(r.id)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&mut **tx)
         .await?;
         let cur_version = current.as_ref().map(|c| c.2 as u64).unwrap_or(0);
         if p.base == cur_version && r.version > cur_version {
@@ -148,10 +164,10 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
             .bind(r.created_at)
             .bind(r.updated_at)
             .bind(seq)
-            .execute(&mut *tx)
+            .execute(&mut **tx)
             .await?;
             if r.deleted {
-                sqlx::query("DELETE FROM attachments WHERE account_id = $1 AND item_id = $2").bind(acct).bind(r.id).execute(&mut *tx).await?;
+                sqlx::query("DELETE FROM attachments WHERE account_id = $1 AND item_id = $2").bind(acct).bind(r.id).execute(&mut **tx).await?;
             }
             resp.accepted.push(("item".into(), r.id, r.version));
         } else if let Some(c) = current {
@@ -159,7 +175,6 @@ pub async fn push(State(state): State<Shared>, session: Session, Json(req): Json
         }
     }
 
-    sqlx::query("UPDATE accounts SET seq = $2 WHERE id = $1").bind(acct).bind(seq).execute(&mut *tx).await?;
-    tx.commit().await?;
-    Ok(Json(resp))
+    sqlx::query("UPDATE accounts SET seq = $2 WHERE id = $1").bind(acct).bind(seq).execute(&mut **tx).await?;
+    Ok(resp)
 }

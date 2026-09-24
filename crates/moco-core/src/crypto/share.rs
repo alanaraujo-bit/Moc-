@@ -122,6 +122,14 @@ pub fn grant(
     Ok(g)
 }
 
+/// Checks only the owner's signature (what the server can do: it has no member key).
+pub fn verify(g: &ShareGrant, owner_ed25519: &[u8]) -> Result<()> {
+    if g.role == Role::Owner {
+        return Err(CoreError::Integrity);
+    }
+    identity::verify(owner_ed25519, &signed_message(g), &g.signature)
+}
+
 /// Verifies the owner's signature and opens the vault key with the member's identity.
 pub fn open(g: &ShareGrant, owner: &PublicIdentity, me: &IdentityKeys, my_id: Uuid) -> Result<SymmetricKey> {
     if g.member_id != my_id || g.role == Role::Owner {
