@@ -1,0 +1,1055 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T17:35:41.567Z",
+  "title": "Design System: Mocó",
+  "extensions": {
+    "colorMeta": {
+      "cobalt": {
+        "role": "primary",
+        "displayName": "Oxide Cobalt",
+        "canonical": "oklch(42% 0.17 266.7)",
+        "tonalRamp": [
+          "oklch(15% 0.057 266.7)",
+          "oklch(26% 0.119 266.7)",
+          "oklch(37% 0.17 266.7)",
+          "oklch(48% 0.17 266.7)",
+          "oklch(60% 0.17 266.7)",
+          "oklch(72% 0.159 266.7)",
+          "oklch(84% 0.091 266.7)",
+          "oklch(95% 0.043 266.7)"
+        ]
+      },
+      "cobalt-fill-hover": {
+        "role": "neutral",
+        "displayName": "cobalt-fill-hover",
+        "canonical": "oklch(37.4% 0.155 266.7)",
+        "tonalRamp": [
+          "oklch(15% 0.052 266.7)",
+          "oklch(26% 0.108 266.7)",
+          "oklch(37% 0.155 266.7)",
+          "oklch(48% 0.155 266.7)",
+          "oklch(60% 0.155 266.7)",
+          "oklch(72% 0.144 266.7)",
+          "oklch(84% 0.082 266.7)",
+          "oklch(95% 0.039 266.7)"
+        ]
+      },
+      "cobalt-soft": {
+        "role": "primary",
+        "displayName": "Cobalt Wash",
+        "canonical": "oklch(94.4% 0.021 271.2)",
+        "tonalRamp": [
+          "oklch(15% 0.007 271.2)",
+          "oklch(26% 0.015 271.2)",
+          "oklch(37% 0.021 271.2)",
+          "oklch(48% 0.021 271.2)",
+          "oklch(60% 0.021 271.2)",
+          "oklch(72% 0.02 271.2)",
+          "oklch(84% 0.011 271.2)",
+          "oklch(95% 0.005 271.2)"
+        ]
+      },
+      "cobalt-soft-2": {
+        "role": "primary",
+        "displayName": "Cobalt Wash Strong",
+        "canonical": "oklch(90.3% 0.039 272.9)",
+        "tonalRamp": [
+          "oklch(15% 0.013 272.9)",
+          "oklch(26% 0.028 272.9)",
+          "oklch(37% 0.039 272.9)",
+          "oklch(48% 0.039 272.9)",
+          "oklch(60% 0.039 272.9)",
+          "oklch(72% 0.037 272.9)",
+          "oklch(84% 0.021 272.9)",
+          "oklch(95% 0.01 272.9)"
+        ]
+      },
+      "cobalt-ink": {
+        "role": "primary",
+        "displayName": "Cobalt Ink",
+        "canonical": "oklch(33.3% 0.129 267.7)",
+        "tonalRamp": [
+          "oklch(15% 0.043 267.7)",
+          "oklch(26% 0.09 267.7)",
+          "oklch(37% 0.129 267.7)",
+          "oklch(48% 0.129 267.7)",
+          "oklch(60% 0.129 267.7)",
+          "oklch(72% 0.12 267.7)",
+          "oklch(84% 0.069 267.7)",
+          "oklch(95% 0.032 267.7)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus Blue",
+        "canonical": "oklch(50.1% 0.205 266.7)",
+        "tonalRamp": [
+          "oklch(15% 0.068 266.7)",
+          "oklch(26% 0.143 266.7)",
+          "oklch(37% 0.205 266.7)",
+          "oklch(48% 0.205 266.7)",
+          "oklch(60% 0.205 266.7)",
+          "oklch(72% 0.191 266.7)",
+          "oklch(84% 0.109 266.7)",
+          "oklch(95% 0.051 266.7)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Blue-Black Ink",
+        "canonical": "oklch(20.7% 0.031 267)",
+        "tonalRamp": [
+          "oklch(15% 0.01 267)",
+          "oklch(26% 0.022 267)",
+          "oklch(37% 0.031 267)",
+          "oklch(48% 0.031 267)",
+          "oklch(60% 0.031 267)",
+          "oklch(72% 0.029 267)",
+          "oklch(84% 0.017 267)",
+          "oklch(95% 0.008 267)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "oklch(42.3% 0.032 264.1)",
+        "tonalRamp": [
+          "oklch(15% 0.011 264.1)",
+          "oklch(26% 0.023 264.1)",
+          "oklch(37% 0.032 264.1)",
+          "oklch(48% 0.032 264.1)",
+          "oklch(60% 0.032 264.1)",
+          "oklch(72% 0.03 264.1)",
+          "oklch(84% 0.017 264.1)",
+          "oklch(95% 0.008 264.1)"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Quiet Ink",
+        "canonical": "oklch(53% 0.029 263.2)",
+        "tonalRamp": [
+          "oklch(15% 0.01 263.2)",
+          "oklch(26% 0.02 263.2)",
+          "oklch(37% 0.029 263.2)",
+          "oklch(48% 0.029 263.2)",
+          "oklch(60% 0.029 263.2)",
+          "oklch(72% 0.027 263.2)",
+          "oklch(84% 0.015 263.2)",
+          "oklch(95% 0.007 263.2)"
+        ]
+      },
+      "ink-4": {
+        "role": "neutral",
+        "displayName": "Faint Ink",
+        "canonical": "oklch(67.2% 0.024 263.1)",
+        "tonalRamp": [
+          "oklch(15% 0.008 263.1)",
+          "oklch(26% 0.017 263.1)",
+          "oklch(37% 0.024 263.1)",
+          "oklch(48% 0.024 263.1)",
+          "oklch(60% 0.024 263.1)",
+          "oklch(72% 0.022 263.1)",
+          "oklch(84% 0.013 263.1)",
+          "oklch(95% 0.006 263.1)"
+        ]
+      },
+      "ink-inverse": {
+        "role": "neutral",
+        "displayName": "ink-inverse",
+        "canonical": "oklch(100% 0 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26% 0 89.9)",
+          "oklch(37% 0 89.9)",
+          "oklch(48% 0 89.9)",
+          "oklch(60% 0 89.9)",
+          "oklch(72% 0 89.9)",
+          "oklch(84% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "bg-app": {
+        "role": "neutral",
+        "displayName": "Second Layer",
+        "canonical": "oklch(96.6% 0.005 258.3)",
+        "tonalRamp": [
+          "oklch(15% 0.002 258.3)",
+          "oklch(26% 0.003 258.3)",
+          "oklch(37% 0.005 258.3)",
+          "oklch(48% 0.005 258.3)",
+          "oklch(60% 0.005 258.3)",
+          "oklch(72% 0.004 258.3)",
+          "oklch(84% 0.002 258.3)",
+          "oklch(95% 0.001 258.3)"
+        ]
+      },
+      "bg-surface": {
+        "role": "neutral",
+        "displayName": "Glazed White",
+        "canonical": "oklch(100% 0 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26% 0 89.9)",
+          "oklch(37% 0 89.9)",
+          "oklch(48% 0 89.9)",
+          "oklch(60% 0 89.9)",
+          "oklch(72% 0 89.9)",
+          "oklch(84% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "bg-sunken": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "oklch(95.1% 0.006 255.5)",
+        "tonalRamp": [
+          "oklch(15% 0.002 255.5)",
+          "oklch(26% 0.004 255.5)",
+          "oklch(37% 0.006 255.5)",
+          "oklch(48% 0.006 255.5)",
+          "oklch(60% 0.006 255.5)",
+          "oklch(72% 0.006 255.5)",
+          "oklch(84% 0.003 255.5)",
+          "oklch(95% 0.002 255.5)"
+        ]
+      },
+      "bg-hover": {
+        "role": "neutral",
+        "displayName": "Hover Fill",
+        "canonical": "oklch(94.2% 0.007 260.7)",
+        "tonalRamp": [
+          "oklch(15% 0.002 260.7)",
+          "oklch(26% 0.005 260.7)",
+          "oklch(37% 0.007 260.7)",
+          "oklch(48% 0.007 260.7)",
+          "oklch(60% 0.007 260.7)",
+          "oklch(72% 0.007 260.7)",
+          "oklch(84% 0.004 260.7)",
+          "oklch(95% 0.002 260.7)"
+        ]
+      },
+      "bg-active": {
+        "role": "neutral",
+        "displayName": "Active Fill",
+        "canonical": "oklch(92.1% 0.01 261.8)",
+        "tonalRamp": [
+          "oklch(15% 0.003 261.8)",
+          "oklch(26% 0.007 261.8)",
+          "oklch(37% 0.01 261.8)",
+          "oklch(48% 0.01 261.8)",
+          "oklch(60% 0.01 261.8)",
+          "oklch(72% 0.01 261.8)",
+          "oklch(84% 0.006 261.8)",
+          "oklch(95% 0.003 261.8)"
+        ]
+      },
+      "grout": {
+        "role": "neutral",
+        "displayName": "Grout",
+        "canonical": "oklch(92.1% 0.009 264.5)",
+        "tonalRamp": [
+          "oklch(15% 0.003 264.5)",
+          "oklch(26% 0.006 264.5)",
+          "oklch(37% 0.009 264.5)",
+          "oklch(48% 0.009 264.5)",
+          "oklch(60% 0.009 264.5)",
+          "oklch(72% 0.008 264.5)",
+          "oklch(84% 0.005 264.5)",
+          "oklch(95% 0.002 264.5)"
+        ]
+      },
+      "grout-strong": {
+        "role": "neutral",
+        "displayName": "Strong Grout",
+        "canonical": "oklch(85.9% 0.014 258.3)",
+        "tonalRamp": [
+          "oklch(15% 0.005 258.3)",
+          "oklch(26% 0.01 258.3)",
+          "oklch(37% 0.014 258.3)",
+          "oklch(48% 0.014 258.3)",
+          "oklch(60% 0.014 258.3)",
+          "oklch(72% 0.013 258.3)",
+          "oklch(84% 0.008 258.3)",
+          "oklch(95% 0.004 258.3)"
+        ]
+      },
+      "wall-ground": {
+        "role": "neutral",
+        "displayName": "Wall Ground",
+        "canonical": "oklch(99.1% 0.003 264.5)",
+        "tonalRamp": [
+          "oklch(15% 0.001 264.5)",
+          "oklch(26% 0.002 264.5)",
+          "oklch(37% 0.003 264.5)",
+          "oklch(48% 0.003 264.5)",
+          "oklch(60% 0.003 264.5)",
+          "oklch(72% 0.003 264.5)",
+          "oklch(84% 0.002 264.5)",
+          "oklch(95% 0.001 264.5)"
+        ]
+      },
+      "wall-relief": {
+        "role": "neutral",
+        "displayName": "Wall Relief",
+        "canonical": "oklch(93.6% 0.01 261.8)",
+        "tonalRamp": [
+          "oklch(15% 0.003 261.8)",
+          "oklch(26% 0.007 261.8)",
+          "oklch(37% 0.01 261.8)",
+          "oklch(48% 0.01 261.8)",
+          "oklch(60% 0.01 261.8)",
+          "oklch(72% 0.01 261.8)",
+          "oklch(84% 0.006 261.8)",
+          "oklch(95% 0.003 261.8)"
+        ]
+      },
+      "wall-edge": {
+        "role": "neutral",
+        "displayName": "Wall Edge",
+        "canonical": "oklch(89.9% 0.013 262.4)",
+        "tonalRamp": [
+          "oklch(15% 0.004 262.4)",
+          "oklch(26% 0.009 262.4)",
+          "oklch(37% 0.013 262.4)",
+          "oklch(48% 0.013 262.4)",
+          "oklch(60% 0.013 262.4)",
+          "oklch(72% 0.013 262.4)",
+          "oklch(84% 0.007 262.4)",
+          "oklch(95% 0.003 262.4)"
+        ]
+      },
+      "tile-field": {
+        "role": "neutral",
+        "displayName": "Tile Field",
+        "canonical": "oklch(100% 0 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26% 0 89.9)",
+          "oklch(37% 0 89.9)",
+          "oklch(48% 0 89.9)",
+          "oklch(60% 0 89.9)",
+          "oklch(72% 0 89.9)",
+          "oklch(84% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Danger Red",
+        "canonical": "oklch(50.1% 0.178 28.7)",
+        "tonalRamp": [
+          "oklch(15% 0.059 28.7)",
+          "oklch(26% 0.125 28.7)",
+          "oklch(37% 0.178 28.7)",
+          "oklch(48% 0.178 28.7)",
+          "oklch(60% 0.178 28.7)",
+          "oklch(72% 0.166 28.7)",
+          "oklch(84% 0.095 28.7)",
+          "oklch(95% 0.045 28.7)"
+        ]
+      },
+      "danger-soft": {
+        "role": "status",
+        "displayName": "Danger Wash",
+        "canonical": "oklch(95.3% 0.019 21.6)",
+        "tonalRamp": [
+          "oklch(15% 0.006 21.6)",
+          "oklch(26% 0.013 21.6)",
+          "oklch(37% 0.019 21.6)",
+          "oklch(48% 0.019 21.6)",
+          "oklch(60% 0.019 21.6)",
+          "oklch(72% 0.017 21.6)",
+          "oklch(84% 0.01 21.6)",
+          "oklch(95% 0.005 21.6)"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Warn Amber",
+        "canonical": "oklch(53.1% 0.119 65.1)",
+        "tonalRamp": [
+          "oklch(15% 0.04 65.1)",
+          "oklch(26% 0.083 65.1)",
+          "oklch(37% 0.119 65.1)",
+          "oklch(48% 0.119 65.1)",
+          "oklch(60% 0.119 65.1)",
+          "oklch(72% 0.111 65.1)",
+          "oklch(84% 0.063 65.1)",
+          "oklch(95% 0.03 65.1)"
+        ]
+      },
+      "warn-soft": {
+        "role": "status",
+        "displayName": "Warn Wash",
+        "canonical": "oklch(96.5% 0.036 83.8)",
+        "tonalRamp": [
+          "oklch(15% 0.012 83.8)",
+          "oklch(26% 0.025 83.8)",
+          "oklch(37% 0.036 83.8)",
+          "oklch(48% 0.036 83.8)",
+          "oklch(60% 0.036 83.8)",
+          "oklch(72% 0.033 83.8)",
+          "oklch(84% 0.019 83.8)",
+          "oklch(95% 0.009 83.8)"
+        ]
+      },
+      "warn-ink": {
+        "role": "status",
+        "displayName": "Warn Ink",
+        "canonical": "oklch(45% 0.1 66.1)",
+        "tonalRamp": [
+          "oklch(15% 0.033 66.1)",
+          "oklch(26% 0.07 66.1)",
+          "oklch(37% 0.1 66.1)",
+          "oklch(48% 0.1 66.1)",
+          "oklch(60% 0.1 66.1)",
+          "oklch(72% 0.094 66.1)",
+          "oklch(84% 0.053 66.1)",
+          "oklch(95% 0.025 66.1)"
+        ]
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "Ok Green",
+        "canonical": "oklch(51.5% 0.113 156)",
+        "tonalRamp": [
+          "oklch(15% 0.038 156)",
+          "oklch(26% 0.079 156)",
+          "oklch(37% 0.113 156)",
+          "oklch(48% 0.113 156)",
+          "oklch(60% 0.113 156)",
+          "oklch(72% 0.105 156)",
+          "oklch(84% 0.06 156)",
+          "oklch(95% 0.028 156)"
+        ]
+      },
+      "glaze-cobalt": {
+        "role": "tertiary",
+        "displayName": "Cobalt Glaze",
+        "canonical": "oklch(42% 0.17 266.7)",
+        "tonalRamp": [
+          "oklch(15% 0.057 266.7)",
+          "oklch(26% 0.119 266.7)",
+          "oklch(37% 0.17 266.7)",
+          "oklch(48% 0.17 266.7)",
+          "oklch(60% 0.17 266.7)",
+          "oklch(72% 0.159 266.7)",
+          "oklch(84% 0.091 266.7)",
+          "oklch(95% 0.043 266.7)"
+        ]
+      },
+      "glaze-sky": {
+        "role": "tertiary",
+        "displayName": "Sky Glaze",
+        "canonical": "oklch(54.7% 0.123 250)",
+        "tonalRamp": [
+          "oklch(15% 0.041 250)",
+          "oklch(26% 0.086 250)",
+          "oklch(37% 0.123 250)",
+          "oklch(48% 0.123 250)",
+          "oklch(60% 0.123 250)",
+          "oklch(72% 0.115 250)",
+          "oklch(84% 0.066 250)",
+          "oklch(95% 0.031 250)"
+        ]
+      },
+      "glaze-moss": {
+        "role": "tertiary",
+        "displayName": "Moss Glaze",
+        "canonical": "oklch(48.6% 0.087 158.1)",
+        "tonalRamp": [
+          "oklch(15% 0.029 158.1)",
+          "oklch(26% 0.061 158.1)",
+          "oklch(37% 0.087 158.1)",
+          "oklch(48% 0.087 158.1)",
+          "oklch(60% 0.087 158.1)",
+          "oklch(72% 0.082 158.1)",
+          "oklch(84% 0.047 158.1)",
+          "oklch(95% 0.022 158.1)"
+        ]
+      },
+      "glaze-ochre": {
+        "role": "tertiary",
+        "displayName": "Ochre Glaze",
+        "canonical": "oklch(61% 0.125 72.5)",
+        "tonalRamp": [
+          "oklch(15% 0.042 72.5)",
+          "oklch(26% 0.087 72.5)",
+          "oklch(37% 0.125 72.5)",
+          "oklch(48% 0.125 72.5)",
+          "oklch(60% 0.125 72.5)",
+          "oklch(72% 0.117 72.5)",
+          "oklch(84% 0.067 72.5)",
+          "oklch(95% 0.031 72.5)"
+        ]
+      },
+      "glaze-clay": {
+        "role": "tertiary",
+        "displayName": "Clay Glaze",
+        "canonical": "oklch(53.3% 0.146 34.1)",
+        "tonalRamp": [
+          "oklch(15% 0.049 34.1)",
+          "oklch(26% 0.102 34.1)",
+          "oklch(37% 0.146 34.1)",
+          "oklch(48% 0.146 34.1)",
+          "oklch(60% 0.146 34.1)",
+          "oklch(72% 0.137 34.1)",
+          "oklch(84% 0.078 34.1)",
+          "oklch(95% 0.037 34.1)"
+        ]
+      },
+      "glaze-plum": {
+        "role": "tertiary",
+        "displayName": "Plum Glaze",
+        "canonical": "oklch(45.4% 0.119 314)",
+        "tonalRamp": [
+          "oklch(15% 0.04 314)",
+          "oklch(26% 0.083 314)",
+          "oklch(37% 0.119 314)",
+          "oklch(48% 0.119 314)",
+          "oklch(60% 0.119 314)",
+          "oklch(72% 0.111 314)",
+          "oklch(84% 0.064 314)",
+          "oklch(95% 0.03 314)"
+        ]
+      },
+      "glaze-slate": {
+        "role": "tertiary",
+        "displayName": "Slate Glaze",
+        "canonical": "oklch(46% 0.042 265.6)",
+        "tonalRamp": [
+          "oklch(15% 0.014 265.6)",
+          "oklch(26% 0.029 265.6)",
+          "oklch(37% 0.042 265.6)",
+          "oklch(48% 0.042 265.6)",
+          "oklch(60% 0.042 265.6)",
+          "oklch(72% 0.039 265.6)",
+          "oklch(84% 0.022 265.6)",
+          "oklch(95% 0.01 265.6)"
+        ]
+      },
+      "pw-symbol": {
+        "role": "tertiary",
+        "displayName": "Symbol Clay",
+        "canonical": "oklch(53.3% 0.146 34.1)",
+        "tonalRamp": [
+          "oklch(15% 0.049 34.1)",
+          "oklch(26% 0.102 34.1)",
+          "oklch(37% 0.146 34.1)",
+          "oklch(48% 0.146 34.1)",
+          "oklch(60% 0.146 34.1)",
+          "oklch(72% 0.137 34.1)",
+          "oklch(84% 0.078 34.1)",
+          "oklch(95% 0.037 34.1)"
+        ]
+      },
+      "dark-bg-app": {
+        "role": "neutral",
+        "displayName": "Night Bg App",
+        "canonical": "oklch(16.8% 0.014 264.1)",
+        "tonalRamp": [
+          "oklch(15% 0.005 264.1)",
+          "oklch(26% 0.009 264.1)",
+          "oklch(37% 0.014 264.1)",
+          "oklch(48% 0.014 264.1)",
+          "oklch(60% 0.014 264.1)",
+          "oklch(72% 0.013 264.1)",
+          "oklch(84% 0.007 264.1)",
+          "oklch(95% 0.003 264.1)"
+        ],
+        "theme": "dark"
+      },
+      "dark-bg-surface": {
+        "role": "neutral",
+        "displayName": "Night Bg Surface",
+        "canonical": "oklch(19.5% 0.017 264)",
+        "tonalRamp": [
+          "oklch(15% 0.006 264)",
+          "oklch(26% 0.012 264)",
+          "oklch(37% 0.017 264)",
+          "oklch(48% 0.017 264)",
+          "oklch(60% 0.017 264)",
+          "oklch(72% 0.016 264)",
+          "oklch(84% 0.009 264)",
+          "oklch(95% 0.004 264)"
+        ],
+        "theme": "dark"
+      },
+      "dark-bg-raised": {
+        "role": "neutral",
+        "displayName": "Night Bg Raised",
+        "canonical": "oklch(22.6% 0.021 264)",
+        "tonalRamp": [
+          "oklch(15% 0.007 264)",
+          "oklch(26% 0.015 264)",
+          "oklch(37% 0.021 264)",
+          "oklch(48% 0.021 264)",
+          "oklch(60% 0.021 264)",
+          "oklch(72% 0.02 264)",
+          "oklch(84% 0.011 264)",
+          "oklch(95% 0.005 264)"
+        ],
+        "theme": "dark"
+      },
+      "dark-grout": {
+        "role": "neutral",
+        "displayName": "Night Grout",
+        "canonical": "oklch(28.1% 0.028 264)",
+        "tonalRamp": [
+          "oklch(15% 0.009 264)",
+          "oklch(26% 0.019 264)",
+          "oklch(37% 0.028 264)",
+          "oklch(48% 0.028 264)",
+          "oklch(60% 0.028 264)",
+          "oklch(72% 0.026 264)",
+          "oklch(84% 0.015 264)",
+          "oklch(95% 0.007 264)"
+        ],
+        "theme": "dark"
+      },
+      "dark-grout-strong": {
+        "role": "neutral",
+        "displayName": "Night Grout Strong",
+        "canonical": "oklch(34.8% 0.032 263)",
+        "tonalRamp": [
+          "oklch(15% 0.011 263)",
+          "oklch(26% 0.023 263)",
+          "oklch(37% 0.032 263)",
+          "oklch(48% 0.032 263)",
+          "oklch(60% 0.032 263)",
+          "oklch(72% 0.03 263)",
+          "oklch(84% 0.017 263)",
+          "oklch(95% 0.008 263)"
+        ],
+        "theme": "dark"
+      },
+      "dark-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "oklch(94.3% 0.01 267.4)",
+        "tonalRamp": [
+          "oklch(15% 0.003 267.4)",
+          "oklch(26% 0.007 267.4)",
+          "oklch(37% 0.01 267.4)",
+          "oklch(48% 0.01 267.4)",
+          "oklch(60% 0.01 267.4)",
+          "oklch(72% 0.009 267.4)",
+          "oklch(84% 0.005 267.4)",
+          "oklch(95% 0.002 267.4)"
+        ],
+        "theme": "dark"
+      },
+      "dark-ink-3": {
+        "role": "neutral",
+        "displayName": "Night Ink 3",
+        "canonical": "oklch(67.5% 0.029 264.4)",
+        "tonalRamp": [
+          "oklch(15% 0.01 264.4)",
+          "oklch(26% 0.02 264.4)",
+          "oklch(37% 0.029 264.4)",
+          "oklch(48% 0.029 264.4)",
+          "oklch(60% 0.029 264.4)",
+          "oklch(72% 0.027 264.4)",
+          "oklch(84% 0.015 264.4)",
+          "oklch(95% 0.007 264.4)"
+        ],
+        "theme": "dark"
+      },
+      "dark-cobalt-fill": {
+        "role": "primary",
+        "displayName": "Night Cobalt Fill",
+        "canonical": "oklch(48.9% 0.185 268.1)",
+        "tonalRamp": [
+          "oklch(15% 0.062 268.1)",
+          "oklch(26% 0.129 268.1)",
+          "oklch(37% 0.185 268.1)",
+          "oklch(48% 0.185 268.1)",
+          "oklch(60% 0.185 268.1)",
+          "oklch(72% 0.173 268.1)",
+          "oklch(84% 0.099 268.1)",
+          "oklch(95% 0.046 268.1)"
+        ],
+        "theme": "dark"
+      },
+      "dark-cobalt-fill-hover": {
+        "role": "primary",
+        "displayName": "Night Cobalt Fill Hover",
+        "canonical": "oklch(53.3% 0.185 268.1)",
+        "tonalRamp": [
+          "oklch(15% 0.062 268.1)",
+          "oklch(26% 0.129 268.1)",
+          "oklch(37% 0.185 268.1)",
+          "oklch(48% 0.185 268.1)",
+          "oklch(60% 0.185 268.1)",
+          "oklch(72% 0.172 268.1)",
+          "oklch(84% 0.099 268.1)",
+          "oklch(95% 0.046 268.1)"
+        ],
+        "theme": "dark"
+      },
+      "dark-sel-bg": {
+        "role": "primary",
+        "displayName": "Night Sel Bg",
+        "canonical": "oklch(44.3% 0.171 268)",
+        "tonalRamp": [
+          "oklch(15% 0.057 268)",
+          "oklch(26% 0.12 268)",
+          "oklch(37% 0.171 268)",
+          "oklch(48% 0.171 268)",
+          "oklch(60% 0.171 268)",
+          "oklch(72% 0.16 268)",
+          "oklch(84% 0.091 268)",
+          "oklch(95% 0.043 268)"
+        ],
+        "theme": "dark"
+      },
+      "dark-cobalt-text": {
+        "role": "primary",
+        "displayName": "Night Cobalt Text",
+        "canonical": "oklch(72.4% 0.126 271.9)",
+        "tonalRamp": [
+          "oklch(15% 0.042 271.9)",
+          "oklch(26% 0.088 271.9)",
+          "oklch(37% 0.126 271.9)",
+          "oklch(48% 0.126 271.9)",
+          "oklch(60% 0.126 271.9)",
+          "oklch(72% 0.118 271.9)",
+          "oklch(84% 0.067 271.9)",
+          "oklch(95% 0.032 271.9)"
+        ],
+        "theme": "dark"
+      },
+      "dark-focus": {
+        "role": "primary",
+        "displayName": "Night Focus",
+        "canonical": "oklch(77.9% 0.112 272.9)",
+        "tonalRamp": [
+          "oklch(15% 0.037 272.9)",
+          "oklch(26% 0.079 272.9)",
+          "oklch(37% 0.112 272.9)",
+          "oklch(48% 0.112 272.9)",
+          "oklch(60% 0.112 272.9)",
+          "oklch(72% 0.105 272.9)",
+          "oklch(84% 0.06 272.9)",
+          "oklch(95% 0.028 272.9)"
+        ],
+        "theme": "dark"
+      },
+      "dark-tile-field": {
+        "role": "neutral",
+        "displayName": "Night Tile Field",
+        "canonical": "oklch(22.2% 0.021 264)",
+        "tonalRamp": [
+          "oklch(15% 0.007 264)",
+          "oklch(26% 0.015 264)",
+          "oklch(37% 0.021 264)",
+          "oklch(48% 0.021 264)",
+          "oklch(60% 0.021 264)",
+          "oklch(72% 0.02 264)",
+          "oklch(84% 0.011 264)",
+          "oklch(95% 0.005 264)"
+        ],
+        "theme": "dark"
+      },
+      "dark-wall-ground": {
+        "role": "neutral",
+        "displayName": "Night Wall Ground",
+        "canonical": "oklch(18.1% 0.016 261.5)",
+        "tonalRamp": [
+          "oklch(15% 0.005 261.5)",
+          "oklch(26% 0.011 261.5)",
+          "oklch(37% 0.016 261.5)",
+          "oklch(48% 0.016 261.5)",
+          "oklch(60% 0.016 261.5)",
+          "oklch(72% 0.015 261.5)",
+          "oklch(84% 0.008 261.5)",
+          "oklch(95% 0.004 261.5)"
+        ],
+        "theme": "dark"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Onboarding welcome hero only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Onboarding step titles."
+      },
+      "title-lg": {
+        "displayName": "Title Large",
+        "purpose": "Item detail title, lock screen line, settings page title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Dialog titles."
+      },
+      "title-sm": {
+        "displayName": "Title Small",
+        "purpose": "List header, empty-state titles, settings section heads."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running UI text; row titles at 600."
+      },
+      "body-sm": {
+        "displayName": "Body Small",
+        "purpose": "Row subtitles, crumbs, small buttons."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels; buttons use 550 at 14px."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Hints, errors, counts, sidebar group headings. Sentence case."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Secrets and codes only: passwords, TOTP, recovery codes, card numbers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-1 (lift)",
+        "value": "0 1px 2px rgb(17 23 38 / 6%), 0 1px 1px rgb(17 23 38 / 4%)",
+        "purpose": "Buttons, active sidebar item, active segment."
+      },
+      {
+        "name": "shadow-2 (float)",
+        "value": "0 4px 12px rgb(17 23 38 / 8%), 0 1px 3px rgb(17 23 38 / 6%)",
+        "purpose": "Tooltips."
+      },
+      {
+        "name": "shadow-3 (overlay)",
+        "value": "0 16px 40px rgb(17 23 38 / 14%), 0 4px 12px rgb(17 23 38 / 8%)",
+        "purpose": "Menus, toasts, command palette."
+      },
+      {
+        "name": "card-object",
+        "value": "0 10px 22px rgb(17 23 38 / 18%), 0 2px 5px rgb(17 23 38 / 12%)",
+        "purpose": "Payment-card face only."
+      },
+      {
+        "name": "scrim",
+        "value": "rgb(17 23 38 / 32%)",
+        "purpose": "Dialog backdrop (55% black in dark)."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px var(--cobalt-soft)",
+        "purpose": "Focused field and search, with a 2px cobalt underline."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing for every state transition and entrance."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "Exits: toast leaving, lock panel leaving."
+      },
+      {
+        "name": "t-fast",
+        "value": "120ms",
+        "purpose": "Hover, press, color changes, tooltips."
+      },
+      {
+        "name": "t-base",
+        "value": "180ms",
+        "purpose": "Switches, menus, overlay fade, detail pane entrance."
+      },
+      {
+        "name": "t-slow",
+        "value": "260ms",
+        "purpose": "Dialogs, toasts, onboarding step entrance, lock panel rise."
+      },
+      {
+        "name": "wall-turn",
+        "value": "620ms",
+        "purpose": "Unlock: every wall tile turns a quarter, center outward."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "1ms",
+        "purpose": "All animations and transitions collapse under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "onboarding-narrow",
+        "value": "960px",
+        "purpose": "Onboarding wall collapses to a 200px strip."
+      },
+      {
+        "name": "sidebar",
+        "value": "clamp(208px, 19vw, 248px)"
+      },
+      {
+        "name": "list",
+        "value": "clamp(290px, 29vw, 380px)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one cobalt action on a surface (Novo item, Continuar, Editar save).",
+      "html": "<button class=\"ds-btn-primary\">Continuar</button>",
+      "css": ".ds-btn-primary{height:32px;padding:0 14px;border:1px solid transparent;border-radius:var(--r-sm,6px);background:var(--cobalt-fill,#2340a8);color:var(--cobalt-fill-ink,#fff);font:550 14px 'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;box-shadow:0 1px 2px rgb(17 23 38/6%),0 1px 1px rgb(17 23 38/4%),inset 0 1px 0 rgb(255 255 255/12%);transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),transform 120ms cubic-bezier(0.16,1,0.3,1)}.ds-btn-primary:hover{background:var(--cobalt-fill-hover,#1c3591)}.ds-btn-primary:active{filter:brightness(0.94);transform:translateY(0.5px)}.ds-btn-primary:focus-visible{outline:2px solid var(--focus,#2f53d6);outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral action beside a primary (Editar in the detail header).",
+      "html": "<button class=\"ds-btn-secondary\">Editar</button>",
+      "css": ".ds-btn-secondary{height:32px;padding:0 14px;border:1px solid var(--grout-strong,#cbd1da);border-radius:var(--r-sm,6px);background:var(--bg-surface,#fff);color:var(--ink,#111726);font:550 14px 'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;box-shadow:0 1px 2px rgb(17 23 38/6%),0 1px 1px rgb(17 23 38/4%);transition:background-color 120ms cubic-bezier(0.16,1,0.3,1)}.ds-btn-secondary:hover{background:var(--bg-hover,#e9ecf1)}.ds-btn-secondary:active{background:var(--bg-active,#e1e5ec);transform:translateY(0.5px)}.ds-btn-secondary:focus-visible{outline:2px solid var(--focus,#2f53d6);outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary action (Voltar in onboarding).",
+      "html": "<button class=\"ds-btn-ghost\">Voltar</button>",
+      "css": ".ds-btn-ghost{height:32px;padding:0 14px;border:0;border-radius:var(--r-sm,6px);background:transparent;color:var(--ink-2,#454e60);font:550 14px 'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),color 120ms cubic-bezier(0.16,1,0.3,1)}.ds-btn-ghost:hover{background:var(--bg-hover,#e9ecf1);color:var(--ink,#111726)}.ds-btn-ghost:focus-visible{outline:2px solid var(--focus,#2f53d6);outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled field with the Windows 11 underline and cobalt focus halo.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Senha mestra</span><span class=\"ds-field-wrap\"><input class=\"ds-field-input\" type=\"password\" placeholder=\"Senha mestra\"></span><span class=\"ds-field-hint\">Ótima. Agora é só não esquecer.</span></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif}.ds-field-label{font-size:13px;font-weight:550;color:var(--ink-2,#454e60)}.ds-field-hint{font-size:12px;color:var(--ink-3,#636c7d)}.ds-field-wrap{display:flex;min-height:34px;border-radius:6px;background:var(--bg-surface,#fff);border:1px solid var(--grout-strong,#cbd1da);box-shadow:inset 0 -1px 0 var(--grout-strong,#cbd1da);transition:border-color 120ms cubic-bezier(0.16,1,0.3,1),box-shadow 120ms cubic-bezier(0.16,1,0.3,1)}.ds-field-wrap:hover{border-color:var(--ink-4,#8e96a5)}.ds-field-wrap:focus-within{border-color:var(--cobalt,#2340a8);box-shadow:inset 0 -2px 0 var(--cobalt,#2340a8),0 0 0 3px var(--cobalt-soft,#e7ecfb)}.ds-field-input{flex:1;border:0;background:transparent;padding:0 11px;font:inherit;font-size:14px;color:var(--ink,#111726);outline:none}.ds-field-input::placeholder{color:var(--ink-3,#636c7d)}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "sidebar-item",
+      "description": "Sidebar group on the bg-app layer; active item lifts onto a white chip with a cobalt icon.",
+      "html": "<nav class=\"ds-nav\"><div class=\"ds-nav-h\">Cofres</div><button class=\"ds-nav-i\" data-active=\"true\"><span class=\"ds-nav-chip\" style=\"background:#2340a8\"></span><span class=\"ds-nav-l\">Pessoal</span><span class=\"ds-nav-c\">27</span></button><button class=\"ds-nav-i\"><span class=\"ds-nav-chip\" style=\"background:#4d5870\"></span><span class=\"ds-nav-l\">Trabalho</span><span class=\"ds-nav-c\">10</span></button><button class=\"ds-nav-i\"><span class=\"ds-nav-chip\" style=\"background:#2c6e4c\"></span><span class=\"ds-nav-l\">Família</span><span class=\"ds-nav-c\">7</span></button></nav>",
+      "css": ".ds-nav{width:230px;padding:8px;background:var(--bg-app,#f2f4f7);display:flex;flex-direction:column;gap:1px;font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif}.ds-nav-h{height:26px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;color:var(--ink-3,#636c7d)}.ds-nav-i{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px 0 13px;border:0;border-radius:6px;background:transparent;color:var(--ink-2,#454e60);font:inherit;font-size:14px;text-align:left;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1)}.ds-nav-i:hover{background:var(--bg-hover,#e9ecf1);color:var(--ink,#111726)}.ds-nav-i[data-active=true]{background:var(--bg-surface,#fff);color:var(--ink,#111726);font-weight:550;box-shadow:0 1px 2px rgb(17 23 38/6%),0 1px 1px rgb(17 23 38/4%)}.ds-nav-i:focus-visible{outline:2px solid var(--focus,#2f53d6);outline-offset:2px}.ds-nav-chip{width:12px;height:12px;border-radius:3px}.ds-nav-l{flex:1}.ds-nav-c{font-size:12px;color:var(--ink-3,#636c7d);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Item Tile",
+      "kind": "custom",
+      "refersTo": "item-tile",
+      "description": "Signature: white field, 1px grout outline, one solid glaze quarter-disk in a hashed corner, monogram in ink.",
+      "html": "<span class=\"ds-tile\"><svg viewBox=\"0 0 100 100\" preserveAspectRatio=\"none\" style=\"position:absolute;inset:0;width:100%;height:100%;z-index:-1\"><path d=\"M100 0 V46 A46 46 0 0 1 54 0 Z\" fill=\"#2f74b5\"/></svg><span class=\"ds-tile-m\">G</span></span><span class=\"ds-tile\"><svg viewBox=\"0 0 100 100\" preserveAspectRatio=\"none\" style=\"position:absolute;inset:0;width:100%;height:100%;z-index:-1\"><path d=\"M0 100 V54 A46 46 0 0 1 46 100 Z\" fill=\"#b07513\"/></svg><span class=\"ds-tile-m\">N</span></span>",
+      "css": ".ds-tile{position:relative;display:inline-grid;place-items:center;width:52px;height:52px;margin-right:12px;border-radius:12px;background:var(--tile-field,#fff);box-shadow:inset 0 0 0 1px var(--grout,#e2e5eb);overflow:hidden;isolation:isolate}.ds-tile-m{font:700 24px 'Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;letter-spacing:-0.02em;line-height:1;color:var(--ink,#111726)}"
+    },
+    {
+      "name": "List Row",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "52px row with a tile; selection inverts to a cobalt ground with white ink.",
+      "html": "<div class=\"ds-list\"><div class=\"ds-row\"><span class=\"ds-rt\"><svg viewBox=\"0 0 100 100\" preserveAspectRatio=\"none\" style=\"position:absolute;inset:0;width:100%;height:100%;z-index:-1\"><path d=\"M100 0 V46 A46 46 0 0 1 54 0 Z\" fill=\"#6e3f84\"/></svg><b>S</b></span><span class=\"ds-rx\"><span class=\"ds-r1\">Spotify</span><span class=\"ds-r2\">anamoura</span></span></div><div class=\"ds-row\" data-selected=\"true\"><span class=\"ds-rt\"><svg viewBox=\"0 0 100 100\" preserveAspectRatio=\"none\" style=\"position:absolute;inset:0;width:100%;height:100%;z-index:-1\"><path d=\"M100 0 V46 A46 46 0 0 1 54 0 Z\" fill=\"#4d5870\"/></svg><b>G</b></span><span class=\"ds-rx\"><span class=\"ds-r1\">Gmail</span><span class=\"ds-r2\">ana.moura.demo@gmail.com</span></span></div></div>",
+      "css": ".ds-list{width:320px;padding:0 6px;background:var(--bg-surface,#fff);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif}.ds-row{display:flex;align-items:center;gap:12px;height:52px;margin:2px 0;padding:0 10px;border-radius:8px;color:var(--ink,#111726);transition:background-color 120ms cubic-bezier(0.16,1,0.3,1)}.ds-row:hover{background:var(--bg-hover,#e9ecf1)}.ds-row[data-selected=true]{background:var(--sel-bg,#2340a8);color:var(--sel-ink,#fff)}.ds-row[data-selected=true] .ds-r2{color:var(--sel-ink-2,rgb(255 255 255/78%))}.ds-rt{position:relative;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--tile-field,#fff);box-shadow:inset 0 0 0 1px var(--grout,#e2e5eb);overflow:hidden;isolation:isolate;color:var(--ink,#111726);font:700 17px 'Segoe UI Variable Display','Segoe UI',system-ui,sans-serif}.ds-rx{display:flex;flex-direction:column;gap:1px;min-width:0}.ds-r1{font-size:14px;font-weight:600}.ds-r2{font-size:13px;color:var(--ink-3,#636c7d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented",
+      "description": "Sunken track; the active segment lifts onto white.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-i\">Sistema</button><button class=\"ds-seg-i\" data-active=\"true\">Claro</button><button class=\"ds-seg-i\">Escuro</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:2px;padding:2px;border-radius:6px;background:var(--bg-sunken,#eceff3);border:1px solid var(--grout,#e2e5eb);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif}.ds-seg-i{height:26px;padding:0 12px;border:0;border-radius:4px;background:transparent;color:var(--ink-2,#454e60);font:inherit;font-size:13px;font-weight:550;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),color 120ms cubic-bezier(0.16,1,0.3,1)}.ds-seg-i:hover{color:var(--ink,#111726)}.ds-seg-i[data-active=true]{background:var(--bg-surface,#fff);color:var(--ink,#111726);box-shadow:0 1px 2px rgb(17 23 38/6%),0 1px 1px rgb(17 23 38/4%)}.ds-seg-i:focus-visible{outline:2px solid var(--focus,#2f53d6);outline-offset:2px}"
+    },
+    {
+      "name": "Strength Meter",
+      "kind": "custom",
+      "refersTo": "strength-meter",
+      "description": "Four short bars plus a word; status never by color alone.",
+      "html": "<div class=\"ds-str\"><span class=\"ds-str-t\"><i data-on=\"true\"></i><i data-on=\"true\"></i><i data-on=\"true\"></i><i data-on=\"true\"></i></span><span class=\"ds-str-l\">Muito forte <span>· quebraria em séculos</span></span></div>",
+      "css": ".ds-str{display:flex;align-items:center;gap:10px;font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif}.ds-str-t{display:grid;grid-template-columns:repeat(4,22px);gap:3px}.ds-str-t i{height:6px;border-radius:2px;background:var(--grout,#e2e5eb)}.ds-str-t i[data-on=true]{background:var(--ok,#1d7a4b)}.ds-str-l{font-size:12px;font-weight:550;color:var(--ink-2,#454e60)}.ds-str-l span{font-weight:400;color:var(--ink-3,#636c7d)}"
+    },
+    {
+      "name": "Keycap Hints",
+      "kind": "custom",
+      "refersTo": "kbd",
+      "description": "Keyboard hints shown where the action lives (empty detail pane, search field).",
+      "html": "<ul class=\"ds-keys\"><li><kbd class=\"ds-kbd\">Ctrl</kbd><kbd class=\"ds-kbd\">F</kbd> buscar</li><li><kbd class=\"ds-kbd\">Ctrl</kbd><kbd class=\"ds-kbd\">K</kbd> comandos</li><li><kbd class=\"ds-kbd\">Ctrl</kbd><kbd class=\"ds-kbd\">L</kbd> trancar</li></ul>",
+      "css": ".ds-keys{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font:13px 'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;color:var(--ink-3,#636c7d)}.ds-keys li{display:flex;align-items:center;gap:4px}.ds-kbd{display:inline-flex;align-items:center;justify-content:center;min-width:18px;padding:2px 5px;margin-right:2px;font:600 11px/1 'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;color:var(--ink-3,#636c7d);background:var(--bg-surface,#fff);border:1px solid var(--grout-strong,#cbd1da);border-bottom-width:2px;border-radius:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Azulejo Panel",
+    "overview": "Mocó is a wall of glazed tiles in the manner of Athos Bulcão: cool glazed white, oxide cobalt, blue-black ink, and 1px grout lines that are the only structure. Every item the person keeps is one tile set into that wall, a white field with a single solid quarter-disk of glaze in a corner chosen by hash, so each item keeps its own tile for life. You find things by rhythm and search, never through a dashboard of padlocks.\n\nThe app is a native Windows 11 tool first. It runs in Segoe UI Variable, it is dense the way a desktop list is dense (52px rows, 14px body), and it is keyboard-first: shortcuts are shown as `kbd` keycaps in the empty detail pane and inside the search field. The operate layout is three quiet panes (sidebar | list of tiles | item detail) separated only by grout. Cobalt is rare and means something: an action, the current selection, focus, or a set tile. Copy is calm, natural Brazilian Portuguese (\"Seu Mocó está trancado.\", \"Escolha um item para ver os detalhes.\"); security moments are plain, never alarming.\n\nBehind the lock screen and onboarding stands the relief wall: white-on-white tiles, motifs a single value step below the ground, grout between. During onboarding the wall glazes itself in cobalt, tile by tile, as each step is completed, so the person literally builds their panel. At unlock every tile turns a quarter, center outward. The system rejects the navy shield-and-padlock security dashboard and the cream-serif-terracotta \"cozy\" default, along with everything PRODUCT.md bans (neon, HUD, glassmorphism, gradients, tropical caricature).",
+    "keyCharacteristics": [
+      "Grout (1px rules in `grout` / `grout-strong`) is the only structure; panes and sections are divided, never boxed into rounded cards.",
+      "Items are two-tone tiles: white field, one solid glaze quarter-disk, monogram or kind glyph in ink.",
+      "Selection inverts: the selected row becomes a cobalt ground with white ink.",
+      "The relief wall carries identity on lock, recovery and onboarding; onboarding fills it with cobalt step by step.",
+      "Native Windows type; Cascadia Mono for secrets, codes and card numbers.",
+      "Dark mode is the same panel at night: a real cobalt fill for surfaces, lifted glazes for text only."
+    ],
+    "rules": [
+      {
+        "name": "The One Glaze Rule",
+        "body": "Cobalt is the only accent in the chrome, and every use points at something: an action, the selection, focus, a link or URL host, an active icon, progress (onboarding step dots and bullet icons, set wall tiles), or the brand mark. Cobalt never fills space for atmosphere.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fill vs. Text Rule",
+        "body": "In dark mode, filled cobalt surfaces (primary button, switch, selected row) use the true cobalt fill, never the lifted text cobalt. Card faces use the deep glaze (`color-mix(in srgb, glaze 42%, #0c0f15)`), because lifted glazes are for text only.",
+        "section": "colors"
+      },
+      {
+        "name": "The Not By Color Alone Rule",
+        "body": "Status always carries a word or icon: the strength meter says \"Muito forte\", field errors carry an icon and a sentence, lock states are named.",
+        "section": "colors"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Labels, group headings and buttons are sentence case in the body face. The only uppercase in the app is the printed name and expiry on a card face, because that is how a real card looks.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Means Exact Rule",
+        "body": "Cascadia Mono is reserved for secrets and codes the person may have to read or type character by character. It never sets prose or headings.",
+        "section": "typography"
+      },
+      {
+        "name": "The Grout Is Structure Rule",
+        "body": "Panes, sections and field groups are separated by 1px grout rules (`grout`, or `grout-strong` for a group's top rule). They are never wrapped in rounded, shadowed cards.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Wall Rule",
+        "body": "Nothing set into the wall (panes, rows, field groups, tiles) casts a shadow. Only what floats above it does.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Quarter-Disk Signature Rule",
+        "body": "When a surface needs a mark of identity, it gets one solid quarter-disk in a corner, never a gradient, badge or icon medallion.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** separate panes, sections and field groups with 1px grout rules (`grout`, `grout-strong`) and a tonal step, never with boxes.",
+      "**Do** give every item a tile: white field, one glaze quarter-disk in a hashed corner, monogram or kind glyph in ink.",
+      "**Do** show selection by inversion: cobalt ground, white ink.",
+      "**Do** use the true cobalt fill (`dark-cobalt-fill`, `dark-sel-bg`) for filled surfaces in dark mode, and lifted cobalt and glazes only for text, icons and small marks. Card faces take the deep glaze mix.",
+      "**Do** keep keyboard hints visible as `kbd` keycaps where the action lives (search field, empty detail pane, menus, tooltips).",
+      "**Do** use the relief wall behind lock, recovery and onboarding, and let onboarding glaze it in cobalt step by step.",
+      "**Do** open destructive confirmations with the consequence: \"Apagar “Gmail” de vez?\" / \"Não dá para desfazer. O item, o histórico de versões e as senhas antigas somem deste computador.\" Reversible actions skip the dialog and offer undo in a toast (\"Movido para a lixeira\").",
+      "**Do** write calm, short PT-BR copy; plain and professional for security, loss and recovery (\"Seu Mocó está trancado.\", \"Senha mestra incorreta.\").",
+      "**Do** pair every status color with a word or icon, and set secrets and codes in Cascadia Mono.",
+      "**Do** keep motion short and state-carrying: 120/180/260ms on the exponential ease-out, and honor reduced motion."
+    ],
+    "donts": [
+      "**Don't** wrap content in rounded, shadowed cards; the only shadowed rectangle in a pane is the payment-card face.",
+      "**Don't** use cobalt or glazes as atmosphere (tinted backgrounds, washes, ornament). Glazes belong to tiles, vault chips, card faces, the favorite star and password character classes; cobalt belongs to the uses the One Glaze Rule lists.",
+      "**Don't** fill surfaces in dark mode with the lifted cobalt (`dark-cobalt-text`) or lifted glazes; they fail as fills and read as pastel.",
+      "**Don't** use shields, giant padlocks, neon, HUD, gradients, glassmorphism, particles, or green-and-yellow Brazilian clichés.",
+      "**Don't** use uppercase tracked labels or eyebrows above headings; group headings are 12px sentence case.",
+      "**Don't** use `ink-4` for readable text."
+    ]
+  }
+}

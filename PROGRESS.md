@@ -48,16 +48,17 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 - Escala: 10 mil itens — criar 0,26 s, desbloquear 0,13 s, listar 6 ms.
 - Revisão de design independente aplicada (parede vidrada, estrutura por rejunte, azulejos
   bicolores, cobalto real no escuro).
+- Site público: https://moco-one.vercel.app (`apps/web`, `/baixar` → instalador mais recente; páginas de segurança e novidades geradas por `node scripts/web/build.mjs`).
+- DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
 1. Teste real de atualização 0.1.0 → 0.2.0 pelo updater.
-2. DESIGN.md (documentador) após o veredito da revisão.
-3. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
-4. Site/downloads/changelog (Vercel). Whitepaper de segurança em `docs/`.
-5. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
-6. Recuperação por código em dispositivo novo (verificador no servidor).
+2. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
+3. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
+4. Recuperação por código em dispositivo novo (verificador no servidor).
 
 ## Log
 - 2026-09-23 — Repositório criado, pipeline de build/instalador validado, núcleo cripto.
 - 2026-09-24 — UI completa do cofre, Hello, importação/exportação, segurança, acesso rápido.
 - 2026-09-24 — Atualizações assinadas, instalador com identidade, sincronização na nuvem, anexos, v0.1.0/v0.2.0.
+- 2026-09-24 — Site no ar (Vercel), DESIGN.md, release 0.2.0 publicada.

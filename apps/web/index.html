@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mocó — gerenciador de senhas para Windows</title>
+    <meta name="description" content="Mocó guarda senhas, documentos, cartões e tudo que importa, cifrado no seu computador com uma chave que só você tem. Para Windows." />
+    <link rel="icon" href="/img/moco.svg" type="image/svg+xml" />
+    <meta property="og:title" content="Mocó — pode esquecer, o Mocó lembra" />
+    <meta property="og:description" content="Um cantinho seguro para suas senhas, documentos e cartões. Cifrado no seu computador." />
+    <meta property="og:image" content="/img/app-claro.png" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!--
+      THESIS: the Mocó site is the same azulejo panel as the app — the wall is the page's ground, the product sits in it like a set tile. Refuses the navy "military-grade encryption" security landing with shields and padlocks.
+      OWN-WORLD: glazed white ground, relief tiles a value step down with 1px grout, oxide cobalt as the only accent, Onest grotesk set tight, grout rules instead of cards.
+      STORY: a Brazilian who keeps passwords in a notebook understands in one screen what Mocó is, sees the real app, understands "only you can open it", and downloads.
+      FIRST VIEWPORT: left column on a ground plate over the tile wall — 68px headline "Pode esquecer. O Mocó lembra.", 20px lede, cobalt "Baixar para Windows" button with the free/Windows note; right: the real app screenshot, labeled as demo data.
+      FORM: continuation of the app's world (seed c1afc502). FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/img/moco.svg" alt="" />mocó</a>
+        <nav class="nav" aria-label="Principal">
+          <a href="/seguranca" class="hide-sm">Segurança</a>
+          <a href="/novidades" class="hide-sm">Novidades</a>
+          <a href="https://github.com/alanaraujo-bit/Moc-" class="hide-sm">Código</a>
+          <a class="btn small" href="/baixar">Baixar</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <canvas data-wall data-tile="72" data-seed="23" data-glazed="0.03" aria-hidden="true"></canvas>
+        <div class="wrap">
+          <div class="pitch">
+            <h1>Pode esquecer.<br /><em>O Mocó lembra.</em></h1>
+            <p class="lede">Um cantinho seguro para suas senhas, documentos, cartões e tudo que importa — trancado com uma chave que só você tem.</p>
+            <div class="cta">
+              <a class="btn" href="/baixar">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.5 1.3L21 21v-8.5h-9.5zm0-15.6v7.3H21V3z" /></svg>
+                Baixar para Windows
+              </a>
+              <span class="fine">Grátis · Windows 10 e 11 · 5 MB</span>
+            </div>
+          </div>
+          <figure class="shot">
+            <img src="/img/app-claro.png" alt="O Mocó aberto: barra lateral com cofres, lista de itens com azulejos coloridos e o detalhe de um login com código de verificação." width="1180" height="760" />
+            <figcaption>O app de verdade, com dados de demonstração.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="band surface">
+        <div class="wrap">
+          <h2>Só você abre. Nem nós conseguimos.</h2>
+          <p class="intro">
+            O Mocó cifra tudo no seu computador antes de guardar ou sincronizar. A chave nasce de duas partes que nunca saem das suas mãos.
+          </p>
+          <div class="keys">
+            <div class="key k-cobalt">
+              <div class="tile"></div>
+              <h3>Sua senha mestra</h3>
+              <p>A única senha que você decora. Não é guardada em lugar nenhum, nem enviada para ninguém.</p>
+            </div>
+            <div class="key k-ochre">
+              <div class="tile"></div>
+              <h3>Sua Chave Secreta</h3>
+              <p>128 bits aleatórios criados no seu computador e impressos no seu Kit de Emergência. Nunca vão para o servidor.</p>
+            </div>
+            <div class="key result k-cobalt">
+              <div class="tile"></div>
+              <h3>Seu cofre</h3>
+              <p>Juntas, abrem o seu Mocó. Se alguém roubar o servidor, leva só dados que não consegue ler.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <h2>Simples na superfície. Poderoso quando precisa.</h2>
+          <p class="intro">Feito para quem guarda senha em caderno e para quem administra servidor — sem despejar tudo na tela.</p>
+          <div class="features">
+            <div class="feature k-cobalt"><h3>Acha em segundos</h3><p>Digite “nubnak” e ele entende Nubank. Busca por nome, site, usuário, etiqueta ou tipo.</p></div>
+            <div class="feature k-ochre"><h3>Feito para o Brasil</h3><p>CPF, CNH, RG, Pix, agência e conta, convênio, placa e RENAVAM como campos de verdade — com validação.</p></div>
+            <div class="feature k-moss"><h3>Central de segurança</h3><p>Aponta senhas fracas, repetidas e vazadas, e documentos vencendo. Diz o que fazer, sem sermão.</p></div>
+            <div class="feature k-clay"><h3>Área de transferência limpa</h3><p>Senhas copiadas não entram no histórico do Windows e somem sozinhas depois de 90 segundos.</p></div>
+            <div class="feature k-plum"><h3>Em todos os seus computadores</h3><p>Sincronização opcional, cifrada de ponta a ponta. Funciona sem internet e acerta tudo quando volta.</p></div>
+            <div class="feature k-cobalt"><h3>Traga tudo</h3><p>Importe do Chrome, Edge, Firefox, Bitwarden, 1Password, LastPass, Proton Pass, KeePass ou de uma planilha.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band surface">
+        <div class="wrap split">
+          <div>
+            <h2>Um atalho, em qualquer programa.</h2>
+            <p class="intro tight">
+              <span class="kbd"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>Espaço</kbd></span> abre o Acesso Rápido por cima do que você estiver usando. Digite o nome, aperte Enter: a senha está copiada.
+            </p>
+            <p class="fine">Shift+Enter copia o usuário · Ctrl+Enter copia o código de verificação · Alt+Enter abre o site.</p>
+          </div>
+          <img src="/img/acesso-rapido.png" alt="Janela de Acesso Rápido do Mocó no modo escuro, com a busca “net” e o Netflix selecionado." width="640" height="440" loading="lazy" />
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <h2>Sem letra miúda sobre os seus dados.</h2>
+          <p class="intro">Sem telemetria de uso, sem anúncios. Com a sincronização ativa, isto é tudo o que o nosso servidor conhece:</p>
+          <div class="sees">
+            <div>
+              <h3>O servidor sabe</h3>
+              <ul>
+                <li>Seu e-mail, para você entrar</li>
+                <li>Seus dispositivos conectados</li>
+                <li>Quantos itens você tem e quando mudaram</li>
+              </ul>
+            </div>
+            <div>
+              <h3>O servidor não consegue ver</h3>
+              <ul>
+                <li>Nomes, sites, usuários e senhas</li>
+                <li>Documentos, cartões, notas e anexos</li>
+                <li>Sua senha mestra ou sua Chave Secreta</li>
+              </ul>
+            </div>
+          </div>
+          <p class="fine after"><a href="/seguranca">Como o Mocó protege o que você guarda →</a></p>
+        </div>
+      </section>
+
+      <section class="final">
+        <canvas data-wall data-variant="cobalt" data-tile="64" data-seed="41" aria-hidden="true"></canvas>
+        <div class="wrap">
+          <h2>Isso aqui merece um lugar melhor do que um bloco de notas.</h2>
+          <p>Leva uns dois minutos para criar o seu Mocó. Depois, é só lembrar de uma senha.</p>
+          <div class="cta">
+            <a class="btn" href="/baixar">Baixar para Windows</a>
+            <span class="fine">Grátis · Windows 10 e 11</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>© 2026 Mocó</span>
+        <a href="/seguranca">Segurança e privacidade</a>
+        <a href="/novidades">Novidades</a>
+        <a href="https://github.com/alanaraujo-bit/Moc-/releases">Todas as versões</a>
+      </div>
+    </footer>
+    <script src="/wall.js" defer></script>
+  </body>
+</html>

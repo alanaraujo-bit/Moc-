@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Segurança e privacidade — Mocó</title>
+    <meta name="description" content="Como o Mocó protege o que você guarda: o que é cifrado, o que o servidor vê e o que acontece em cada situação ruim." />
+    <link rel="icon" href="/img/moco.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/img/moco.svg" alt="" />mocó</a>
+        <nav class="nav" aria-label="Principal">
+          <a href="/seguranca" class="hide-sm">Segurança</a>
+          <a href="/novidades" class="hide-sm">Novidades</a>
+          <a href="https://github.com/alanaraujo-bit/Moc-" class="hide-sm">Código</a>
+          <a class="btn small" href="/baixar">Baixar</a>
+        </nav>
+      </div>
+    </header>
+    <main class="doc">
+      <div class="wrap">
+<h1>Como o Mocó protege o que você guarda</h1>
+<p>Este documento explica, sem marketing, o que o Mocó faz para proteger seus dados, o que ele consegue e o que ele não consegue ver, e o que acontece em cada situação ruim. As decisões técnicas e suas justificativas estão em <a href="https://github.com/alanaraujo-bit/Moc-/blob/main/DECISIONS.md"><code>DECISIONS.md</code></a>.</p>
+<h2>Em uma frase</h2>
+<p>Tudo o que você guarda é cifrado no seu computador, com uma chave que nasce da sua senha mestra <strong>e</strong> de uma Chave Secreta aleatória que só existe nos seus dispositivos. O servidor guarda apenas dados já cifrados e não tem como abri-los.</p>
+<h2>As duas chaves que abrem o seu Mocó</h2>
+<ol><li><strong>Senha mestra</strong> — a única que você decora. Nunca é armazenada nem enviada a lugar nenhum.</li><li><strong>Chave Secreta</strong> — 128 bits aleatórios gerados no seu computador na criação da conta (formato <code>M1-XXXXXX-…</code>). Fica guardada no Windows, protegida pela sua conta de usuário, e impressa no seu Kit de Emergência. Nunca vai para o servidor.</li></ol>
+<p>A partir delas, o Mocó calcula (Argon2id com 64 MiB de memória, depois HKDF-SHA256) a chave que desembrulha a <strong>Chave da Conta</strong>, que por sua vez abre as chaves de cada cofre.</p>
+<p><strong>Por que duas?</strong> Se alguém roubar o banco de dados do servidor ou uma cópia do arquivo do seu cofre, não basta adivinhar a sua senha: seria preciso adivinhar também 128 bits aleatórios — impraticável, mesmo que a sua senha seja fraca.</p>
+<p><strong>Limite honesto:</strong> a Chave Secreta fica no mesmo computador, protegida pelo Windows. Quem tiver o seu computador <strong>e</strong> a sua senha do Windows enfrenta só a senha mestra (ainda protegida pelo Argon2id). Por isso a senha mestra continua importando.</p>
+<h2>O que é cifrado</h2>
+<p>Tudo que você digita: nomes dos itens, sites, usuários, senhas, notas, etiquetas, anexos, nomes dos cofres, histórico de versões. Cada item é cifrado com XChaCha20-Poly1305 e leva um cabeçalho autenticado que diz a qual conta, cofre, item e versão ele pertence — se alguém trocar, mover, duplicar ou "voltar no tempo" um item, o Mocó percebe e recusa.</p>
+<p>Os tamanhos são arredondados em faixas para não revelar o comprimento exato do conteúdo.</p>
+<h2>O que o servidor do Mocó consegue ver</h2>
+<p>Quando a sincronização está ativa, o servidor conhece:</p>
+<ul><li>seu e-mail (para você entrar), a data de criação da conta e seu plano;</li><li>a lista de dispositivos conectados (nome do computador, sistema, datas de uso);</li><li>quantos itens você tem, identificadores aleatórios, datas de alteração e tamanhos aproximados;</li><li>registros de acesso (entradas, troca de senha, dispositivos removidos).</li></ul>
+<p>O servidor <strong>não</strong> consegue ver: nomes dos itens, sites, usuários, senhas, notas, anexos, etiquetas ou nomes de cofres. Ele também não recebe nada que permita testar senhas — o login é feito com uma assinatura digital de uso único, derivada da senha e da Chave Secreta.</p>
+<h2>No seu computador</h2>
+<ul><li><strong>Área de transferência:</strong> senhas copiadas não entram no histórico do Windows (Win+V) nem na área de transferência na nuvem, e são apagadas depois de 90 s (configurável) — só se você não copiou outra coisa nesse meio-tempo.</li><li><strong>Tranca automática:</strong> por inatividade, ao bloquear o Windows, ao suspender, ou ao minimizar (opcional). Trancar apaga as chaves da memória e recarrega a interface.</li><li><strong>Capturas de tela:</strong> a janela do Mocó é invisível para prints, gravações e compartilhamento de tela (configurável).</li><li><strong>Windows Hello:</strong> opcional. Usa uma chave guardada no chip de segurança (TPM) do computador. A senha mestra continua sendo pedida periodicamente, para você não esquecê-la.</li><li><strong>Tentativas erradas</strong> atrasam novas tentativas progressivamente.</li></ul>
+<h2>E se…</h2>
+<table><thead><tr><th>Situação</th><th>O que acontece</th></tr></thead><tbody><tr><td>Esqueci a senha mestra</td><td>Com o <strong>Código de Recuperação</strong> (folha separada) + a Chave Secreta, você define uma senha nova. Sem o código, não há como recuperar — nem por nós.</td></tr><tr><td>Perdi a Chave Secreta, mas tenho o computador</td><td>Ela está guardada nele: veja em Configurações › Kit de Emergência e imprima de novo.</td></tr><tr><td>Troquei de computador</td><td>Instale o Mocó, escolha "Já uso o Mocó em outro computador" e use e-mail, senha mestra e Chave Secreta (do Kit).</td></tr><tr><td>Perdi ou roubaram um computador</td><td>Em outro dispositivo: Configurações › Sincronização › remova o dispositivo e troque a senha mestra. O que já estava nele continua cifrado.</td></tr><tr><td>Perdi o celular do autenticador (2FA)</td><td>Use um dos códigos de emergência entregues ao ativar a verificação em duas etapas.</td></tr><tr><td>O servidor do Mocó vazou</td><td>Os invasores levam dados cifrados que não conseguem abrir, porque não têm sua Chave Secreta.</td></tr><tr><td>O servidor tentar me enganar</td><td>Itens adulterados, trocados ou antigos são recusados pelo aplicativo.</td></tr></tbody></table>
+<h2>Atualizações</h2>
+<p>O Mocó só instala atualizações assinadas com a chave privada do projeto; a assinatura é conferida antes de qualquer coisa ser executada. Atualizações de segurança aparecem como tal; as demais nunca interrompem você.</p>
+<h2>Telemetria</h2>
+<p>Não há telemetria de uso nem anúncios. Saem do seu computador apenas: a sincronização (se ativada, só dados cifrados), a busca de atualizações (só a versão do app) e, se você pedir, a verificação de vazamentos (anônima, por k-anonimato: só 5 caracteres do hash SHA-1 da senha).</p>
+<h2>Primitivas usadas</h2>
+<p>Argon2id (RFC 9106), HKDF-SHA256 (RFC 5869), XChaCha20-Poly1305 com compromisso de chave, X25519 e Ed25519 (dalek), aleatoriedade do sistema operacional. Nada de criptografia inventada. Bibliotecas RustCrypto e dalek, com vetores de teste oficiais na suíte de testes.</p>
+<h2>Reportar um problema de segurança</h2>
+<p>Abra uma issue privada ("Security advisory") no repositório do GitHub. Por favor, não publique detalhes antes de conversarmos.</p>
+      </div>
+    </main>
+    <footer>
+      <div class="wrap">
+        <span>© 2026 Mocó</span>
+        <a href="/seguranca">Segurança e privacidade</a>
+        <a href="/novidades">Novidades</a>
+        <a href="https://github.com/alanaraujo-bit/Moc-/releases">Todas as versões</a>
+      </div>
+    </footer>
+  </body>
+</html>

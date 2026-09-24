@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Mocó mark: a cobalt azulejo with the doorway of the hideout and a quarter arc. -->
+  <rect x="32" y="32" width="960" height="960" rx="224" fill="#2340a8"/>
+  <path d="M992 400 A368 368 0 0 1 624 32 H768 A224 224 0 0 1 992 256 Z" fill="#ffffff" fill-opacity="0.2"/>
+  <path d="M320 992 V580 a192 192 0 0 1 384 0 V992 Z" fill="#ffffff"/>
+</svg>
