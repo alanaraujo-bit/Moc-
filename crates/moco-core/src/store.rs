@@ -7,9 +7,10 @@ use std::path::Path;
 use uuid::Uuid;
 
 use crate::error::{CoreError, Result};
+use crate::crypto::share::Role;
 use crate::model::Timestamp;
 
-const SCHEMA_VERSION: i64 = 4;
+const SCHEMA_VERSION: i64 = 5;
 
 impl From<rusqlite::Error> for CoreError {
     fn from(e: rusqlite::Error) -> Self {
@@ -196,6 +197,17 @@ impl Store {
                  COMMIT;",
             )?;
         }
+        if version < 5 {
+            // Vaults other people shared with us: same table (items reference it), marked
+            // with the owner and our role. Their key is re-wrapped under our Account Key.
+            self.conn.execute_batch(
+                "BEGIN;
+                 ALTER TABLE vaults ADD COLUMN owner_id TEXT;
+                 ALTER TABLE vaults ADD COLUMN role TEXT;
+                 PRAGMA user_version = 5;
+                 COMMIT;",
+            )?;
+        }
         Ok(())
     }
 
@@ -236,7 +248,8 @@ impl Store {
 
     pub fn vaults(&self) -> Result<Vec<VaultRow>> {
         let mut st = self.conn.prepare(
-            "SELECT id, wrapped_key, attrs, created_at, updated_at, revision FROM vaults WHERE deleted = 0 ORDER BY created_at",
+            "SELECT id, wrapped_key, attrs, created_at, updated_at, revision FROM vaults
+             WHERE deleted = 0 AND owner_id IS NULL ORDER BY created_at",
         )?;
         let rows = st.query_map([], |r| {
             Ok(VaultRow {
@@ -260,6 +273,91 @@ impl Store {
             params![v.id.to_string(), v.wrapped_key, v.attrs, v.created_at, v.updated_at, v.revision as i64],
         )?;
         self.enqueue(Entity::Vault, v.id, v.revision, Op::Upsert)
+    }
+
+    // ---- vaults shared with us ---------------------------------------------------------
+
+    pub fn shared_vaults(&self) -> Result<Vec<(VaultRow, Uuid, Role)>> {
+        let mut st = self.conn.prepare(
+            "SELECT id, wrapped_key, attrs, created_at, updated_at, revision, owner_id, role FROM vaults
+             WHERE deleted = 0 AND owner_id IS NOT NULL ORDER BY created_at",
+        )?;
+        let rows = st.query_map([], |r| {
+            let role: String = r.get(7)?;
+            Ok((
+                VaultRow {
+                    id: uuid_of(r.get(0)?)?,
+                    wrapped_key: r.get(1)?,
+                    attrs: r.get(2)?,
+                    created_at: r.get(3)?,
+                    updated_at: r.get(4)?,
+                    revision: r.get::<_, i64>(5)? as u64,
+                },
+                uuid_of(r.get(6)?)?,
+                if role == "editor" { Role::Editor } else { Role::Reader },
+            ))
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// Stores a vault shared with us (never queued for our own account's sync).
+    pub fn put_shared_vault(&self, v: &VaultRow, owner: Uuid, role: Role) -> Result<()> {
+        let role = if role == Role::Editor { "editor" } else { "reader" };
+        self.conn.execute(
+            "INSERT INTO vaults(id, wrapped_key, attrs, created_at, updated_at, revision, deleted, owner_id, role)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, 0, ?7, ?8)
+             ON CONFLICT(id) DO UPDATE SET wrapped_key = excluded.wrapped_key, attrs = excluded.attrs,
+               updated_at = excluded.updated_at, revision = excluded.revision, role = excluded.role",
+            params![v.id.to_string(), v.wrapped_key, v.attrs, v.created_at, v.updated_at, v.revision as i64, owner.to_string(), role],
+        )?;
+        Ok(())
+    }
+
+    /// Forgets a shared vault and everything in it (we left, or were removed).
+    pub fn remove_shared_vault(&self, id: Uuid) -> Result<()> {
+        let v = id.to_string();
+        self.conn.execute_batch("SAVEPOINT rm_shared")?;
+        let r = (|| -> rusqlite::Result<()> {
+            let sub = "(SELECT id FROM items WHERE vault_id = ?1)";
+            self.conn.execute(&format!("DELETE FROM sync_hwm WHERE entity = 'item' AND id IN {sub}"), [&v])?;
+            self.conn.execute(&format!("DELETE FROM outbox WHERE entity = 'item' AND entity_id IN {sub}"), [&v])?;
+            self.conn.execute("DELETE FROM item_history WHERE vault_id = ?1", [&v])?;
+            self.conn.execute("DELETE FROM attachments WHERE vault_id = ?1", [&v])?;
+            self.conn.execute("DELETE FROM items WHERE vault_id = ?1", [&v])?;
+            self.conn.execute("DELETE FROM vaults WHERE id = ?1 AND owner_id IS NOT NULL", [&v])?;
+            self.conn.execute("DELETE FROM meta WHERE key = ?1", [format!("shared-cursor:{v}")])?;
+            Ok(())
+        })();
+        match r {
+            Ok(()) => {
+                self.conn.execute_batch("RELEASE rm_shared")?;
+                Ok(())
+            }
+            Err(e) => {
+                let _ = self.conn.execute_batch("ROLLBACK TO rm_shared; RELEASE rm_shared");
+                Err(e.into())
+            }
+        }
+    }
+
+    /// Items (live and tombstoned) of one vault with local changes to push.
+    pub fn outbox_items_in_vault(&self, vault: Uuid) -> Result<(i64, Vec<Uuid>)> {
+        let max: i64 = self.conn.query_row("SELECT COALESCE(MAX(seq), 0) FROM outbox", [], |r| r.get(0))?;
+        let mut st = self.conn.prepare(
+            "SELECT DISTINCT o.entity_id FROM outbox o JOIN items i ON i.id = o.entity_id
+             WHERE o.entity = 'item' AND o.seq <= ?1 AND i.vault_id = ?2",
+        )?;
+        let rows = st.query_map(params![max, vault.to_string()], |r| uuid_of(r.get(0)?))?;
+        Ok((max, rows.collect::<rusqlite::Result<_>>()?))
+    }
+
+    /// Live items of one vault.
+    pub fn items_in_vault(&self, vault: Uuid) -> Result<Vec<ItemRow>> {
+        let mut st = self.conn.prepare(
+            "SELECT id, vault_id, revision, overview, details, created_at, updated_at FROM items WHERE deleted = 0 AND vault_id = ?1",
+        )?;
+        let rows = st.query_map([vault.to_string()], Self::item_from)?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
     /// Marks a vault deleted, keeping an authenticated tombstone (in `attrs`) for sync.

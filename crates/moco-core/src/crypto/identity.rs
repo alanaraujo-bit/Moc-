@@ -62,6 +62,38 @@ impl IdentityKeys {
     pub fn sign(&self, message: &[u8]) -> [u8; 64] {
         self.ed25519.sign(message).to_bytes()
     }
+
+    /// X25519 agreement with someone's public key. Refuses non-contributory results
+    /// (low-order points), so a malicious key can't force a known shared secret.
+    pub fn agree(&self, their_public: &[u8]) -> Result<Zeroizing<[u8; 32]>> {
+        let pk: [u8; 32] = their_public.try_into().map_err(|_| CoreError::Integrity)?;
+        let shared = self.x25519.diffie_hellman(&XPublic::from(pk));
+        if !shared.was_contributory() {
+            return Err(CoreError::Integrity);
+        }
+        Ok(Zeroizing::new(shared.to_bytes()))
+    }
+}
+
+impl PublicIdentity {
+    /// Safety number people compare to confirm they have each other's real keys:
+    /// SHA-256 over both public keys, shown as 6 groups of 5 digits.
+    pub fn fingerprint(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let mut h = Sha256::new();
+        h.update(b"moco/v1/fingerprint");
+        h.update(&self.x25519);
+        h.update(&self.ed25519);
+        let d = h.finalize();
+        d.chunks(5)
+            .take(6)
+            .map(|c| {
+                let n = c.iter().fold(0u64, |acc, b| (acc << 8) | *b as u64);
+                format!("{:05}", n % 100_000)
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
 }
 
 impl fmt::Debug for IdentityKeys {

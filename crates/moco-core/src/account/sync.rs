@@ -115,6 +115,10 @@ pub struct SyncOutcome {
     pub rejected: usize,
 }
 
+pub(super) fn wire_item(row: &ItemRow, deleted: bool) -> WireItem {
+    to_wire_item(row, deleted)
+}
+
 fn to_wire_item(row: &ItemRow, deleted: bool) -> WireItem {
     WireItem {
         id: row.id,
@@ -259,6 +263,9 @@ impl Account {
                 }
                 _ => {
                     if let Some((row, deleted)) = self.store.item_raw(id)? {
+                        if self.is_shared_with_us(row.vault_id) {
+                            continue;
+                        }
                         let base = self.store.hwm(E_ITEM, id)?;
                         if row.revision > base {
                             req.items.push(Push { base, row: to_wire_item(&row, deleted) });
@@ -329,7 +336,14 @@ impl Account {
                 out.rejected += 1;
             }
         }
-        for i in &resp.items {
+        self.apply_pulled_items(&resp.items, &mut out)?;
+        self.set_cursor(resp.cursor)?;
+        Ok(out)
+    }
+
+    /// Items from a pull: rollback check, then apply (or merge with a pending local edit).
+    pub(super) fn apply_pulled_items(&mut self, items: &[WireItem], out: &mut SyncOutcome) -> Result<()> {
+        for i in items {
             let hwm = self.store.hwm(E_ITEM, i.id)?;
             if i.version < hwm {
                 out.rejected += 1;
@@ -353,8 +367,7 @@ impl Account {
                 Err(e) => return Err(e),
             }
         }
-        self.set_cursor(resp.cursor)?;
-        Ok(out)
+        Ok(())
     }
 
     // ---- verification -----------------------------------------------------------------
@@ -381,8 +394,8 @@ impl Account {
 
     fn verify_item(&self, i: &WireItem) -> Result<Verified> {
         let s = self.session()?;
-        let acct = s.record.id;
         let vault = s.vaults.get(&i.vault_id).ok_or(CoreError::Integrity)?;
+        let acct = vault.owner;
         if i.deleted {
             let (h, _) = aead::open(
                 &vault.key,
@@ -419,7 +432,16 @@ impl Account {
             Some((key, key_gen, attrs)) => {
                 s.vaults.insert(
                     v.id,
-                    VaultState { key, key_gen, attrs, created_at: v.created_at, updated_at: v.updated_at, revision: v.version },
+                    VaultState {
+                        owner: s.record.id,
+                        role: crate::crypto::share::Role::Owner,
+                        key,
+                        key_gen,
+                        attrs,
+                        created_at: v.created_at,
+                        updated_at: v.updated_at,
+                        revision: v.version,
+                    },
                 );
             }
             None => {
@@ -489,11 +511,10 @@ impl Account {
         };
         let local_raw = self.store.item_raw(server.id)?;
         let s = self.session()?;
-        let acct = s.record.id;
         let ours: Option<Item> = match &local_raw {
             Some((row, false)) => {
                 let vault = s.vaults.get(&row.vault_id).ok_or(CoreError::Integrity)?;
-                Some(decrypt_item(acct, &vault.key, row)?)
+                Some(decrypt_item(vault.owner, &vault.key, row)?)
             }
             _ => None,
         };
@@ -527,11 +548,11 @@ impl Account {
                 w.updated_at = w.updated_at.max(now_ms());
                 let s = self.session()?;
                 let vault = s.vaults.get(&w.vault_id).ok_or(CoreError::Integrity)?;
-                let row = encrypt_item(acct, &vault.key, vault.key_gen, &w)?;
+                let row = encrypt_item(vault.owner, &vault.key, vault.key_gen, &w)?;
                 let history = match loser {
                     Some(l) => {
                         let lv = s.vaults.get(&l.vault_id).ok_or(CoreError::Integrity)?;
-                        let enc = encrypt_item(acct, &lv.key, lv.key_gen, &l)?;
+                        let enc = encrypt_item(lv.owner, &lv.key, lv.key_gen, &l)?;
                         Some(HistoryRow { item_id: l.id, vault_id: l.vault_id, revision: l.revision, overview: enc.overview, details: enc.details, saved_at: l.updated_at })
                     }
                     None => None,

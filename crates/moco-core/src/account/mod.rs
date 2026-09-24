@@ -20,6 +20,7 @@ use zeroize::Zeroizing;
 
 use crate::crypto::aead::{self, Expect, Header, Purpose};
 use crate::crypto::identity::{IdentityKeys, PublicIdentity};
+use crate::crypto::share::Role;
 use crate::crypto::kdf::{self, KdfParams};
 use crate::crypto::{random, RecoveryCode, SecretKey, SymmetricKey};
 use crate::error::{CoreError, Result};
@@ -29,6 +30,7 @@ use crate::model::{
 };
 use crate::store::{HistoryRow, ItemRow, Store, VaultRow};
 
+pub mod sharing;
 pub mod sync;
 
 const ACCOUNT_META: &str = "account";
@@ -106,6 +108,11 @@ pub struct VaultInfo {
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
     pub item_count: usize,
+    /// "owner" for our own vaults; "editor"/"reader" for vaults shared with us.
+    pub role: Role,
+    /// Set for vaults someone shared with us.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_id: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -145,6 +152,9 @@ pub struct AccountStatus {
 }
 
 struct VaultState {
+    /// Account whose envelopes this vault's objects carry (us, unless shared with us).
+    owner: Uuid,
+    role: Role,
     key: SymmetricKey,
     key_gen: u32,
     attrs: VaultAttrs,
@@ -462,14 +472,57 @@ impl Account {
             let attrs: VaultAttrs = serde_json::from_slice(&attrs_raw)?;
             vaults.insert(
                 row.id,
-                VaultState { key, key_gen, attrs, created_at: row.created_at, updated_at: row.updated_at, revision: row.revision },
+                VaultState {
+                    owner: acct,
+                    role: Role::Owner,
+                    key,
+                    key_gen,
+                    attrs,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    revision: row.revision,
+                },
+            );
+        }
+        for (row, owner, role) in self.store.shared_vaults()? {
+            // A broken shared vault must not lock us out of our own: skip it.
+            let Ok((h, key)) = aead::unwrap_key(
+                &ak,
+                &row.wrapped_key,
+                &Expect::purpose(Purpose::VaultKey).account(acct).container(owner).object(row.id).key(acct),
+            ) else {
+                continue;
+            };
+            let Ok((_, attrs_raw)) =
+                aead::open(&key, &row.attrs, &Expect::purpose(Purpose::VaultAttrs).account(owner).container(row.id).object(row.id).key(row.id))
+            else {
+                continue;
+            };
+            let attrs: VaultAttrs = serde_json::from_slice(&attrs_raw)?;
+            vaults.insert(
+                row.id,
+                VaultState {
+                    owner,
+                    role,
+                    key,
+                    key_gen: h.version as u32,
+                    attrs,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    revision: row.revision,
+                },
             );
         }
 
         let mut items = HashMap::new();
         for row in self.store.items()? {
             let Some(vault) = vaults.get(&row.vault_id) else { continue };
-            let (kind, overview) = open_overview(acct, &vault.key, &row)?;
+            let Ok((kind, overview)) = open_overview(vault.owner, &vault.key, &row) else {
+                if vault.owner == acct {
+                    return Err(CoreError::Integrity);
+                }
+                continue;
+            };
             items.insert(
                 row.id,
                 CachedItem {
@@ -670,6 +723,8 @@ impl Account {
                 created_at: v.created_at,
                 updated_at: v.updated_at,
                 item_count: counts.get(id).copied().unwrap_or(0),
+                role: v.role,
+                owner_id: (v.role != Role::Owner).then_some(v.owner),
             })
             .collect();
         out.sort_by_key(|v| v.created_at);
@@ -700,11 +755,21 @@ impl Account {
         validate_vault_attrs(&attrs)?;
         let id = Uuid::new_v4();
         let now = now_ms();
-        let state = VaultState { key: SymmetricKey::generate(), key_gen: 1, attrs: attrs.clone(), created_at: now, updated_at: now, revision: 1 };
+        let owner = self.session()?.record.id;
+        let state = VaultState {
+            owner,
+            role: Role::Owner,
+            key: SymmetricKey::generate(),
+            key_gen: 1,
+            attrs: attrs.clone(),
+            created_at: now,
+            updated_at: now,
+            revision: 1,
+        };
         let row = self.vault_row(id, &state, &attrs, 1, now)?;
         self.store.put_vault(&row)?;
         self.session_mut()?.vaults.insert(id, state);
-        Ok(VaultInfo { id, attrs, created_at: now, updated_at: now, item_count: 0 })
+        Ok(VaultInfo { id, attrs, created_at: now, updated_at: now, item_count: 0, role: Role::Owner, owner_id: None })
     }
 
     pub fn update_vault(&mut self, id: Uuid, attrs: VaultAttrs) -> Result<VaultInfo> {
@@ -712,6 +777,9 @@ impl Account {
         let now = now_ms();
         let s = self.session()?;
         let v = s.vaults.get(&id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        if v.role != Role::Owner {
+            return Err(CoreError::Invalid("só quem criou o cofre pode mudar o nome dele".into()));
+        }
         let row = self.vault_row(id, v, &attrs, v.revision + 1, now)?;
         self.store.put_vault(&row)?;
         let v = self.session_mut()?.vaults.get_mut(&id).expect("checked above");
@@ -725,10 +793,14 @@ impl Account {
     /// the vault must hold no live items (trashed ones are purged with it).
     pub fn delete_vault(&mut self, id: Uuid, move_to: Option<Uuid>) -> Result<()> {
         let s = self.session()?;
-        if !s.vaults.contains_key(&id) {
-            return Err(CoreError::NotFound("cofre".into()));
+        match s.vaults.get(&id) {
+            None => return Err(CoreError::NotFound("cofre".into())),
+            Some(v) if v.role != Role::Owner => {
+                return Err(CoreError::Invalid("para sair de um cofre compartilhado, use “Sair do cofre”".into()))
+            }
+            _ => {}
         }
-        if s.vaults.len() == 1 {
+        if s.vaults.values().filter(|v| v.role == Role::Owner).count() == 1 {
             return Err(CoreError::Invalid("o Mocó precisa de pelo menos um cofre".into()));
         }
         let members: Vec<(Uuid, bool)> = s
@@ -791,7 +863,7 @@ impl Account {
         let s = self.session()?;
         let row = self.store.item(id)?.ok_or_else(|| CoreError::NotFound("item".into()))?;
         let vault = s.vaults.get(&row.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-        decrypt_item(s.record.id, &vault.key, &row)
+        decrypt_item(vault.owner, &vault.key, &row)
     }
 
     /// Every live item with details — for health checks and export. Decrypts on demand.
@@ -800,7 +872,11 @@ impl Account {
         let mut out = Vec::new();
         for row in self.store.items()? {
             if let Some(vault) = s.vaults.get(&row.vault_id) {
-                out.push(decrypt_item(s.record.id, &vault.key, &row)?);
+                match decrypt_item(vault.owner, &vault.key, &row) {
+                    Ok(item) => out.push(item),
+                    Err(e) if vault.owner == s.record.id => return Err(e),
+                    Err(_) => {}
+                }
             }
         }
         Ok(out)
@@ -820,7 +896,7 @@ impl Account {
                 created_at: 0,
                 updated_at: h.saved_at,
             };
-            if let Ok(item) = decrypt_item(s.record.id, &vault.key, &row) {
+            if let Ok(item) = decrypt_item(vault.owner, &vault.key, &row) {
                 out.push(ItemVersion { revision: h.revision, saved_at: h.saved_at, item });
             }
         }
@@ -931,11 +1007,10 @@ impl Account {
 
     fn write_items_bulk(&mut self, items: Vec<Item>) -> Result<usize> {
         let s = self.session()?;
-        let acct = s.record.id;
         let mut rows = Vec::with_capacity(items.len());
         for item in &items {
-            let vault = s.vaults.get(&item.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-            rows.push(encrypt_item(acct, &vault.key, vault.key_gen, item)?);
+            let vault = writable(s, item.vault_id)?;
+            rows.push(encrypt_item(vault.owner, &vault.key, vault.key_gen, item)?);
         }
         self.store.transaction(|st| {
             for r in &rows {
@@ -1017,11 +1092,11 @@ impl Account {
     pub fn purge_item(&mut self, id: Uuid) -> Result<()> {
         let s = self.session()?;
         let cached = s.items.get(&id).ok_or_else(|| CoreError::NotFound("item".into()))?;
-        let vault = s.vaults.get(&cached.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let vault = writable(s, cached.vault_id)?;
         let revision = cached.revision + 1;
         let tombstone = aead::seal(
             &vault.key,
-            &Header::new(Purpose::Tombstone, s.record.id)
+            &Header::new(Purpose::Tombstone, vault.owner)
                 .container(cached.vault_id)
                 .object(id)
                 .key(cached.vault_id, vault.key_gen)
@@ -1068,9 +1143,12 @@ impl Account {
             return Ok(current);
         }
         let s = self.session()?;
-        let acct = s.record.id;
-        let target = s.vaults.get(&vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-        let source = s.vaults.get(&current.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let target = writable(s, vault_id)?;
+        let source = writable(s, current.vault_id)?;
+        if source.owner != target.owner {
+            return self.move_across_owners(current, vault_id);
+        }
+        let acct = source.owner;
 
         // History is bound to the old vault key: re-encrypt it under the new one.
         let mut history = Vec::new();
@@ -1110,6 +1188,30 @@ impl Account {
         })?;
         self.cache(&next);
         Ok(next)
+    }
+
+    /// Moving into (or out of) a vault someone else owns means a different account holds
+    /// the item: it becomes a new item there, and the original is deleted here.
+    fn move_across_owners(&mut self, current: Item, vault_id: Uuid) -> Result<Item> {
+        let mut files = Vec::new();
+        for a in &current.details.attachments {
+            let (meta, bytes) = self.read_attachment(current.id, a.id)?;
+            files.push((meta, bytes));
+        }
+        let now = now_ms();
+        let mut copy = current.clone();
+        copy.id = Uuid::new_v4();
+        copy.vault_id = vault_id;
+        copy.revision = 1;
+        copy.updated_at = now;
+        copy.details.attachments.clear();
+        copy.refresh_derived();
+        self.write_item(&copy, None)?;
+        for (meta, bytes) in files {
+            copy = self.add_attachment(copy.id, &meta.name, &meta.mime, &bytes)?;
+        }
+        self.purge_item(current.id)?;
+        Ok(copy)
     }
 
     pub fn duplicate_item(&mut self, id: Uuid) -> Result<Item> {
@@ -1153,13 +1255,12 @@ impl Account {
 
     fn write_item(&mut self, item: &Item, previous: Option<&Item>) -> Result<()> {
         let s = self.session()?;
-        let acct = s.record.id;
-        let vault = s.vaults.get(&item.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-        let row = encrypt_item(acct, &vault.key, vault.key_gen, item)?;
+        let vault = writable(s, item.vault_id)?;
+        let row = encrypt_item(vault.owner, &vault.key, vault.key_gen, item)?;
         let history = match previous {
             Some(prev) => {
                 let pv = s.vaults.get(&prev.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-                let enc = encrypt_item(acct, &pv.key, pv.key_gen, prev)?;
+                let enc = encrypt_item(pv.owner, &pv.key, pv.key_gen, prev)?;
                 Some(HistoryRow {
                     item_id: prev.id,
                     vault_id: prev.vault_id,
@@ -1201,7 +1302,7 @@ impl Account {
     // ---- attachments ------------------------------------------------------------------
 
     fn attachment_header(&self, vault: Uuid, key_gen: u32, item: Uuid, att: Uuid) -> Result<Header> {
-        let acct = self.session()?.record.id;
+        let acct = writable(self.session()?, vault)?.owner;
         Ok(Header::new(Purpose::Attachment, acct).container(item).object(att).key(vault, key_gen).padded())
     }
 
@@ -1239,7 +1340,7 @@ impl Account {
         }
         let s = self.session()?;
         let vault = s.vaults.get(&vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-        let acct = s.record.id;
+        let acct = vault.owner;
         let (_, pt) = aead::open(&vault.key, &blob, &Expect::purpose(Purpose::Attachment).account(acct).container(item_id).object(att_id).key(vault_id))?;
         Ok((meta, pt))
     }
@@ -1264,7 +1365,7 @@ impl Account {
         let s = self.session()?;
         let src = s.vaults.get(&from).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
         let dst = s.vaults.get(&to).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
-        let acct = s.record.id;
+        let acct = src.owner;
         for (att, _, blob) in self.store.attachments_of(item_id)? {
             let (_, pt) = aead::open(&src.key, &blob, &Expect::purpose(Purpose::Attachment).account(acct).container(item_id).object(att).key(from))?;
             let sealed = aead::seal(&dst.key, &self.attachment_header(to, dst.key_gen, item_id, att)?, &pt);
@@ -1333,6 +1434,15 @@ impl Account {
 struct EncryptedItem {
     overview: Vec<u8>,
     details: Vec<u8>,
+}
+
+/// The vault, if this account may write to it (read-only shares can't).
+fn writable(s: &Session, vault_id: Uuid) -> Result<&VaultState> {
+    let v = s.vaults.get(&vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+    if !v.role.can_write() {
+        return Err(CoreError::Invalid("este cofre foi compartilhado com você só para leitura".into()));
+    }
+    Ok(v)
 }
 
 fn encrypt_item(account: Uuid, key: &SymmetricKey, key_gen: u32, item: &Item) -> Result<ItemRow> {

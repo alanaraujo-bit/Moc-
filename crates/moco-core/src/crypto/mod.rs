@@ -7,6 +7,7 @@ pub mod kdf;
 pub mod keys;
 pub mod random;
 pub mod secret_key;
+pub mod share;
 
 pub use aead::{Expect, Header, Purpose};
 pub use keys::{SecretString, SymmetricKey};

@@ -70,6 +70,8 @@ pub enum Purpose {
     Attachment = 0x0F,
     AuthKey = 0x10,
     SyncToken = 0x11,
+    Share = 0x12,
+    Contacts = 0x13,
 }
 
 impl Purpose {
@@ -93,6 +95,8 @@ impl Purpose {
             0x0F => Attachment,
             0x10 => AuthKey,
             0x11 => SyncToken,
+            0x12 => Share,
+            0x13 => Contacts,
             _ => return None,
         })
     }
