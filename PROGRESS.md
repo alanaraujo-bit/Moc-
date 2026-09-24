@@ -49,13 +49,13 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 - Revisão de design independente aplicada (parede vidrada, estrutura por rejunte, azulejos
   bicolores, cobalto real no escuro).
 - Site público: https://moco-one.vercel.app (`apps/web`, `/baixar` → instalador mais recente; páginas de segurança e novidades geradas por `node scripts/web/build.mjs`).
+- Atualização real validada: 0.1.0 instalado → buscou o feed, baixou, conferiu a assinatura, instalou e reabriu como 0.2.0.
 - DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
-1. Teste real de atualização 0.1.0 → 0.2.0 pelo updater.
-2. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
-3. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
-4. Recuperação por código em dispositivo novo (verificador no servidor).
+1. Compartilhamento (HPKE + assinatura), famílias/equipes, planos/billing (bloqueado: provedor).
+2. Acessibilidade (leitor de tela, foco), verificação de e-mail (bloqueado: provedor).
+3. Recuperação por código em dispositivo novo (verificador no servidor).
 
 ## Log
 - 2026-09-23 — Repositório criado, pipeline de build/instalador validado, núcleo cripto.
