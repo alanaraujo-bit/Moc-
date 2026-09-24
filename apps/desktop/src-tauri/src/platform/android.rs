@@ -102,3 +102,21 @@ pub fn idle_millis() -> u64 {
 pub fn session_locked() -> bool {
     false
 }
+
+#[derive(Deserialize)]
+struct Empty {}
+
+/// Sends the app to the background (Android back at the top level).
+pub fn move_to_background() {
+    let _ = call::<Empty>("background", ());
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Insets {
+    pub top: f64,
+    pub bottom: f64,
+}
+
+pub fn insets() -> Option<Insets> {
+    call::<Insets>("insets", ()).ok()
+}

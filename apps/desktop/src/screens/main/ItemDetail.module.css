@@ -220,3 +220,33 @@
   color: var(--ink-3);
   padding: 4px 2px;
 }
+
+/* Phones: tile and title on one line, actions on the next, edge padding to 16px. */
+@media (max-width: 640px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 12px 14px;
+    padding: 18px 16px 14px;
+    position: static;
+  }
+  .headText {
+    flex: 1 1 calc(100% - 70px);
+  }
+  .title {
+    font-size: var(--text-xl);
+    overflow-wrap: break-word;
+  }
+  .crumbs {
+    flex-wrap: wrap;
+  }
+  .headActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .body {
+    padding: 0 16px 28px;
+  }
+  .banner {
+    margin: 12px 16px 0;
+  }
+}

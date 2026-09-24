@@ -198,6 +198,10 @@ pub fn lock_now(app: &AppHandle, reason: &str) {
         }
         unlocked
     });
+    // The background clock starts over for the next unlock.
+    if let Ok(mut g) = st.hidden_since.lock() {
+        *g = None;
+    }
     // Parsed-but-uncommitted imports hold plaintext: forget them too (D-009).
     if let Ok(mut g) = st.pending_import.lock() {
         *g = None;
@@ -711,4 +715,31 @@ pub async fn open_url(app: AppHandle, url: String) -> AppResult<()> {
     }
     use tauri_plugin_opener::OpenerExt;
     app.opener().open_url(full, None::<&str>).map_err(|e| AppError::internal(e.to_string()))
+}
+
+/// The window went to the background or came back (phones: leaving the app). Background
+/// time counts toward the auto-lock timeout even though nothing is "idle" on a phone.
+#[tauri::command]
+pub async fn app_visibility(state: State<'_, Arc<AppState>>, visible: bool) -> AppResult<()> {
+    if let Ok(mut g) = state.hidden_since.lock() {
+        *g = if visible { None } else { Some(std::time::Instant::now()) };
+    }
+    Ok(())
+}
+
+/// Back pressed at the top of the app (Android): go to the background instead of closing.
+#[tauri::command]
+pub async fn app_background() -> AppResult<()> {
+    #[cfg(target_os = "android")]
+    platform::move_to_background();
+    Ok(())
+}
+
+/// Status/navigation bar sizes in CSS px on phones (None elsewhere).
+#[tauri::command]
+pub async fn app_insets() -> AppResult<Option<(f64, f64)>> {
+    #[cfg(target_os = "android")]
+    return Ok(platform::insets().map(|i| (i.top, i.bottom)));
+    #[cfg(not(target_os = "android"))]
+    Ok(None)
 }

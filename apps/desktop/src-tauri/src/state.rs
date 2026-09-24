@@ -31,6 +31,8 @@ pub struct AppState {
     pub clipboard_generation: AtomicU64,
     pub failed_unlocks: AtomicU32,
     pub retry_after: Mutex<Option<Instant>>,
+    /// When the app went to the background (phones), for locking after the timeout.
+    pub hidden_since: Mutex<Option<Instant>>,
     pub pending_import: crate::transfer::Pending,
     pub pending_update: crate::updates::PendingUpdate,
     pub cloud: crate::cloud::CloudRuntime,
@@ -114,6 +116,7 @@ impl AppState {
             clipboard_generation: AtomicU64::new(0),
             failed_unlocks: AtomicU32::new(0),
             retry_after: Mutex::new(None),
+            hidden_since: Mutex::new(None),
             pending_import: Mutex::new(None),
             pending_update: Mutex::new(None),
             cloud: Default::default(),
@@ -149,7 +152,7 @@ impl AppState {
         let mut entropy = DPAPI_ENTROPY.to_vec();
         entropy.extend_from_slice(account_id.as_bytes());
         let blob = platform::protect(key.as_bytes(), &entropy)
-            .map_err(|e| AppError::new("keystore", format!("Não conseguimos guardar a Chave Secreta no Windows: {e}")))?;
+            .map_err(|e| AppError::new("keystore", format!("Não conseguimos guardar a Chave Secreta neste aparelho: {e}")))?;
         let stored = StoredSecretKey { account_id, blob };
         let tmp = self.dir.join(format!("{SECRET_KEY_FILE}.tmp"));
         std::fs::write(&tmp, serde_json::to_vec(&stored).expect("serializes"))?;

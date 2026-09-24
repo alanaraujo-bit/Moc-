@@ -202,3 +202,34 @@ textarea:focus-visible,
 select:focus-visible {
   outline: none;
 }
+
+/* ---- Phones ------------------------------------------------------------------------------
+   Same panel, held in the hand: system type (Roboto on Android is the native voice there),
+   touch-sized controls, and room for the status and gesture bars. */
+html[data-platform="mobile"] {
+  --font-ui: system-ui, "Roboto", sans-serif;
+  --font-display: system-ui, "Roboto", sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --text-md: 0.9375rem; /* 15 — body reads a step larger at arm's length */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-platform="mobile"] body {
+  overscroll-behavior: none;
+}
+
+/* 16px inputs keep the WebView from zooming on focus. */
+html[data-platform="mobile"] input,
+html[data-platform="mobile"] textarea,
+html[data-platform="mobile"] select {
+  font-size: 16px;
+}
+
+/* Touch scrolling needs no bars, and their gutter shifts content off the grout lines. */
+html[data-platform="mobile"] * {
+  scrollbar-width: none;
+}
+html[data-platform="mobile"] ::-webkit-scrollbar {
+  display: none;
+}

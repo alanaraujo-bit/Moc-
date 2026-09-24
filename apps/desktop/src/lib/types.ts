@@ -100,6 +100,9 @@ export interface VaultInfo extends VaultAttrs {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   itemCount: number;
+  /** "owner" for our own vaults; "editor"/"reader" for vaults shared with us. */
+  role?: "owner" | "editor" | "reader";
+  ownerId?: Uuid;
 }
 
 export interface ItemSummary {

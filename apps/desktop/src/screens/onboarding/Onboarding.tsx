@@ -13,6 +13,7 @@ import { useApp } from "../../state/app";
 import { useVault } from "../../state/vault";
 import { EmergencyKitSheet, PrintPortal } from "./Printable";
 import { SignIn } from "./SignIn";
+import { deviceNoun, isMobile } from "../../lib/platform";
 import { CodeBlock, printNow, RecoverySheet } from "./RecoverySheet";
 import s from "./Onboarding.module.css";
 
@@ -92,7 +93,7 @@ export function Onboarding() {
                 <li>
                   <ShieldCheck size={20} />
                   <span>
-                    <strong>Só você vê o que guarda.</strong> Tudo é cifrado aqui no seu computador, antes de ir para qualquer lugar.
+                    <strong>Só você vê o que guarda.</strong> Tudo é cifrado aqui no seu {deviceNoun}, antes de ir para qualquer lugar.
                   </span>
                 </li>
                 <li>
@@ -108,15 +109,29 @@ export function Onboarding() {
                   </span>
                 </li>
               </ul>
-              <div className={s.row}>
-                <Button variant="primary" size="lg" onClick={() => setStep("password")} icon={null}>
-                  Criar meu Mocó <ArrowRight size={16} weight="bold" />
-                </Button>
-                <span className={s.muted}>Leva uns dois minutos.</span>
-              </div>
-              <button className={s.linkBtn} onClick={() => setStep("signin")}>
-                Já uso o Mocó em outro computador
-              </button>
+              {isMobile ? (
+                // On a phone most people already have Mocó on their computer.
+                <div className={s.row}>
+                  <Button variant="primary" size="lg" onClick={() => setStep("signin")} icon={null}>
+                    Já uso o Mocó <ArrowRight size={16} weight="bold" />
+                  </Button>
+                  <Button size="lg" onClick={() => setStep("password")}>
+                    Criar meu Mocó
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className={s.row}>
+                    <Button variant="primary" size="lg" onClick={() => setStep("password")} icon={null}>
+                      Criar meu Mocó <ArrowRight size={16} weight="bold" />
+                    </Button>
+                    <span className={s.muted}>Leva uns dois minutos.</span>
+                  </div>
+                  <button className={s.linkBtn} onClick={() => setStep("signin")}>
+                    Já uso o Mocó em outro computador
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -126,7 +141,7 @@ export function Onboarding() {
             <div className={s.step}>
               <h1 className={s.title}>Crie sua senha mestra</h1>
               <p className={s.lede}>
-                É a única senha que você vai precisar decorar. Ela nunca sai deste computador e nós não temos cópia — então escolha
+                É a única senha que você vai precisar decorar. Ela nunca sai deste {deviceNoun} e nós não temos cópia — então escolha
                 uma que você não vá esquecer.
               </p>
               <MasterPasswordForm onChange={onPw} onSubmit={create} autoFocus />
@@ -158,8 +173,8 @@ export function Onboarding() {
             <div className={s.step}>
               <h1 className={s.title}>Guarde seu Kit de Emergência</h1>
               <p className={s.lede}>
-                Esta é a sua <strong>Chave Secreta</strong>. Ela fica guardada neste computador e você não precisa digitá-la no dia a
-                dia — mas, para abrir o Mocó em outro computador, vai precisar dela e da senha mestra.
+                Esta é a sua <strong>Chave Secreta</strong>. Ela fica guardada neste {deviceNoun} e você não precisa digitá-la no dia a
+                dia — mas, para abrir o Mocó em outro aparelho, vai precisar dela e da senha mestra.
               </p>
               <CodeBlock value={created.secretKey} label="Chave Secreta" />
               <div className={s.actions}>
@@ -179,7 +194,7 @@ export function Onboarding() {
               </div>
               <label className={s.check}>
                 <input type="checkbox" checked={kitSaved} onChange={(e) => setKitSaved(e.target.checked)} />
-                <span>Imprimi ou salvei o Kit num lugar seguro, fora deste computador.</span>
+                <span>Imprimi ou salvei o Kit num lugar seguro, fora deste {deviceNoun}.</span>
               </label>
               <Button variant="primary" size="lg" disabled={!kitSaved} onClick={() => setStep("recovery")} className={s.fit}>
                 Continuar

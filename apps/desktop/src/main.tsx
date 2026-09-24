@@ -6,6 +6,12 @@ import { App } from "./App";
 import { api, on } from "./lib/ipc";
 import { applyTheme } from "./state/app";
 import { initBridge } from "./lib/ipc";
+import { isMobile } from "./lib/platform";
+
+if (isMobile) {
+  document.documentElement.dataset.platform = "mobile";
+  void import("./mobile/back").then((m) => Promise.all([m.installAndroidBack(), m.applyInsets()])).catch(() => {});
+}
 
 // A desktop app, not a web page: no browser context menu or reload shortcuts outside
 // text fields, and no dropping files onto the window to navigate away.

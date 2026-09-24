@@ -148,6 +148,9 @@ export const api = {
   settings: () => call<Settings>("settings_get"),
   updateSettings: (settings: Settings) => call<Settings>("settings_update", { settings }),
   openUrl: (url: string) => call<void>("open_url", { url }),
+  appVisibility: (visible: boolean) => call<void>("app_visibility", { visible }),
+  appBackground: () => call<void>("app_background"),
+  appInsets: () => call<[number, number] | null>("app_insets"),
 };
 
 export function errorMessage(e: unknown): string {

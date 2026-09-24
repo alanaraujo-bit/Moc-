@@ -38,11 +38,21 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
     private fun key(): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
         (ks.getKey(alias, null) as? SecretKey)?.let { return it }
+        // Prefer a key that only works while the phone is unlocked; that needs a secure
+        // lock screen, so phones without one get a key that is still hardware-bound.
+        return try {
+            generate(unlockedOnly = true)
+        } catch (e: Exception) {
+            generate(unlockedOnly = false)
+        }
+    }
+
+    private fun generate(unlockedOnly: Boolean): SecretKey {
         val spec = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(256)
-            .setUnlockedDeviceRequired(true)
+            .setUnlockedDeviceRequired(unlockedOnly)
             .build()
         return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").run {
             init(spec)
@@ -118,6 +128,29 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
             val cleared = label == "moco-$seq"
             if (cleared) cb.clearPrimaryClip()
             invoke.resolve(JSObject().put("cleared", cleared))
+        }
+    }
+
+    /** Back at the top of the app: leave like Android's home-screen apps do (the lock clock starts). */
+    @Command
+    fun background(invoke: Invoke) {
+        activity.runOnUiThread { activity.moveTaskToBack(true) }
+        invoke.resolve()
+    }
+
+    /** System bar and cutout insets in CSS px (the WebView doesn't report the bottom one). */
+    @Command
+    fun insets(invoke: Invoke) {
+        activity.runOnUiThread {
+            val root = activity.window.decorView
+            val density = activity.resources.displayMetrics.density
+            val ins = androidx.core.view.ViewCompat.getRootWindowInsets(root)
+                ?.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars() or androidx.core.view.WindowInsetsCompat.Type.displayCutout())
+            invoke.resolve(
+                JSObject()
+                    .put("top", (ins?.top ?: 0) / density)
+                    .put("bottom", (ins?.bottom ?: 0) / density)
+            )
         }
     }
 }

@@ -300,3 +300,37 @@
   overflow: hidden;
   background: var(--wall-ground);
 }
+
+/* Phones: one column; the relief wall becomes a band across the top, still glazing
+   itself step by step. */
+@media (max-width: 640px) {
+  .root {
+    grid-template-columns: 1fr;
+    grid-template-rows: calc(88px + var(--safe-top, 0px)) minmax(0, 1fr);
+  }
+  .wall {
+    order: -1;
+    border-left: 0;
+    border-bottom: 1px solid var(--grout);
+  }
+  .content {
+    padding: 20px 22px calc(20px + var(--safe-bottom, 0px));
+  }
+  .stepWrap {
+    align-items: flex-start;
+    padding: 28px 0 20px;
+  }
+  .hero {
+    font-size: var(--text-3xl);
+  }
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .row > button {
+    width: 100%;
+  }
+  .starters {
+    grid-template-columns: 1fr;
+  }
+}

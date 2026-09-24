@@ -1,0 +1,351 @@
+/* Mocó on a phone. Same panel: grout is the structure, cobalt marks action and selection. */
+
+.page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ---- bars ---- */
+
+.top,
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: calc(var(--safe-top) + 6px) 8px 6px 16px;
+  min-height: calc(var(--safe-top) + 56px);
+}
+
+.bar {
+  padding-left: 4px;
+  border-bottom: 1px solid var(--grout);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: auto;
+}
+
+.barTitle {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-md, 8px);
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.iconBtn:active {
+  background: var(--bg-active);
+}
+
+/* ---- search + filters ---- */
+
+.searchWrap {
+  position: relative;
+  flex: none;
+  margin: 2px 16px 10px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+.search {
+  width: 100%;
+  height: 46px;
+  padding: 0 44px 0 40px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm, 6px);
+  background: var(--bg-sunken);
+  outline: none;
+  appearance: none;
+}
+
+.search::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search:focus {
+  background: var(--bg-surface);
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px var(--cobalt-soft);
+}
+
+.clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.chips {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--grout);
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: none;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--grout-strong);
+  border-radius: var(--r-sm, 6px);
+  background: var(--bg-surface);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+/* Selection inverts: the current filter is a cobalt ground with white ink. */
+.chip[data-on] {
+  background: var(--cobalt);
+  border-color: var(--cobalt);
+  color: #fff;
+}
+
+/* ---- list ---- */
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 96px; /* clear of the + tile */
+  scrollbar-width: none;
+}
+
+.rowSlot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.row {
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--grout);
+  background: transparent;
+  text-align: left;
+}
+
+.row:active {
+  background: var(--bg-hover);
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rowTitle,
+.rowSub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowTitle {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rowSub {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.rowMeta {
+  display: flex;
+  gap: 6px;
+  color: var(--ink-4);
+}
+
+.star {
+  color: var(--glaze-ochre);
+}
+
+.empty {
+  padding: 48px 32px;
+  text-align: center;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+
+/* The + is a cobalt tile, like the brand mark. */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(20px + var(--safe-bottom));
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: var(--cobalt);
+  color: #fff;
+  box-shadow: 0 10px 22px rgb(17 23 38 / 18%), 0 2px 5px rgb(17 23 38 / 12%);
+}
+
+.fab:active {
+  background: var(--cobalt-fill-hover);
+}
+
+/* ---- deeper screens ---- */
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Desktop panes pad for a wide column; on the phone they take the full width. */
+.pane,
+.wide {
+  min-height: 100%;
+}
+
+.pane > *,
+.wide > * {
+  max-width: none;
+}
+
+/* ---- new item sheet ---- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(17 23 38 / 32%);
+  animation: fade var(--t-base, 180ms) var(--ease-out);
+}
+
+.sheet {
+  width: 100%;
+  max-height: 80%;
+  overflow-y: auto;
+  padding: 8px 16px calc(16px + var(--safe-bottom));
+  background: var(--bg-surface);
+  border-radius: 12px 12px 0 0;
+  border-top: 1px solid var(--grout);
+  animation: up var(--t-slow, 260ms) var(--ease-out);
+}
+
+.grip {
+  width: 36px;
+  height: 4px;
+  margin: 4px auto 14px;
+  border-radius: 2px;
+  background: var(--grout-strong);
+}
+
+.sheetTitle {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  margin: 0 4px 12px;
+}
+
+.kinds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--grout);
+  border-left: 1px solid var(--grout);
+}
+
+.kind {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 96px;
+  padding: 12px 6px;
+  border: 0;
+  border-right: 1px solid var(--grout);
+  border-bottom: 1px solid var(--grout);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 550;
+  text-align: center;
+}
+
+.kind:active {
+  background: var(--bg-hover);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes up {
+  from {
+    transform: translateY(24px);
+    opacity: 0.6;
+  }
+}
+
+/* Screens that scroll themselves (detail, editor with its Save bar). */
+.fill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fill > .pane {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}

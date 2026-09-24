@@ -171,8 +171,11 @@ fn device_info(st: &AppState) -> AppResult<Value> {
         d.device_id = Uuid::new_v4();
         st.save_device(&d)?;
     }
-    let name = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "Computador".into());
-    Ok(json!({ "id": d.device_id, "name": name, "platform": "windows" }))
+    #[cfg(target_os = "android")]
+    let (name, platform) = ("Celular Android".to_string(), "android");
+    #[cfg(not(target_os = "android"))]
+    let (name, platform) = (std::env::var("COMPUTERNAME").unwrap_or_else(|_| "Computador".into()), "windows");
+    Ok(json!({ "id": d.device_id, "name": name, "platform": platform }))
 }
 
 // ---- local config / token ---------------------------------------------------------------

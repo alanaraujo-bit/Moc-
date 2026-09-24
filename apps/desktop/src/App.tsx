@@ -6,6 +6,8 @@ import { useApp } from "./state/app";
 import { LockScreen } from "./screens/lock/LockScreen";
 const Onboarding = lazy(() => import("./screens/onboarding/Onboarding").then((m) => ({ default: m.Onboarding })));
 import { Main } from "./screens/main/Main";
+import { isMobile } from "./lib/platform";
+const MobileUnlocked = lazy(() => import("./mobile/MobileApp").then((m) => ({ default: m.MobileUnlocked })));
 import { toast } from "./components/ui/toast";
 import { useVault } from "./state/vault";
 
@@ -55,7 +57,7 @@ export function App() {
   let screen: React.ReactNode = null;
   if (phase === "onboarding") screen = <Onboarding />;
   else if (phase === "locked") screen = <LockScreen reason={lockReason} />;
-  else if (phase === "unlocked") screen = <Main />;
+  else if (phase === "unlocked") screen = isMobile ? <MobileUnlocked /> : <Main />;
   else if (phase === "error")
     screen = (
       <div style={{ padding: 40, maxWidth: 560 }}>

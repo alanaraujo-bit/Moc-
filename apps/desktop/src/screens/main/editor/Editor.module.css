@@ -339,3 +339,24 @@
     transform: translateY(-4px);
   }
 }
+
+/* Phones: 16px edges, Save always reachable above the gesture bar, no keyboard hints. */
+@media (max-width: 640px) {
+  .header {
+    padding: 18px 16px 14px;
+    align-items: flex-start;
+  }
+  .body {
+    padding: 0 16px 24px;
+  }
+  .footer {
+    padding: 10px 16px;
+  }
+  .footHint {
+    display: none;
+  }
+  .footer > button {
+    flex: 1;
+    height: 44px;
+  }
+}

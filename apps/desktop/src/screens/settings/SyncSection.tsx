@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { deviceNoun } from "../../lib/platform";
 import { ArrowsClockwise, CloudCheck, CloudSlash, Desktop, DeviceMobile, ShieldCheck, Trash } from "@phosphor-icons/react";
 import { Confirm, Dialog } from "../../components/ui/overlays";
 import { Button, PasswordField, TextField } from "../../components/ui/primitives";
@@ -62,7 +63,7 @@ export function SyncSection() {
         <div className={x.intro}>
           <CloudSlash size={22} />
           <div>
-            <strong>Seu Mocó está só neste computador.</strong>
+            <strong>Seu Mocó está só neste {deviceNoun}.</strong>
             <p>
               Ative a sincronização para ter seus itens em outros dispositivos e uma cópia segura fora daqui. O servidor recebe
               apenas dados cifrados — sem sua senha mestra e sua Chave Secreta, ninguém consegue ler, nem nós.
@@ -129,7 +130,7 @@ export function SyncSection() {
               <span className={x.icon}>{d.platform === "windows" ? <Desktop size={18} /> : <DeviceMobile size={18} />}</span>
               <span className={x.devText}>
                 <strong>
-                  {d.name} {d.current && <span className={x.here}>este computador</span>}
+                  {d.name} {d.current && <span className={x.here}>este {deviceNoun}</span>}
                 </strong>
                 <span>Visto {relativeTime(d.lastSeenAt)} · conectado {relativeTime(d.createdAt)}</span>
               </span>
@@ -145,7 +146,7 @@ export function SyncSection() {
 
       <div className={s.row}>
         <div className={s.rowText}>
-          <span className={s.rowTitle}>Desconectar este computador</span>
+          <span className={s.rowTitle}>Desconectar este {deviceNoun}</span>
           <span className={s.rowDetail}>Os itens continuam aqui, só param de sincronizar.</span>
         </div>
         <div className={s.control}>
@@ -157,7 +158,7 @@ export function SyncSection() {
       <div className={s.row}>
         <div className={s.rowText}>
           <span className={s.rowTitle}>Apagar a conta no servidor</span>
-          <span className={s.rowDetail}>Remove tudo que está no servidor. Este computador mantém seus itens.</span>
+          <span className={s.rowDetail}>Remove tudo que está no servidor. Este {deviceNoun} mantém seus itens.</span>
         </div>
         <div className={s.control}>
           <Button variant="dangerGhost" icon={<Trash size={15} />} onClick={() => setDialog("delete")}>
@@ -191,14 +192,14 @@ export function SyncSection() {
       <Confirm
         open={dialog === "signout"}
         onOpenChange={(o) => setDialog(o ? "signout" : null)}
-        title="Desconectar este computador?"
+        title={`Desconectar este ${deviceNoun}?`}
         description="O Mocó continua funcionando aqui com tudo que você tem. Alterações feitas daqui em diante não vão para outros dispositivos até você entrar de novo."
         confirmLabel="Desconectar"
         onConfirm={async () => {
           setDialog(null);
           try {
             await api.cloudSignout();
-            toast("Sincronização desativada neste computador.");
+            toast(`Sincronização desativada neste ${deviceNoun}.`);
             void load();
           } catch (e) {
             toast(errorMessage(e), { tone: "danger" });
@@ -381,7 +382,7 @@ function DeleteAccountDialog({ open, onOpenChange, onDone }: { open: boolean; on
       open={open}
       onOpenChange={onOpenChange}
       title="Apagar a conta no servidor?"
-      description="Tudo que está no servidor — itens, dispositivos, histórico de acesso — é apagado de vez. Outros dispositivos param de sincronizar. Este computador mantém uma cópia completa dos seus itens."
+      description={`Tudo que está no servidor — itens, dispositivos, histórico de acesso — é apagado de vez. Outros dispositivos param de sincronizar. Este ${deviceNoun} mantém uma cópia completa dos seus itens.`}
       footer={
         <>
           <Button onClick={() => onOpenChange(false)}>Cancelar</Button>
@@ -395,7 +396,7 @@ function DeleteAccountDialog({ open, onOpenChange, onDone }: { open: boolean; on
                 await api.cloudDeleteAccount(pw.current?.value ?? "");
                 onOpenChange(false);
                 onDone();
-                toast("Conta apagada do servidor. Seus itens continuam neste computador.");
+                toast(`Conta apagada do servidor. Seus itens continuam neste ${deviceNoun}.`);
               } catch (e) {
                 setError(errorMessage(e));
               } finally {

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { deviceNoun } from "../../lib/platform";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Button, PasswordField, TextField } from "../../components/ui/primitives";
 import { api, errorCode, errorMessage } from "../../lib/ipc";
@@ -44,7 +45,7 @@ export function SignIn({ onBack }: { onBack: () => void }) {
       </Button>
       <h1 className={s.title}>Entrar no seu Mocó</h1>
       <p className={s.lede}>
-        Use o e-mail da sua conta, a senha mestra e a <strong>Chave Secreta</strong> do seu Kit de Emergência. Depois disso, este computador lembra
+        Use o e-mail da sua conta, a senha mestra e a <strong>Chave Secreta</strong> do seu Kit de Emergência. Depois disso, este {deviceNoun} lembra
         da Chave Secreta.
       </p>
       <form

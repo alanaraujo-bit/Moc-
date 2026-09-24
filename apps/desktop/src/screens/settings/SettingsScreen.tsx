@@ -14,9 +14,10 @@ import { HelloSetting } from "./HelloSetting";
 import { DataSection } from "./DataSection";
 import { SyncSection } from "./SyncSection";
 import { useUpdates } from "../main/Updates";
+import { isMobile } from "../../lib/platform";
 import s from "./SettingsScreen.module.css";
 
-const SECTIONS = [
+const ALL_SECTIONS = [
   { id: "aparencia", label: "Aparência", icon: <Palette size={16} /> },
   { id: "seguranca", label: "Segurança", icon: <ShieldCheck size={16} /> },
   { id: "desbloqueio", label: "Desbloqueio", icon: <Fingerprint size={16} /> },
@@ -27,6 +28,9 @@ const SECTIONS = [
   { id: "privacidade", label: "Privacidade", icon: <Eye size={16} /> },
   { id: "sobre", label: "Sobre o Mocó", icon: <Info size={16} /> },
 ];
+
+// Hello, Windows integration and file import/export are desktop features for now.
+const SECTIONS = isMobile ? ALL_SECTIONS.filter((x) => !["desbloqueio", "windows", "dados"].includes(x.id)) : ALL_SECTIONS;
 
 function Row({ title, detail, children, htmlFor }: { title: ReactNode; detail?: ReactNode; children: ReactNode; htmlFor?: string }) {
   return (
@@ -118,7 +122,7 @@ export function SettingsScreen() {
       <div className={s.scroll} ref={scroller}>
         <section id="aparencia" className={s.section}>
           <h2>Aparência</h2>
-          <Row title="Tema" detail="“Sistema” segue o modo claro ou escuro do Windows.">
+          <Row title="Tema" detail="“Sistema” segue o modo claro ou escuro do aparelho.">
             <Segmented<Settings["theme"]>
               label="Tema"
               value={settings.theme}
@@ -134,7 +138,7 @@ export function SettingsScreen() {
 
         <section id="seguranca" className={s.section}>
           <h2>Segurança</h2>
-          <Row title="Trancar automaticamente" detail="Depois de um tempo sem usar o computador — não só o Mocó.">
+          <Row title="Trancar automaticamente" detail={isMobile ? "Depois de um tempo com o Mocó em segundo plano." : "Depois de um tempo sem usar o computador — não só o Mocó."}>
             <Select<number>
               label="Tempo para trancar"
               value={settings.autoLockMinutes}
@@ -150,6 +154,7 @@ export function SettingsScreen() {
               ]}
             />
           </Row>
+{!isMobile && (<>
           <Row title="Trancar ao bloquear o Windows" detail="Win+L, troca de usuário ou tela de bloqueio.">
             <Switch label="Trancar ao bloquear o Windows" checked={settings.lockOnSessionLock} onChange={(lockOnSessionLock) => set({ lockOnSessionLock })} />
           </Row>
@@ -159,9 +164,10 @@ export function SettingsScreen() {
           <Row title="Trancar ao minimizar">
             <Switch label="Trancar ao minimizar" checked={settings.lockOnMinimize} onChange={(lockOnMinimize) => set({ lockOnMinimize })} />
           </Row>
+</>)}
           <Row
             title="Limpar a área de transferência"
-            detail="Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. Elas nunca vão para o histórico (Win+V) nem para a nuvem."
+            detail={isMobile ? "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. O teclado não mostra a prévia delas." : "Senhas copiadas somem depois desse tempo — só se nada novo tiver sido copiado. Elas nunca vão para o histórico (Win+V) nem para a nuvem."}
           >
             <Select<number>
               label="Tempo para limpar"
@@ -176,6 +182,7 @@ export function SettingsScreen() {
               ]}
             />
           </Row>
+{!isMobile && (<>
           <Row title="Esconder de capturas de tela" detail="O Mocó aparece em preto em prints, gravações e chamadas de vídeo.">
             <Switch
               label="Esconder de capturas de tela"
@@ -183,11 +190,13 @@ export function SettingsScreen() {
               onChange={(screenCaptureProtection) => set({ screenCaptureProtection })}
             />
           </Row>
+</>)}
           <Row title="Verificar vazamentos de senhas" detail="Consulta anônima no Have I Been Pwned: só 5 caracteres de uma impressão digital saem daqui.">
             <Switch label="Verificar vazamentos" checked={settings.breachCheck} onChange={(breachCheck) => set({ breachCheck })} />
           </Row>
         </section>
 
+{!isMobile && (<>
         <section id="desbloqueio" className={s.section}>
           <h2>Desbloqueio</h2>
           <HelloSetting status={status} onChange={reloadStatus} />
@@ -205,6 +214,7 @@ export function SettingsScreen() {
             />
           </Row>
         </section>
+</>)}
 
         <section id="conta" className={s.section}>
           <h2>Conta e recuperação</h2>
@@ -216,6 +226,7 @@ export function SettingsScreen() {
           <SyncSection />
         </section>
 
+{!isMobile && (<>
         <section id="windows" className={s.section}>
           <h2>Windows</h2>
           <Row title="Abrir com o Windows" detail="O Mocó começa trancado, na bandeja do sistema.">
@@ -228,11 +239,14 @@ export function SettingsScreen() {
             <kbd className={s.shortcut}>Ctrl + Shift + Espaço</kbd>
           </Row>
         </section>
+</>)}
 
+{!isMobile && (<>
         <section id="dados" className={s.section}>
           <h2>Importar e exportar</h2>
           <DataSection />
         </section>
+</>)}
 
         <section id="privacidade" className={s.section}>
           <h2>Privacidade</h2>
@@ -265,6 +279,7 @@ export function SettingsScreen() {
 
         <section id="sobre" className={s.section}>
           <h2>Sobre o Mocó</h2>
+{!isMobile && (<>
           <Row title={`Versão ${info?.version ?? ""}`} detail="Atualizações são verificadas pela assinatura digital do Mocó antes de instalar.">
             <Button loading={updates.checking} onClick={() => void updates.check(true)}>
               Procurar atualizações
@@ -284,6 +299,7 @@ export function SettingsScreen() {
               ]}
             />
           </Row>
+</>)}
           <p className={s.footnote}>Feito no Brasil. Guardado com carinho.</p>
         </section>
       </div>

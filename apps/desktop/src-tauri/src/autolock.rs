@@ -36,6 +36,14 @@ pub fn spawn(app: AppHandle) {
                     lock_now(&app, "session");
                     continue;
                 }
+                if settings.auto_lock_minutes > 0 {
+                    let limit = Duration::from_secs(settings.auto_lock_minutes as u64 * 60);
+                    let hidden = st.hidden_since.lock().ok().and_then(|g| *g).is_some_and(|t| t.elapsed() >= limit);
+                    if hidden {
+                        lock_now(&app, "background");
+                        continue;
+                    }
+                }
                 if settings.auto_lock_minutes > 0 && platform::idle_millis() >= settings.auto_lock_minutes as u64 * 60_000 {
                     lock_now(&app, "idle");
                 }

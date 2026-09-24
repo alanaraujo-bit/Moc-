@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { deviceNoun } from "../../lib/platform";
 import { ArrowRight, Fingerprint, Key, Question } from "@phosphor-icons/react";
 import { MocoMark } from "../../components/brand/Brand";
 import { Button, IconButton, PasswordField, Spinner, TextField } from "../../components/ui/primitives";
@@ -13,6 +14,7 @@ const REASONS: Record<string, string> = {
   session: "Trancamos quando o Windows foi bloqueado.",
   sleep: "Trancamos quando o computador dormiu.",
   minimize: "Trancamos ao minimizar.",
+  background: "Trancamos porque o Mocó ficou em segundo plano.",
 };
 
 export function LockScreen({ reason }: { reason?: string | null }) {
@@ -148,7 +150,7 @@ export function LockScreen({ reason }: { reason?: string | null }) {
                   </span>
                 }
                 placeholder="M1-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXX"
-                hint="Ela está no seu Kit de Emergência. Depois de digitar uma vez, este computador lembra."
+                hint={`Ela está no seu Kit de Emergência. Depois de digitar uma vez, este ${deviceNoun} lembra.`}
                 disabled={busy}
               />
               <Button type="submit" variant="primary" size="lg" full loading={busy}>

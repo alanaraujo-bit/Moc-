@@ -157,3 +157,10 @@
   font-size: var(--text-sm);
   padding: 4px 0;
 }
+
+/* Touch screens have no hover: field actions are always there. */
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
+}

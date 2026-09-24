@@ -161,3 +161,26 @@
   color: var(--ink-3);
   font-size: var(--text-sm);
 }
+
+/* Phones: no section index (the list is short); controls go under their text. */
+@media (max-width: 640px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+  .index {
+    display: none;
+  }
+  .scroll {
+    padding: 8px 16px calc(40px + var(--safe-bottom, 0px));
+  }
+  .row {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+  .rowText {
+    flex: 1 1 60%;
+  }
+  .select {
+    height: 42px;
+  }
+}
