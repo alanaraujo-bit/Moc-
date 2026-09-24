@@ -58,12 +58,12 @@
 }
 
 .result[data-active="true"] {
-  background: var(--cobalt);
-  color: var(--ink-inverse);
+  background: var(--sel-bg);
+  color: var(--sel-ink);
 }
 
 .result[data-active="true"] .text span {
-  color: color-mix(in srgb, var(--ink-inverse) 78%, transparent);
+  color: var(--sel-ink-2);
 }
 
 .text {
@@ -99,7 +99,7 @@
 .hint kbd {
   background: transparent;
   color: inherit;
-  border-color: color-mix(in srgb, var(--ink-inverse) 40%, transparent);
+  border-color: var(--sel-ink-2);
 }
 
 .none {
@@ -181,7 +181,7 @@
 }
 
 .go {
-  background: var(--cobalt);
-  color: var(--ink-inverse);
+  background: var(--sel-bg);
+  color: var(--sel-ink);
   border-color: var(--cobalt);
 }

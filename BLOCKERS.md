@@ -35,3 +35,15 @@ biométrica precisa de você.
 
 **Impacto.** Site e endpoint de atualização usam endereços provisórios (GitHub Releases /
 subdomínio da Vercel) até lá.
+
+## 5. Guardar a chave de assinatura das atualizações (ação recomendada)
+
+**O que é.** A chave que assina as atualizações automáticas foi gerada em
+`D:\PROJETOS\moco-secrets\` (fora do repositório) e copiada para os secrets do GitHub
+(`TAURI_SIGNING_PRIVATE_KEY` e `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`).
+
+**Por que importa.** Se ela se perder, versões já instaladas não aceitam mais atualizações
+(o app só instala o que estiver assinado com ela).
+
+**O que fazer.** Copie a pasta `moco-secrets` para um lugar seguro offline (ou guarde no
+próprio Mocó, numa nota segura). Nunca commite esses arquivos.

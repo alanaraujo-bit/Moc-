@@ -134,21 +134,21 @@
 
 /* Selection inverts the tile's calm: cobalt ground, white ink. */
 .row[data-selected="true"] {
-  background: var(--cobalt);
-  color: var(--ink-inverse);
+  background: var(--sel-bg);
+  color: var(--sel-ink);
 }
 
 .row[data-selected="true"] .rowSub,
 .row[data-selected="true"] .rowMeta {
-  color: color-mix(in srgb, var(--ink-inverse) 78%, transparent);
+  color: var(--sel-ink-2);
 }
 
 .row[data-selected="true"] .star {
-  color: var(--ink-inverse);
+  color: var(--sel-ink);
 }
 
 .row[data-selected="true"] mark {
-  background: color-mix(in srgb, var(--ink-inverse) 22%, transparent);
+  background: rgb(255 255 255 / 22%);
   color: inherit;
 }
 

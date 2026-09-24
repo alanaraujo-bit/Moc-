@@ -169,3 +169,26 @@ recomendações. Estado:
 | S7 anexos e exportação | Chave por arquivo, streaming em blocos de 64 KiB; exportação cifrada por padrão |
 | S8 vazamento de tamanho | Padding feito; busca só em memória |
 | S9 crates | Ajustado (sem crypto_box; dalek 2; normalização fixada) |
+
+## D-012 · Atualizações e releases
+
+- `tauri-plugin-updater` com assinatura minisign: o app só instala pacotes assinados pela
+  chave do Mocó; a chave pública está em `tauri.conf.json`.
+- Canais: **estável** lê `releases/latest/download/latest.json`; **beta** lê o release
+  contínuo `beta`, atualizado pelo workflow a cada tag `vX.Y.Z-beta.N`.
+- Atualização **crítica** = notas do release contêm `[critica]`: aparece um diálogo; as
+  demais são só uma faixa discreta na barra lateral. Nunca reinicia sem o usuário pedir.
+- Instalar tranca o cofre antes de reiniciar. Falha no download ou na instalação não muda nada.
+- Rollback: publicar uma versão maior com o código anterior (o updater não instala versões
+  menores). Releases antigos ficam no GitHub para instalação manual.
+- Pipeline: `.github/workflows/ci.yml` (testes no Windows a cada push) e `release.yml`
+  (tag → testes → instalador NSIS + artefatos do updater → GitHub Release).
+
+## D-013 · Acesso Rápido e integração com o Windows
+
+- Atalho global (padrão Ctrl+Shift+Espaço) abre uma janela sem bordas, sempre no topo, que
+  some ao perder o foco. Enter copia o segredo principal; Shift+Enter o usuário; Ctrl+Enter
+  o código 2FA; Alt+Enter abre o site.
+- "Abrir com o Windows" registra o app com `--hidden`: começa trancado, na bandeja.
+- Fechar a janela esconde na bandeja (configurável); a bandeja oferece Abrir, Acesso rápido,
+  Trancar agora e Sair.

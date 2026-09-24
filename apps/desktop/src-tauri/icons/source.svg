@@ -1,9 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <defs>
-    <mask id="door">
-      <rect width="1024" height="1024" fill="#fff"/>
-      <path d="M422 960 V668 a90 90 0 0 1 180 0 V960 Z" fill="#000"/>
-    </mask>
-  </defs>
-  <path mask="url(#door)" fill="#B85A34" d="M512 96C770 96 928 250 928 522C928 790 780 928 512 928C244 928 96 790 96 522C96 250 254 96 512 96Z"/>
+  <!-- Mocó mark: a cobalt azulejo with the doorway of the hideout and a quarter arc. -->
+  <rect x="32" y="32" width="960" height="960" rx="224" fill="#2340a8"/>
+  <path d="M992 400 A368 368 0 0 1 624 32 H768 A224 224 0 0 1 992 256 Z" fill="#ffffff" fill-opacity="0.2"/>
+  <path d="M320 992 V580 a192 192 0 0 1 384 0 V992 Z" fill="#ffffff"/>
 </svg>

@@ -49,7 +49,23 @@
         "languages": [
           "PortugueseBR"
         ],
-        "displayLanguageSelector": false
+        "displayLanguageSelector": false,
+        "sidebarImage": "installer/sidebar.bmp",
+        "headerImage": "installer/header.bmp",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
+    "createUpdaterArtifacts": true,
+    "longDescription": "Mocó guarda senhas, documentos, cartões e tudo que importa, cifrado no seu computador com uma chave que só você tem."
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk0N0UxMDQwRjIzMjFDNkMKUldSc0hETHlRQkIrbEJTSFJ0ZHNtVy9hN3BkdHY0M2tvMSs3em0xazd2OFBGOXRiMzJtRys2NDUK",
+      "endpoints": [
+        "https://github.com/alanaraujo-bit/Moc-/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
       }
     }
   }

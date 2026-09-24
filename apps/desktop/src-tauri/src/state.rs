@@ -32,6 +32,7 @@ pub struct AppState {
     pub failed_unlocks: AtomicU32,
     pub retry_after: Mutex<Option<Instant>>,
     pub pending_import: crate::transfer::Pending,
+    pub pending_update: crate::updates::PendingUpdate,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -111,6 +112,7 @@ impl AppState {
             failed_unlocks: AtomicU32::new(0),
             retry_after: Mutex::new(None),
             pending_import: Mutex::new(None),
+            pending_update: Mutex::new(None),
         }
     }
 

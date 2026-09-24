@@ -21,6 +21,7 @@ import type {
   Settings,
   Strength,
   TotpCode,
+  UpdateInfo,
   Uuid,
   VaultAttrs,
   VaultInfo,
@@ -107,6 +108,9 @@ export const api = {
 
   quickHide: () => call<void>("quick_hide"),
   quickOpenInMain: (itemId: Uuid) => call<void>("quick_open_in_main", { itemId }),
+
+  updateCheck: () => call<UpdateInfo | null>("update_check"),
+  updateInstall: () => call<void>("update_install"),
 
   settings: () => call<Settings>("settings_get"),
   updateSettings: (settings: Settings) => call<Settings>("settings_update", { settings }),

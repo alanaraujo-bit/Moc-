@@ -79,6 +79,9 @@
   --cobalt-soft-2: #d6defa;
   --cobalt-ink: #1a2d77;
   --focus: #2f53d6;
+  --sel-bg: #2340a8;
+  --sel-ink: #ffffff;
+  --sel-ink-2: rgb(255 255 255 / 78%);
 
   --danger: #b3261e;
   --danger-hover: #971f18;
@@ -148,6 +151,9 @@
   --cobalt-soft-2: #243058;
   --cobalt-ink: #c3cffb;
   --focus: #9fb2ff;
+  --sel-bg: #2b3f8f;
+  --sel-ink: #f3f5fb;
+  --sel-ink-2: rgb(243 245 251 / 74%);
 
   --danger: #f08a80;
   --danger-hover: #f4a39b;

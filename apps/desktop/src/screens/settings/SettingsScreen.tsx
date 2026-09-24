@@ -12,6 +12,7 @@ import { EmergencyKitSheet, PrintPortal, RecoverySheetPrint } from "../onboardin
 import { CodeBlock, printNow } from "../onboarding/RecoverySheet";
 import { HelloSetting } from "./HelloSetting";
 import { DataSection } from "./DataSection";
+import { useUpdates } from "../main/Updates";
 import s from "./SettingsScreen.module.css";
 
 const SECTIONS = [
@@ -62,6 +63,7 @@ export function SettingsScreen() {
   const info = useApp((st) => st.info);
   const updateSettings = useApp((st) => st.updateSettings);
   const [status, setStatus] = useState<SecurityStatus | null>(null);
+  const updates = useUpdates();
   const [active, setActive] = useState("aparencia");
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -254,8 +256,24 @@ export function SettingsScreen() {
 
         <section id="sobre" className={s.section}>
           <h2>Sobre o Mocó</h2>
-          <Row title={`Versão ${info?.version ?? ""}`} detail="Canal estável.">
-            <span className={s.muted}>Atualizações automáticas chegam em breve.</span>
+          <Row title={`Versão ${info?.version ?? ""}`} detail="Atualizações são verificadas pela assinatura digital do Mocó antes de instalar.">
+            <Button loading={updates.checking} onClick={() => void updates.check(true)}>
+              Procurar atualizações
+            </Button>
+          </Row>
+          <Row title="Atualizar automaticamente" detail="Baixa em segundo plano e avisa quando estiver pronta. Nunca reinicia sem você pedir.">
+            <Switch label="Atualizar automaticamente" checked={settings.autoUpdate} onChange={(autoUpdate) => set({ autoUpdate })} />
+          </Row>
+          <Row title="Canal" detail="O beta recebe novidades antes, com um pouco mais de risco de defeitos.">
+            <Segmented<Settings["updateChannel"]>
+              label="Canal de atualização"
+              value={settings.updateChannel}
+              onChange={(updateChannel) => set({ updateChannel })}
+              options={[
+                { value: "stable", label: "Estável" },
+                { value: "beta", label: "Beta" },
+              ]}
+            />
           </Row>
           <p className={s.footnote}>Feito no Brasil. Guardado com carinho.</p>
         </section>

@@ -21,6 +21,7 @@ import type { ItemKind } from "../../lib/types";
 import { inView, tagTree, useVault, type TagNode, type View } from "../../state/vault";
 import { NewItemButton } from "./NewItem";
 import { VaultDialog } from "./VaultDialog";
+import { UpdateBanner } from "./Updates";
 import s from "./Sidebar.module.css";
 
 function sameView(a: View, b: View) {
@@ -218,6 +219,7 @@ export function Sidebar({ onLock }: { onLock: () => void }) {
         </div>
       </div>
 
+      <UpdateBanner />
       <div className={s.tools}>
         <NavItem
           icon={<ShieldCheck size={16} />}

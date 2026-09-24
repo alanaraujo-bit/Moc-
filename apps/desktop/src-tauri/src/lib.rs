@@ -10,6 +10,7 @@ mod platform;
 mod settings;
 mod state;
 mod transfer;
+mod updates;
 
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
@@ -80,6 +81,7 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
@@ -189,6 +191,9 @@ pub fn run() {
             commands::open_url,
             devseed::dev_seed,
             native::quick_hide,
+            updates::update_check,
+            updates::update_install,
+            native::quick_toggle,
             native::quick_open_in_main,
             transfer::import_pick,
             transfer::import_backup_pick,

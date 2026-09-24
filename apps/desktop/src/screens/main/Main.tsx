@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Kbd } from "../../components/ui/primitives";
 import { toast } from "../../components/ui/toast";
 import { api, errorMessage } from "../../lib/ipc";
@@ -11,6 +11,9 @@ import { Sidebar } from "./Sidebar";
 import { GeneratorScreen } from "../generator/GeneratorScreen";
 import { SecurityScreen } from "../security/SecurityScreen";
 import { SettingsScreen } from "../settings/SettingsScreen";
+import { WhatsNew } from "./Updates";
+import { CommandPalette, paletteBus } from "./CommandPalette";
+import { ImportDialog } from "../import/ImportDialog";
 import s from "./Main.module.css";
 
 function inTextField(el: Element | null) {
@@ -32,6 +35,7 @@ export function Main() {
   const selectedId = useVault((st) => st.selectedId);
   const editing = useVault((st) => st.editing);
   const searchRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (!loaded) load().catch((e) => toast(errorMessage(e), { tone: "danger" }));
@@ -42,7 +46,10 @@ export function Main() {
       const st = useVault.getState();
       const key = e.key.toLowerCase();
       const typing = inTextField(document.activeElement);
-      if (e.ctrlKey && !e.shiftKey && (key === "f" || key === "k")) {
+      if (e.ctrlKey && !e.shiftKey && key === "k") {
+        e.preventDefault();
+        paletteBus.open();
+      } else if (e.ctrlKey && !e.shiftKey && key === "f") {
         e.preventDefault();
         st.setScreen("vault");
         window.setTimeout(() => {
@@ -96,6 +103,9 @@ export function Main() {
   return (
     <div className={s.root}>
       <Sidebar onLock={() => void lockApp()} />
+      <WhatsNew />
+      <CommandPalette onLock={() => void lockApp()} onImport={() => setImporting(true)} />
+      <ImportDialog open={importing} onOpenChange={setImporting} />
       {screen === "vault" ? (
         <>
           <ListPane searchRef={searchRef} />
@@ -147,6 +157,9 @@ function EmptyDetail() {
         </li>
         <li>
           <Kbd keys="Enter" /> na busca copia a senha
+        </li>
+        <li>
+          <Kbd keys="Ctrl+K" /> comandos
         </li>
         <li>
           <Kbd keys="Ctrl+L" /> trancar

@@ -319,3 +319,11 @@ export interface ExportResult {
   count: number;
   cloudSynced: boolean;
 }
+
+export interface UpdateInfo {
+  version: string;
+  currentVersion: string;
+  notes: string;
+  date: string | null;
+  critical: boolean;
+}

@@ -1,0 +1,65 @@
+name: Release
+
+# Stable: push a tag like v0.2.0.  Beta: push a tag like v0.2.0-beta.1.
+# Builds the signed NSIS installer + updater artifacts and publishes a GitHub Release
+# with latest.json for the in-app updater. Beta builds also refresh the rolling "beta"
+# release that the beta channel reads.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> ../moco-target"
+      - run: pnpm install --frozen-lockfile
+
+      - name: Tests
+        run: cargo test --workspace
+
+      - name: Version matches tag
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart("v")
+          $conf = Get-Content apps/desktop/src-tauri/tauri.conf.json | ConvertFrom-Json
+          if ($conf.version -ne $tag) { throw "tauri.conf.json version $($conf.version) != tag $tag" }
+
+      - name: Build and publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: "Mocó ${{ github.ref_name }}"
+          releaseBody: ${{ contains(github.ref_name, '-') && 'Versão beta do Mocó.' || 'Veja as novidades no app, em Configurações › Sobre o Mocó.' }}
+          releaseDraft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+
+      - name: Refresh rolling beta feed
+        if: contains(github.ref_name, '-')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ github.ref_name }}" -p latest.json -D feed
+          gh release view beta >/dev/null 2>&1 || gh release create beta --prerelease --title "Canal beta" --notes "Feed do canal beta do Mocó. Não baixe daqui: use o app."
+          gh release upload beta feed/latest.json --clobber

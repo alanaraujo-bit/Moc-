@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Testes (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> ../moco-target"
+      - run: pnpm install --frozen-lockfile
+      - name: Núcleo e desktop (Rust)
+        run: cargo test --workspace
+      - name: Tipos (TypeScript)
+        run: pnpm --filter @moco/desktop typecheck
+      - name: Build da interface
+        run: pnpm --filter @moco/desktop exec vite build

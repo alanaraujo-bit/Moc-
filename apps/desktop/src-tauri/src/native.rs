@@ -122,3 +122,9 @@ pub async fn quick_open_in_main(app: AppHandle, item_id: String) -> AppResult<()
     let _ = app.emit_to("main", "moco://open-item", item_id);
     Ok(())
 }
+
+#[tauri::command]
+pub async fn quick_toggle(app: AppHandle) -> AppResult<()> {
+    toggle_quick(&app);
+    Ok(())
+}
