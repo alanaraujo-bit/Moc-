@@ -1,7 +1,7 @@
 {
   "name": "moco",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mocó — seu cantinho seguro para senhas, documentos e tudo que importa.",
   "packageManager": "pnpm@11.20.0",
   "scripts": {

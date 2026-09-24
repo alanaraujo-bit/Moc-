@@ -234,6 +234,7 @@ pub async fn import_commit(state: S<'_>, args: CommitArgs) -> AppResult<CommitRe
             .ok_or_else(|| AppError::new("expired", "Escolha o arquivo de novo."))?;
         let exclude: HashSet<usize> = args.exclude.into_iter().collect();
         let (mut imported, mut skipped) = (0, 0);
+        let mut batch: Vec<Item> = Vec::new();
         st.with_account(|a| {
             for (i, (c, dup)) in pending.candidates.iter().cloned().enumerate() {
                 if exclude.contains(&i) || (dup && args.skip_duplicates) {
@@ -250,9 +251,9 @@ pub async fn import_commit(state: S<'_>, args: CommitArgs) -> AppResult<CommitRe
                     item.overview.tags.push(t.clone());
                 }
                 item.overview.tags = normalize_tags(&item.overview.tags);
-                a.import_item(args.vault_id, item)?;
-                imported += 1;
+                batch.push(item);
             }
+            imported = a.import_items(args.vault_id, std::mem::take(&mut batch))?;
             let src = pending.source.map(|s| s.label()).unwrap_or("?");
             let _ = a.store().log_event("import", Some(format!("{imported} itens · {src} · {}", pending.file_name).as_bytes()));
             Ok(())

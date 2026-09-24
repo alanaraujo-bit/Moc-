@@ -10,6 +10,17 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.2.0",
+    date: "2026-09-24",
+    title: "Seu Mocó em todos os seus computadores",
+    highlights: [
+      { title: "Sincronização", body: "Ative em Configurações › Sincronização. Tudo sai daqui já cifrado: o servidor guarda, mas não consegue ler." },
+      { title: "Entrar em outro computador", body: "Na primeira tela, escolha “Já uso o Mocó em outro computador” e use seu e-mail, a senha mestra e a Chave Secreta." },
+      { title: "Anexos", body: "Arraste fotos de documentos, contratos e comprovantes para dentro de um item. Eles ficam cifrados junto com ele." },
+      { title: "Wi-Fi para visitas", body: "Itens de Wi-Fi mostram um QR code: a câmera do celular conecta sem ninguém digitar a senha." },
+    ],
+  },
+  {
     version: "0.1.0",
     date: "2026-09-24",
     title: "O primeiro Mocó",

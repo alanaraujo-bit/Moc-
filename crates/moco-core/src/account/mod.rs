@@ -874,6 +874,81 @@ impl Account {
         Ok(item)
     }
 
+    /// Creates many items in one transaction (imports, restores).
+    pub fn create_items_bulk(&mut self, vault_id: Uuid, inputs: Vec<ItemInput>) -> Result<usize> {
+        let now = now_ms();
+        let items: Vec<Item> = inputs
+            .into_iter()
+            .map(|input| {
+                let mut item = Item {
+                    id: Uuid::new_v4(),
+                    vault_id,
+                    kind: input.kind,
+                    overview: Overview {
+                        title: input.title.trim().to_string(),
+                        urls: input.urls,
+                        tags: input.tags,
+                        favorite: input.favorite,
+                        icon: input.icon,
+                        ..Default::default()
+                    },
+                    details: Details { fields: clean_fields(input.fields), sections: input.sections, notes: input.notes, ..Default::default() },
+                    created_at: now,
+                    updated_at: now,
+                    revision: 1,
+                };
+                item.refresh_derived();
+                item
+            })
+            .collect();
+        self.write_items_bulk(items)
+    }
+
+    /// Imports fully-formed items in one transaction (keeps timestamps and history).
+    pub fn import_items(&mut self, vault_id: Uuid, items: Vec<Item>) -> Result<usize> {
+        let items = items
+            .into_iter()
+            .map(|mut item| {
+                item.id = Uuid::new_v4();
+                item.vault_id = vault_id;
+                item.revision = 1;
+                if item.created_at == 0 {
+                    item.created_at = now_ms();
+                }
+                if item.updated_at == 0 {
+                    item.updated_at = item.created_at;
+                }
+                if item.overview.title.trim().is_empty() {
+                    item.overview.title = "Sem nome".into();
+                }
+                item.details.fields = clean_fields(std::mem::take(&mut item.details.fields));
+                item.refresh_derived();
+                item
+            })
+            .collect();
+        self.write_items_bulk(items)
+    }
+
+    fn write_items_bulk(&mut self, items: Vec<Item>) -> Result<usize> {
+        let s = self.session()?;
+        let acct = s.record.id;
+        let mut rows = Vec::with_capacity(items.len());
+        for item in &items {
+            let vault = s.vaults.get(&item.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+            rows.push(encrypt_item(acct, &vault.key, vault.key_gen, item)?);
+        }
+        self.store.transaction(|st| {
+            for r in &rows {
+                st.put_item(r)?;
+            }
+            Ok(())
+        })?;
+        for item in &items {
+            self.cache(item);
+        }
+        Ok(items.len())
+    }
+
     pub fn update_item(&mut self, id: Uuid, input: ItemInput) -> Result<Item> {
         validate_input(&input)?;
         let current = self.item(id)?;
