@@ -237,3 +237,22 @@ recomendações. Estado:
   `GET /v1/shared` e `/v1/shared/{dono}/{cofre}/{pull,push,attachments}` autorizados por
   participação. Anexos só de itens do próprio cofre, na cota do dono. Apagar o cofre apaga
   as participações. Regras de referência: `FakeCloud` no núcleo.
+
+## D-016 · Android
+
+- **Mesmo app Tauri, não um projeto separado.** `apps/desktop` compila para Android
+  (`src-tauri/gen/android`, pacote `app.moco.android`, Android 9+). O que só existe no
+  computador (bandeja, instância única, atalho global, iniciar com o sistema, updater,
+  Windows Hello) fica atrás de `cfg(desktop)`. O núcleo Rust é o mesmo, byte a byte.
+- **Chave Secreta no aparelho:** Android Keystore, AES-256-GCM, chave que nunca sai do
+  hardware, amarrada ao aparelho destravado quando há bloqueio de tela seguro (sem bloqueio
+  de tela o Keystore recusa esse vínculo; aí a chave continua presa ao hardware). O
+  identificador da conta vai como dado autenticado, como a entropia no DPAPI.
+- **Interface:** um "casco" de celular (`src/mobile`) com uma tela por vez, reaproveitando
+  detalhe, editor, login, sincronização e configurações. O botão voltar do Android percorre
+  essa pilha; no topo, o app vai para segundo plano (fechar a activity derrubava o WebView).
+- **Trancar:** não existe "ocioso" no celular; conta o tempo em segundo plano
+  (`autoLockMinutes`). Capturas de tela bloqueadas (FLAG_SECURE) no release.
+- **Fora desta etapa:** biometria (precisa ser ligada à chave com CryptoObject, como o
+  Hello, nunca um sim/não), preenchimento automático (Autofill Service), anexos e
+  importação/exportação no celular.

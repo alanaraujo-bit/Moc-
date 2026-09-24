@@ -55,11 +55,21 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 - Escala: 10 mil itens — criar 0,26 s, desbloquear 0,13 s, listar 6 ms.
 - Revisão de design independente aplicada (parede vidrada, estrutura por rejunte, azulejos
   bicolores, cobalto real no escuro).
+- Android (Tauri mobile, mesmo núcleo Rust): Keystore no lugar do DPAPI, área de transferência
+  sensível, FLAG_SECURE, interface de celular (lista → item → edição, folha de tipos, voltar do
+  Android, trancar em segundo plano), impressão nativa do Kit. Validado no emulador: criar conta,
+  destrancar lendo a Chave Secreta do Keystore, editar, e ida e volta real com o servidor
+  (instalação limpa → "Já uso o Mocó" → itens de volta). APK assinado:
+  `D:PROJETOSmoco-releasesMoco-0.2.0-android.apk`. Build: `pnpm tauri android build --apk`
+  (NDK_HOME, ANDROID_HOME, CARGO_TARGET_DIR=D:moco-target).
 - Site público: https://moco-one.vercel.app (`apps/web`, `/baixar` → instalador mais recente; páginas de segurança e novidades geradas por `node scripts/web/build.mjs`).
 - Atualização real validada: 0.1.0 instalado → buscou o feed, baixou, conferiu a assinatura, instalou e reabriu como 0.2.0.
 - DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
+0. Android: app no ar em debug e release (ver Feito). Faltam: desbloqueio por biometria ligado à
+   chave (BiometricPrompt + CryptoObject, não um sim/não), Serviço de Preenchimento Automático,
+   anexos/importação/exportação no celular, compartilhamento e publicação (BLOCKERS 8).
 1. Compartilhamento: núcleo e servidor prontos (no ar). Falta o desktop — cuidados:
    - anexos de itens compartilhados vão por `/v1/shared/{dono}/{cofre}/attachments` (hoje
      `cloud.rs` usa sempre `/v1/attachments`); cofre de leitor não envia nem apaga anexos;

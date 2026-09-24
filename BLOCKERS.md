@@ -61,3 +61,20 @@ identificador. Tudo já está desenhado para plugar a verificação quando houve
 
 O servidor e o Postgres rodam no projeto `moco` do seu Railway. Revise o plano/limites de
 uso e ative backups do Postgres antes de convidar usuários reais.
+
+## 8. Android: chave de assinatura, Play Console e verificação de desenvolvedor
+
+**Chave de assinatura (ação recomendada).** O APK de release é assinado com
+`D:\PROJETOS\moco-secrets\android-release.jks` (senha em `android-release.password`,
+SHA-256 do certificado `3B:73:19:C6:…:B7:DA`). Guarde essa pasta junto com a chave do
+updater: sem ela, versões novas não instalam por cima das antigas.
+
+**Play Console.** Para publicar na Play Store: criar a conta de desenvolvedor (taxa única),
+aceitar os termos e cadastrar o app `app.moco.android`. Dá para usar a chave acima como chave
+de upload.
+
+**Verificação de desenvolvedor do Android (Brasil, a partir de setembro de 2026).** O Google
+passou a exigir que apps instalados fora da Play Store em celulares certificados sejam de um
+desenvolvedor verificado com o pacote registrado. Se o celular recusar o APK, o caminho é
+verificar a conta no Android Developer Console e registrar `app.moco.android` com o
+certificado acima. Instalar pelo cabo (depuração USB / `adb install`) continua funcionando.
