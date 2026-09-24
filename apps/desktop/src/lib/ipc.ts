@@ -33,17 +33,27 @@ export type Listen = (event: string, handler: (payload: unknown) => void) => Pro
 
 let invokeImpl: Invoke;
 let listenImpl: Listen;
+let markReady: () => void;
+const ready = new Promise<void>((r) => (markReady = r));
 
 export async function initBridge(): Promise<void> {
   const core = await import("@tauri-apps/api/core");
   const event = await import("@tauri-apps/api/event");
   invokeImpl = core.invoke as Invoke;
   listenImpl = async (name, handler) => event.listen(name, (e) => handler(e.payload));
+  markReady();
 }
 
-const call = <T>(cmd: string, args?: Record<string, unknown>) => invokeImpl<T>(cmd, args);
+// Calls made before the bridge is up (module-level code) wait for it instead of failing.
+const call = async <T>(cmd: string, args?: Record<string, unknown>): Promise<T> => {
+  if (!invokeImpl) await ready;
+  return invokeImpl<T>(cmd, args);
+};
 
-export const on = (event: string, handler: (payload: unknown) => void) => listenImpl(event, handler);
+export const on = async (event: string, handler: (payload: unknown) => void) => {
+  if (!listenImpl) await ready;
+  return listenImpl(event, handler);
+};
 
 export const api = {
   appInfo: () => call<AppInfo>("app_info"),
@@ -111,6 +121,13 @@ export const api = {
 
   updateCheck: () => call<UpdateInfo | null>("update_check"),
   updateInstall: () => call<void>("update_install"),
+
+  attachmentAdd: (itemId: Uuid) => call<ItemView | null>("attachment_add", { itemId }),
+  attachmentAddPaths: (itemId: Uuid, paths: string[]) => call<ItemView>("attachment_add_paths", { itemId, paths }),
+  attachmentSave: (itemId: Uuid, attachmentId: Uuid) => call<string | null>("attachment_save", { itemId, attachmentId }),
+  attachmentPreview: (itemId: Uuid, attachmentId: Uuid) => call<string>("attachment_preview", { itemId, attachmentId }),
+  attachmentRemove: (itemId: Uuid, attachmentId: Uuid) => call<ItemView>("attachment_remove", { itemId, attachmentId }),
+  wifiQr: (itemId: Uuid) => call<string>("wifi_qr", { itemId }),
 
   settings: () => call<Settings>("settings_get"),
   updateSettings: (settings: Settings) => call<Settings>("settings_update", { settings }),

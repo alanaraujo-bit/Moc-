@@ -24,7 +24,7 @@ use crate::crypto::kdf::{self, KdfParams};
 use crate::crypto::{random, RecoveryCode, SecretKey, SymmetricKey};
 use crate::error::{CoreError, Result};
 use crate::model::{
-    now_ms, Details, Field, FieldType, Item, ItemInput, ItemKind, ItemSummary, Overview, PasswordHistoryEntry,
+    now_ms, AttachmentMeta, Details, Field, FieldType, Item, ItemInput, ItemKind, ItemSummary, Overview, PasswordHistoryEntry,
     Timestamp,
 };
 use crate::store::{HistoryRow, ItemRow, Store, VaultRow};
@@ -36,6 +36,7 @@ const HISTORY_KEEP: usize = 20;
 const PASSWORD_HISTORY_KEEP: usize = 30;
 pub const TRASH_RETENTION_DAYS: i64 = 30;
 pub const MIN_PASSWORD_CHARS: usize = 10;
+pub const MAX_ATTACHMENT_BYTES: usize = 25 * 1024 * 1024;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -855,6 +856,7 @@ impl Account {
             &[],
         );
         self.store.purge_item(id, revision, now_ms(), &tombstone)?;
+        self.store.delete_attachments_of(id)?;
         let s = self.session_mut()?;
         s.items.remove(&id);
         if s.local.usage.remove(&id).is_some() {
@@ -928,6 +930,7 @@ impl Account {
         next.revision = current.revision + 1;
         next.updated_at = now_ms();
         let row = encrypt_item(acct, &target.key, target.key_gen, &next)?;
+        self.move_attachments(id, current.vault_id, vault_id)?;
         self.store.transaction(|st| {
             st.put_item(&row)?;
             st.replace_history(id, &history)
@@ -1020,6 +1023,81 @@ impl Account {
                 },
             );
         }
+    }
+
+    // ---- attachments ------------------------------------------------------------------
+
+    fn attachment_header(&self, vault: Uuid, key_gen: u32, item: Uuid, att: Uuid) -> Result<Header> {
+        let acct = self.session()?.record.id;
+        Ok(Header::new(Purpose::Attachment, acct).container(item).object(att).key(vault, key_gen).padded())
+    }
+
+    /// Encrypts and attaches a file to an item (max 25 MB).
+    pub fn add_attachment(&mut self, item_id: Uuid, name: &str, mime: &str, bytes: &[u8]) -> Result<Item> {
+        if bytes.len() > MAX_ATTACHMENT_BYTES {
+            return Err(CoreError::Invalid("o arquivo passa de 25 MB".into()));
+        }
+        let name = name.trim();
+        if name.is_empty() {
+            return Err(CoreError::Invalid("arquivo sem nome".into()));
+        }
+        let current = self.item(item_id)?;
+        let s = self.session()?;
+        let vault = s.vaults.get(&current.vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let att = Uuid::new_v4();
+        let blob = aead::seal(&vault.key, &self.attachment_header(current.vault_id, vault.key_gen, item_id, att)?, bytes);
+        let now = now_ms();
+        self.store.put_attachment(att, item_id, current.vault_id, &blob, now)?;
+        let mut next = current.clone();
+        next.details.attachments.push(AttachmentMeta { id: att, name: name.to_string(), size: bytes.len() as u64, mime: mime.to_string(), added_at: now });
+        next.revision = current.revision + 1;
+        next.updated_at = now;
+        next.refresh_derived();
+        self.write_item(&next, Some(&current))?;
+        Ok(next)
+    }
+
+    pub fn read_attachment(&self, item_id: Uuid, att_id: Uuid) -> Result<(AttachmentMeta, Zeroizing<Vec<u8>>)> {
+        let item = self.item(item_id)?;
+        let meta = item.details.attachments.iter().find(|a| a.id == att_id).cloned().ok_or_else(|| CoreError::NotFound("anexo".into()))?;
+        let (owner, vault_id, blob) = self.store.attachment(att_id)?.ok_or_else(|| CoreError::NotFound("anexo".into()))?;
+        if owner != item_id || vault_id != item.vault_id {
+            return Err(CoreError::Integrity);
+        }
+        let s = self.session()?;
+        let vault = s.vaults.get(&vault_id).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let acct = s.record.id;
+        let (_, pt) = aead::open(&vault.key, &blob, &Expect::purpose(Purpose::Attachment).account(acct).container(item_id).object(att_id).key(vault_id))?;
+        Ok((meta, pt))
+    }
+
+    pub fn remove_attachment(&mut self, item_id: Uuid, att_id: Uuid) -> Result<Item> {
+        let current = self.item(item_id)?;
+        let mut next = current.clone();
+        next.details.attachments.retain(|a| a.id != att_id);
+        if next.details.attachments.len() == current.details.attachments.len() {
+            return Err(CoreError::NotFound("anexo".into()));
+        }
+        next.revision = current.revision + 1;
+        next.updated_at = now_ms();
+        next.refresh_derived();
+        self.write_item(&next, Some(&current))?;
+        self.store.delete_attachment(att_id)?;
+        Ok(next)
+    }
+
+    /// Re-encrypts an item's attachments for another vault (called by move).
+    fn move_attachments(&self, item_id: Uuid, from: Uuid, to: Uuid) -> Result<()> {
+        let s = self.session()?;
+        let src = s.vaults.get(&from).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let dst = s.vaults.get(&to).ok_or_else(|| CoreError::NotFound("cofre".into()))?;
+        let acct = s.record.id;
+        for (att, _, blob) in self.store.attachments_of(item_id)? {
+            let (_, pt) = aead::open(&src.key, &blob, &Expect::purpose(Purpose::Attachment).account(acct).container(item_id).object(att).key(from))?;
+            let sealed = aead::seal(&dst.key, &self.attachment_header(to, dst.key_gen, item_id, att)?, &pt);
+            self.store.put_attachment(att, item_id, to, &sealed, now_ms())?;
+        }
+        Ok(())
     }
 
     // ---- local usage (recents) --------------------------------------------------------
@@ -1375,6 +1453,26 @@ mod tests {
         rolled.revision = newer.revision;
         acct.store.put_item(&rolled).unwrap();
         assert!(acct.item(a.id).is_err());
+    }
+
+    #[test]
+    fn attachments_roundtrip_move_and_purge() {
+        let (mut acct, _, _) = setup();
+        let personal = acct.vaults().unwrap()[0].id;
+        let work = acct.create_vault(VaultAttrs { name: "T".into(), description: String::new(), icon: String::new(), color: String::new() }).unwrap().id;
+        let item = acct.create_item(personal, login("RG", "a", "b")).unwrap();
+        let with = acct.add_attachment(item.id, "rg-frente.jpg", "image/jpeg", b"imagem secreta").unwrap();
+        assert_eq!(with.overview.attachment_count, 1);
+        let att = with.details.attachments[0].id;
+        assert_eq!(&acct.read_attachment(item.id, att).unwrap().1[..], b"imagem secreta");
+        acct.move_item(item.id, work).unwrap();
+        assert_eq!(&acct.read_attachment(item.id, att).unwrap().1[..], b"imagem secreta");
+        acct.remove_attachment(item.id, att).unwrap();
+        assert!(acct.read_attachment(item.id, att).is_err());
+        let again = acct.add_attachment(item.id, "x.pdf", "application/pdf", b"pdf").unwrap();
+        let att2 = again.details.attachments[0].id;
+        acct.purge_item(item.id).unwrap();
+        assert!(acct.store.attachment(att2).unwrap().is_none());
     }
 
     #[test]

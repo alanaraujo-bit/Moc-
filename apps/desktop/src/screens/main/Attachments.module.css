@@ -1,0 +1,139 @@
+.root {
+  border: 1px dashed var(--grout-strong);
+  border-radius: var(--r-lg);
+  padding: 4px 16px 12px;
+  transition:
+    border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
+}
+
+.root[data-dragging="true"] {
+  border-color: var(--cobalt);
+  background: var(--cobalt-soft);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+}
+
+.head h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 650;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--grout);
+}
+
+.file:first-child {
+  border-top: 0;
+}
+
+.icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-app);
+  color: var(--ink-2);
+  flex: none;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+}
+
+.name:hover {
+  background: var(--bg-hover);
+}
+
+.name strong {
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name span {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.empty {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  padding: 2px 0 6px;
+  line-height: 1.5;
+}
+
+.preview {
+  display: block;
+  max-width: 100%;
+  max-height: 60vh;
+  margin: 0 auto;
+  border-radius: var(--r-md);
+}
+
+.wifi {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: var(--glaze-sky-g);
+}
+
+.wifi > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.wifi strong {
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+
+.qr {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  background: #fff;
+  border-radius: var(--r-md);
+}
+
+.qr svg {
+  width: 260px;
+  height: 260px;
+}

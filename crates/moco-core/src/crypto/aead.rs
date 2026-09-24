@@ -67,6 +67,7 @@ pub enum Purpose {
     VaultAttrs = 0x0C,
     LocalState = 0x0D,
     Export = 0x0E,
+    Attachment = 0x0F,
 }
 
 impl Purpose {
@@ -87,6 +88,7 @@ impl Purpose {
             0x0C => VaultAttrs,
             0x0D => LocalState,
             0x0E => Export,
+            0x0F => Attachment,
             _ => return None,
         })
     }

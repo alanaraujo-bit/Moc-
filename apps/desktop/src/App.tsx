@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Tooltip } from "radix-ui";
 import { Toaster } from "./components/ui/toast";
 import { on } from "./lib/ipc";
 import { useApp } from "./state/app";
 import { LockScreen } from "./screens/lock/LockScreen";
-import { Onboarding } from "./screens/onboarding/Onboarding";
+const Onboarding = lazy(() => import("./screens/onboarding/Onboarding").then((m) => ({ default: m.Onboarding })));
 import { Main } from "./screens/main/Main";
 import { toast } from "./components/ui/toast";
 import { useVault } from "./state/vault";
@@ -65,7 +65,7 @@ export function App() {
 
   return (
     <Tooltip.Provider delayDuration={450} skipDelayDuration={200}>
-      {screen}
+      <Suspense fallback={null}>{screen}</Suspense>
       <Toaster />
     </Tooltip.Provider>
   );

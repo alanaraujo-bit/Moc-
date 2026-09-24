@@ -4,6 +4,7 @@ mod commands;
 mod devseed;
 mod dto;
 mod error;
+mod files;
 mod hello;
 mod native;
 mod platform;
@@ -191,6 +192,12 @@ pub fn run() {
             commands::open_url,
             devseed::dev_seed,
             native::quick_hide,
+            files::attachment_add,
+            files::attachment_add_paths,
+            files::attachment_save,
+            files::attachment_preview,
+            files::attachment_remove,
+            files::wifi_qr,
             updates::update_check,
             updates::update_install,
             native::quick_toggle,

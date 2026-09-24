@@ -25,6 +25,7 @@ import { useVault } from "../../state/vault";
 import { CardFace } from "./CardFace";
 import { copyField, FieldRow } from "./fields";
 import { HistoryDialog } from "./HistoryDialog";
+import { Attachments, WifiShare } from "./Attachments";
 import s from "./ItemDetail.module.css";
 
 /** The field copied by Enter in search and Ctrl+C in the list, per kind. */
@@ -230,6 +231,8 @@ export function ItemDetail({ id }: { id: string }) {
           </section>
         )}
 
+        {item.kind === "wifi" && !trashed && <WifiShare item={item} />}
+
         {sections.map((sec) => {
           const fields = bySection(sec.id);
           if (!fields.length) return null;
@@ -287,6 +290,8 @@ export function ItemDetail({ id }: { id: string }) {
             ))}
           </section>
         )}
+
+        <Attachments item={item} />
 
         {item.passwordHistory.length > 0 && <PasswordHistory item={item} />}
 

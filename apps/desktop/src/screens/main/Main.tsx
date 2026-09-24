@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Kbd } from "../../components/ui/primitives";
 import { toast } from "../../components/ui/toast";
 import { api, errorMessage } from "../../lib/ipc";
@@ -8,12 +8,12 @@ import { ItemDetail } from "./ItemDetail";
 import { ListPane } from "./ListPane";
 import { newItemBus } from "./NewItem";
 import { Sidebar } from "./Sidebar";
-import { GeneratorScreen } from "../generator/GeneratorScreen";
-import { SecurityScreen } from "../security/SecurityScreen";
-import { SettingsScreen } from "../settings/SettingsScreen";
+const GeneratorScreen = lazy(() => import("../generator/GeneratorScreen").then((m) => ({ default: m.GeneratorScreen })));
+const SecurityScreen = lazy(() => import("../security/SecurityScreen").then((m) => ({ default: m.SecurityScreen })));
+const SettingsScreen = lazy(() => import("../settings/SettingsScreen").then((m) => ({ default: m.SettingsScreen })));
+const ImportDialog = lazy(() => import("../import/ImportDialog").then((m) => ({ default: m.ImportDialog })));
 import { WhatsNew } from "./Updates";
 import { CommandPalette, paletteBus } from "./CommandPalette";
-import { ImportDialog } from "../import/ImportDialog";
 import s from "./Main.module.css";
 
 function inTextField(el: Element | null) {
@@ -105,7 +105,11 @@ export function Main() {
       <Sidebar onLock={() => void lockApp()} />
       <WhatsNew />
       <CommandPalette onLock={() => void lockApp()} onImport={() => setImporting(true)} />
-      <ImportDialog open={importing} onOpenChange={setImporting} />
+      {importing && (
+        <Suspense fallback={null}>
+          <ImportDialog open={importing} onOpenChange={setImporting} />
+        </Suspense>
+      )}
       {screen === "vault" ? (
         <>
           <ListPane searchRef={searchRef} />
@@ -121,9 +125,11 @@ export function Main() {
         </>
       ) : (
         <main className={s.wide}>
-          {screen === "generator" && <GeneratorScreen />}
-          {screen === "security" && <SecurityScreen />}
-          {screen === "settings" && <SettingsScreen />}
+          <Suspense fallback={null}>
+            {screen === "generator" && <GeneratorScreen />}
+            {screen === "security" && <SecurityScreen />}
+            {screen === "settings" && <SettingsScreen />}
+          </Suspense>
         </main>
       )}
     </div>

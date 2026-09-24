@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::error::{CoreError, Result};
 use crate::model::Timestamp;
 
-const SCHEMA_VERSION: i64 = 1;
+const SCHEMA_VERSION: i64 = 2;
 
 impl From<rusqlite::Error> for CoreError {
     fn from(e: rusqlite::Error) -> Self {
@@ -152,6 +152,22 @@ impl Store {
                    detail BLOB
                  );
                  PRAGMA user_version = 1;
+                 COMMIT;",
+            )?;
+        }
+        if version < 2 {
+            // Encrypted file contents live apart from items so lists never load them.
+            self.conn.execute_batch(
+                "BEGIN;
+                 CREATE TABLE attachments (
+                   id       TEXT PRIMARY KEY,
+                   item_id  TEXT NOT NULL,
+                   vault_id TEXT NOT NULL,
+                   blob     BLOB NOT NULL,
+                   added_at INTEGER NOT NULL
+                 );
+                 CREATE INDEX attachments_item ON attachments(item_id);
+                 PRAGMA user_version = 2;
                  COMMIT;",
             )?;
         }
@@ -336,6 +352,41 @@ impl Store {
                 params![h.item_id.to_string(), h.revision as i64, h.vault_id.to_string(), h.overview, h.details, h.saved_at],
             )?;
         }
+        Ok(())
+    }
+
+    // ---- attachments ------------------------------------------------------------------
+
+    pub fn put_attachment(&self, id: Uuid, item_id: Uuid, vault_id: Uuid, blob: &[u8], at: Timestamp) -> Result<()> {
+        self.conn.execute(
+            "INSERT OR REPLACE INTO attachments(id, item_id, vault_id, blob, added_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![id.to_string(), item_id.to_string(), vault_id.to_string(), blob, at],
+        )?;
+        Ok(())
+    }
+
+    pub fn attachment(&self, id: Uuid) -> Result<Option<(Uuid, Uuid, Vec<u8>)>> {
+        Ok(self
+            .conn
+            .query_row("SELECT item_id, vault_id, blob FROM attachments WHERE id = ?1", [id.to_string()], |r| {
+                Ok((uuid_of(r.get(0)?)?, uuid_of(r.get(1)?)?, r.get(2)?))
+            })
+            .optional()?)
+    }
+
+    pub fn attachments_of(&self, item_id: Uuid) -> Result<Vec<(Uuid, Uuid, Vec<u8>)>> {
+        let mut st = self.conn.prepare("SELECT id, vault_id, blob FROM attachments WHERE item_id = ?1")?;
+        let rows = st.query_map([item_id.to_string()], |r| Ok((uuid_of(r.get(0)?)?, uuid_of(r.get(1)?)?, r.get(2)?)))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    pub fn delete_attachment(&self, id: Uuid) -> Result<()> {
+        self.conn.execute("DELETE FROM attachments WHERE id = ?1", [id.to_string()])?;
+        Ok(())
+    }
+
+    pub fn delete_attachments_of(&self, item_id: Uuid) -> Result<()> {
+        self.conn.execute("DELETE FROM attachments WHERE item_id = ?1", [item_id.to_string()])?;
         Ok(())
     }
 
