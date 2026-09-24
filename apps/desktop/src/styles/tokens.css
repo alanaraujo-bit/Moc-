@@ -80,6 +80,9 @@
   --cobalt-ink: #1a2d77;
   --focus: #2f53d6;
   --sel-bg: #2340a8;
+  --cobalt-fill: #2340a8;
+  --cobalt-fill-hover: #1c3591;
+  --cobalt-fill-ink: #ffffff;
   --sel-ink: #ffffff;
   --sel-ink-2: rgb(255 255 255 / 78%);
 
@@ -121,8 +124,11 @@
   --shadow-3: 0 16px 40px rgb(17 23 38 / 14%), 0 4px 12px rgb(17 23 38 / 8%);
   --scrim: rgb(17 23 38 / 32%);
 
-  --wall-ground: #f5f6f9;
-  --wall-relief: #eaedf2;
+  /* The relief wall: glazed white tiles, motifs a value step down, grout between. */
+  --wall-ground: #fbfcfe;
+  --wall-relief: #e6eaf1;
+  --wall-edge: #d9dee7;
+  --tile-field: #ffffff;
 }
 
 /* ---- Dark: the same panel at night ---- */
@@ -151,7 +157,10 @@
   --cobalt-soft-2: #243058;
   --cobalt-ink: #c3cffb;
   --focus: #9fb2ff;
-  --sel-bg: #2b3f8f;
+  --sel-bg: #2c46b0;
+  --cobalt-fill: #3552c7;
+  --cobalt-fill-hover: #4060d6;
+  --cobalt-fill-ink: #ffffff;
   --sel-ink: #f3f5fb;
   --sel-ink-2: rgb(243 245 251 / 74%);
 
@@ -192,5 +201,7 @@
   --scrim: rgb(0 0 0 / 55%);
 
   --wall-ground: #0e1219;
-  --wall-relief: #161b25;
+  --wall-relief: #1a2130;
+  --wall-edge: #252d3d;
+  --tile-field: #161b25;
 }

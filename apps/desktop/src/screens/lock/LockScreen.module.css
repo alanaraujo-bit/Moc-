@@ -76,14 +76,14 @@
 
 .go {
   --s: 32px;
-  background: var(--cobalt);
-  color: var(--ink-inverse);
+  background: var(--cobalt-fill);
+  color: var(--cobalt-fill-ink);
   border-radius: 6px;
   margin-right: 2px;
 }
 .go:hover:not(:disabled) {
-  background: var(--cobalt-hover);
-  color: var(--ink-inverse);
+  background: var(--cobalt-fill-hover);
+  color: var(--cobalt-fill-ink);
 }
 
 .skLabel {

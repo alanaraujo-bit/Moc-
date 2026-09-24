@@ -105,16 +105,15 @@
   padding: 0 28px 28px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 22px;
   max-width: 760px;
 }
 
 .group {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--grout);
-  border-radius: var(--r-lg);
-  padding: 2px 16px;
+  border-top: 1px solid var(--grout-strong);
+  padding: 2px 0;
 }
 
 .groupTitle {

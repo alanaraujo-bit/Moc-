@@ -108,6 +108,7 @@ export function Sidebar({ onLock }: { onLock: () => void }) {
   const setView = useVault((st) => st.setView);
   const setScreen = useVault((st) => st.setScreen);
   const [vaultDialog, setVaultDialog] = useState(false);
+  const [showAllKinds, setShowAllKinds] = useState(false);
 
   const counts = useMemo(() => {
     const c = (v: View) => items.filter((it) => inView(it, v, usage)).length;
@@ -183,7 +184,9 @@ export function Sidebar({ onLock }: { onLock: () => void }) {
             <div className={s.heading}>
               <span>Tipos</span>
             </div>
-            {TEMPLATES.filter((t) => counts.kinds.has(t.kind)).map((t) => (
+            {TEMPLATES.filter((t) => counts.kinds.has(t.kind))
+              .filter((t, i, all) => showAllKinds || all.length <= 6 || i < 5 || (view.type === "kind" && view.kind === t.kind))
+              .map((t) => (
               <NavItem
                 key={t.kind}
                 icon={<KindGlyph kind={t.kind} size={16} />}
@@ -193,6 +196,11 @@ export function Sidebar({ onLock }: { onLock: () => void }) {
                 onClick={() => setView({ type: "kind", kind: t.kind })}
               />
             ))}
+            {counts.kinds.size > 6 && (
+              <button className={s.more} onClick={() => setShowAllKinds((v) => !v)}>
+                {showAllKinds ? "Mostrar menos" : `Mais ${counts.kinds.size - 5} tipos`}
+              </button>
+            )}
           </div>
         )}
 

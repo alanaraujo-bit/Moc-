@@ -47,15 +47,16 @@
 }
 
 .primary {
-  background: var(--cobalt);
-  color: var(--ink-inverse);
+  background: var(--cobalt-fill);
+  color: var(--cobalt-fill-ink);
   box-shadow: var(--shadow-1), inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 .primary:hover:not(:disabled) {
-  background: var(--cobalt-hover);
+  background: var(--cobalt-fill-hover);
 }
 .primary:active:not(:disabled) {
-  background: var(--cobalt-press);
+  background: var(--cobalt-fill);
+  filter: brightness(0.94);
 }
 
 .secondary {
@@ -263,8 +264,8 @@
   outline-offset: 2px;
 }
 .switch[data-state="checked"] {
-  background: var(--cobalt);
-  border-color: var(--cobalt);
+  background: var(--cobalt-fill);
+  border-color: var(--cobalt-fill);
 }
 .switchThumb {
   display: block;
@@ -281,7 +282,7 @@
 }
 .switch[data-state="checked"] .switchThumb {
   transform: translateX(19px);
-  background: var(--ink-inverse);
+  background: #ffffff;
 }
 .switch:disabled {
   opacity: 0.45;
@@ -438,7 +439,7 @@
   background: var(--bg-raised);
   border: 1px solid var(--grout);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-3);
+  box-shadow: 0 18px 40px rgb(17 23 38 / 16%);
   z-index: 81;
   animation: dialogIn var(--t-slow) var(--ease-out);
   display: flex;

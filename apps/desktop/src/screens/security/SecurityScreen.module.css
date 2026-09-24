@@ -65,10 +65,8 @@
 }
 
 .section {
-  border: 1px solid var(--grout);
-  border-radius: var(--r-lg);
-  padding: 4px 16px 12px;
-  background: var(--bg-surface);
+  border-top: 1px solid var(--grout-strong);
+  padding: 4px 0 10px;
 }
 
 .sectionHead {
@@ -215,10 +213,9 @@
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  padding: 18px;
-  border-radius: var(--r-lg);
-  background: var(--ok-soft);
-  color: var(--ok-ink);
+  padding: 16px 0;
+  border-top: 1px solid var(--grout-strong);
+  color: var(--ink);
 }
 
 .clear p {
@@ -231,10 +228,8 @@
   gap: 20px;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
-  border-radius: var(--r-lg);
-  background: var(--bg-app);
-  border: 1px solid var(--grout);
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--grout-strong);
 }
 
 .breachCard h2 {
@@ -250,9 +245,8 @@
 }
 
 .account {
-  border: 1px solid var(--grout);
-  border-radius: var(--r-lg);
-  padding: 18px;
+  border-left: 1px solid var(--grout);
+  padding: 4px 0 18px 24px;
   position: sticky;
   top: 20px;
 }

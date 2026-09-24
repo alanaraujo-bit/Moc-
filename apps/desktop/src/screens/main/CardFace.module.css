@@ -11,13 +11,14 @@
   justify-content: space-between;
   overflow: hidden;
   box-shadow:
-    0 12px 28px color-mix(in srgb, var(--g) 30%, transparent),
-    0 2px 6px rgb(0 0 0 / 12%);
+    0 10px 22px rgb(17 23 38 / 18%),
+    0 2px 5px rgb(17 23 38 / 12%);
   isolation: isolate;
 }
 
 :global([data-theme="dark"]) .card {
   color: #0c0f15;
+  box-shadow: 0 10px 22px rgb(0 0 0 / 45%);
 }
 
 .arcs {
@@ -64,8 +65,11 @@
   width: 34px;
   height: 25px;
   border-radius: 5px;
-  background: linear-gradient(135deg, rgb(255 255 255 / 55%), rgb(255 255 255 / 25%));
-  border: 1px solid rgb(255 255 255 / 30%);
+  background: rgb(255 255 255 / 30%);
+  border: 1px solid rgb(255 255 255 / 45%);
+  background-image: linear-gradient(rgb(255 255 255 / 45%) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 45%) 1px, transparent 1px);
+  background-size: 50% 50%;
+  background-position: center;
 }
 
 .number {

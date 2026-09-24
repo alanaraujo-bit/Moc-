@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, CaretDown, CheckCircle, Fingerprint, Globe, Key, Lifebuoy, LockSimple, Password, Recycle, ShieldWarning, Timer, Warning } from "@phosphor-icons/react";
+import { ArrowRight, CaretDown, CheckCircle, Fingerprint, Globe, Key, Lifebuoy, LockSimple, Password, Copy, ShieldWarning, Timer, Warning } from "@phosphor-icons/react";
 import { ItemTile } from "../../components/tile/Tile";
 import { Button, Spinner } from "../../components/ui/primitives";
 import { toast } from "../../components/ui/toast";
@@ -171,7 +171,7 @@ export function SecurityScreen() {
           )}
 
           <Section
-            icon={<Recycle size={18} />}
+            icon={<Copy size={18} />}
             title="Senhas repetidas"
             count={report.reused.length}
             tone="danger"

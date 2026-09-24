@@ -1,14 +1,16 @@
 .root {
-  border: 1px dashed var(--grout-strong);
-  border-radius: var(--r-lg);
-  padding: 4px 16px 12px;
+  border-top: 1px solid var(--grout-strong);
+  padding: 4px 0 8px;
+  outline: 1px dashed transparent;
+  outline-offset: 6px;
+  border-radius: 2px;
   transition:
     border-color var(--t-fast) var(--ease-out),
     background-color var(--t-fast) var(--ease-out);
 }
 
 .root[data-dragging="true"] {
-  border-color: var(--cobalt);
+  outline-color: var(--cobalt);
   background: var(--cobalt-soft);
 }
 
@@ -105,9 +107,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 16px;
-  border-radius: var(--r-lg);
-  background: var(--glaze-sky-g);
+  padding: 14px 0;
+  border-top: 1px solid var(--grout-strong);
 }
 
 .wifi > div {

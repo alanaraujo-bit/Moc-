@@ -129,6 +129,7 @@ export function GeneratorPanel({
         </div>
         <div className={s.outputActions}>
           <IconButton
+            tooltipSide="top"
             label="Gerar outra"
             shortcut={big ? "Ctrl+R" : undefined}
             onClick={() => {
@@ -138,7 +139,7 @@ export function GeneratorPanel({
           >
             <ArrowsClockwise size={17} className={s.spin} style={{ transform: `rotate(${spin * 180}deg)` }} />
           </IconButton>
-          <IconButton label="Copiar" onClick={copy}>
+          <IconButton label="Copiar" onClick={copy} tooltipSide="top">
             <Copy size={17} />
           </IconButton>
         </div>

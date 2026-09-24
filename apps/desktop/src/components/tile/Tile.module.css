@@ -3,8 +3,9 @@
   display: inline-grid;
   place-items: center;
   flex: none;
-  background: var(--t-ground);
+  background: var(--tile-field);
   color: var(--t-ink);
+  box-shadow: inset 0 0 0 1px var(--grout);
   overflow: hidden;
   isolation: isolate;
 }
@@ -14,21 +15,20 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: none;
-  stroke: var(--t-ink);
-  stroke-opacity: 0.2;
-  stroke-width: 7;
+  fill: var(--t-ink);
   z-index: -1;
 }
 
 .monogram {
   font-family: var(--font-display);
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
+  color: var(--ink);
   transform: translateY(-0.02em);
 }
 
 .glyph {
   display: block;
+  color: var(--ink);
 }

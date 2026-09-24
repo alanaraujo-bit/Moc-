@@ -12,13 +12,33 @@ const BRAND_GLAZE: Record<string, string> = {
   JCB: "moss",
 };
 
+// Issuer first: people recognize "the purple one", "the orange one".
+const ISSUER_GLAZE: [string, string][] = [
+  ["nubank", "plum"],
+  ["itaú", "ochre"],
+  ["itau", "ochre"],
+  ["inter", "ochre"],
+  ["bradesco", "clay"],
+  ["santander", "clay"],
+  ["caixa", "sky"],
+  ["brasil", "ochre"],
+  ["c6", "ink"],
+  ["xp", "ink"],
+  ["btg", "cobalt"],
+  ["picpay", "moss"],
+  ["mercado pago", "sky"],
+  ["alelo", "moss"],
+  ["sodexo", "cobalt"],
+];
+
 /** The card as an object: issuer, brand, last digits, name and expiry. */
 export function CardFace({ item }: { item: ItemView }) {
   const v = (id: string) => item.fields.find((f) => f.id === id)?.value ?? "";
   const [brandPart, lastPart] = item.subtitle.includes("•") ? item.subtitle.split(" · ") : [item.subtitle, ""];
   const brand = lastPart ? brandPart : "";
   const last4 = (lastPart || item.subtitle).replace(/\D/g, "").slice(-4);
-  const glaze = BRAND_GLAZE[brand] ?? "slate";
+  const issuer = (v("issuer") || item.title).toLowerCase();
+  const glaze = ISSUER_GLAZE.find(([k]) => issuer.includes(k))?.[1] ?? BRAND_GLAZE[brand] ?? "slate";
   return (
     <div className={s.card} style={{ "--g": `var(--glaze-${glaze})` } as React.CSSProperties} aria-hidden="true">
       <svg className={s.arcs} viewBox="0 0 340 214" preserveAspectRatio="xMaxYMid slice">

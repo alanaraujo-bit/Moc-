@@ -133,12 +133,13 @@ export function KindGlyph({ kind, size = 18, className }: { kind: ItemKind; size
   );
 }
 
-// Quarter arcs centered on a tile corner — the azulejo motif, one per item.
+// A solid quarter-disk in the item's glaze, set in one corner of a white tile — the
+// azulejo motif, one per item, placed by a hash so each item keeps its own tile.
 const ARC_PATHS = [
-  "M0 64 A64 64 0 0 0 64 0", // top-left
-  "M36 0 A64 64 0 0 0 100 64", // top-right
-  "M100 36 A64 64 0 0 0 36 100", // bottom-right
-  "M64 100 A64 64 0 0 0 0 36", // bottom-left
+  "M0 0 H46 A46 46 0 0 1 0 46 Z", // top-left
+  "M100 0 V46 A46 46 0 0 1 54 0 Z", // top-right
+  "M100 100 H54 A46 46 0 0 1 100 54 Z", // bottom-right
+  "M0 100 V54 A46 46 0 0 1 46 100 Z", // bottom-left
 ];
 
 interface ItemTileProps {

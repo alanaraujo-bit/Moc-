@@ -18,12 +18,14 @@ const MOTIFS: Motif[] = [
     c.arc(0, 0, s * 0.62, 0, Math.PI / 2);
     c.closePath();
     c.fill();
+    c.stroke();
   },
   (c, s) => {
     c.beginPath();
     c.arc(s / 2, 0, s * 0.3, 0, Math.PI);
     c.closePath();
     c.fill();
+    c.stroke();
   },
   (c, s) => {
     const w = s * 0.34;
@@ -35,10 +37,13 @@ const MOTIFS: Motif[] = [
     c.lineTo(x + w, s);
     c.closePath();
     c.fill();
+    c.stroke();
   },
   (c, s) => {
     c.fillRect(0, s * 0.18, s, s * 0.12);
     c.fillRect(0, s * 0.42, s, s * 0.12);
+    c.strokeRect(0.5, s * 0.18 + 0.5, s - 1, s * 0.12 - 1);
+    c.strokeRect(0.5, s * 0.42 + 0.5, s - 1, s * 0.12 - 1);
   },
   (c, s) => {
     c.beginPath();
@@ -46,6 +51,7 @@ const MOTIFS: Motif[] = [
     c.arc(0, 0, s * 0.56, Math.PI / 2, 0, true);
     c.closePath();
     c.fill();
+    c.stroke();
   },
   (c, s) => {
     c.beginPath();
@@ -53,11 +59,13 @@ const MOTIFS: Motif[] = [
     c.lineTo(s, s);
     c.closePath();
     c.fill();
+    c.stroke();
     c.beginPath();
     c.arc(0, 0, s * 0.22, 0, Math.PI / 2);
     c.lineTo(0, 0);
     c.closePath();
     c.fill();
+    c.stroke();
   },
   () => {},
 ];
@@ -118,7 +126,8 @@ export function TileWall({ tile = 56, opening, progress = 0, turning = false, on
       const relief = css.getPropertyValue("--wall-relief").trim();
       const grout = css.getPropertyValue("--grout").trim();
       const glaze = css.getPropertyValue("--glaze-cobalt").trim();
-      const glazeGround = css.getPropertyValue("--bg-surface").trim();
+      const glazeGround = css.getPropertyValue("--tile-field").trim();
+      const edge = css.getPropertyValue("--wall-edge").trim();
       ctx.fillStyle = ground;
       ctx.fillRect(0, 0, w, h);
 
@@ -145,7 +154,14 @@ export function TileWall({ tile = 56, opening, progress = 0, turning = false, on
           const motif = Math.floor(rand() * MOTIFS.length);
           const rot = Math.floor(rand() * 4);
           const rank = rand(); // order in which this tile gets glazed
-          if (opening && Math.abs(c + 0.5 - cx) < opening.cols / 2 && Math.abs(r + 0.5 - cy) < opening.rows / 2) continue;
+          if (
+            opening &&
+            c >= Math.round(cx - opening.cols / 2) &&
+            c < Math.round(cx - opening.cols / 2) + opening.cols &&
+            r >= Math.round(cy - opening.rows / 2) &&
+            r < Math.round(cy - opening.rows / 2) + opening.rows
+          )
+            continue;
           const x = ox + c * tile;
           const y = oy + r * tile;
           const isGlazed = rank < targetCount / total;
@@ -177,6 +193,8 @@ export function TileWall({ tile = 56, opening, progress = 0, turning = false, on
           ctx.globalAlpha = (1 - local * 0.85) * (g > 0 ? g : 1);
           ctx.translate(-tile / 2, -tile / 2);
           ctx.fillStyle = g > 0 ? glaze : relief;
+          ctx.strokeStyle = g > 0 ? glaze : edge;
+          ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.rect(0, 0, tile, tile);
           ctx.clip();
@@ -203,10 +221,16 @@ export function TileWall({ tile = 56, opening, progress = 0, turning = false, on
       ctx.stroke();
       ctx.globalAlpha = 1;
       if (opening) {
-        ctx.fillStyle = ground;
+        // The opening is cut on grout lines and framed, so it reads as set into the wall.
+        const left = ox + Math.round(cx - opening.cols / 2) * tile;
+        const top = oy + Math.round(cy - opening.rows / 2) * tile;
         const ow = opening.cols * tile;
         const oh = opening.rows * tile;
-        ctx.fillRect(Math.round(ox + cx * tile - ow / 2) + 1, Math.round(oy + cy * tile - oh / 2) + 1, ow - 1, oh - 1);
+        ctx.fillStyle = ground;
+        ctx.fillRect(left, top, ow, oh);
+        ctx.strokeStyle = edge;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(left + 0.5, top + 0.5, ow - 1, oh - 1);
       }
       if (turning && tur >= 1) {
         turnedCb.current?.();

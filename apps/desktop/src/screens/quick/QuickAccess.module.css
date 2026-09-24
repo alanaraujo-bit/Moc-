@@ -181,7 +181,7 @@
 }
 
 .go {
-  background: var(--sel-bg);
-  color: var(--sel-ink);
-  border-color: var(--cobalt);
+  background: var(--cobalt-fill);
+  color: var(--cobalt-fill-ink);
+  border-color: var(--cobalt-fill);
 }

@@ -223,7 +223,7 @@ export function Onboarding() {
                   </button>
                 ))}
               </div>
-              <Button variant="ghost" onClick={() => finish()} className={s.fit}>
+              <Button variant="ghost" onClick={() => finish()} className={s.fitGhost}>
                 Ir para o meu Mocó
               </Button>
             </div>

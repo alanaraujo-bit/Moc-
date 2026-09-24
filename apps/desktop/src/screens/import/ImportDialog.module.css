@@ -93,9 +93,8 @@
 .options {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--grout);
-  border-radius: var(--r-md);
-  padding: 2px 14px;
+  border-top: 1px solid var(--grout);
+  border-bottom: 1px solid var(--grout);
 }
 
 .opt {
@@ -126,15 +125,14 @@
   padding: 0;
   max-height: 280px;
   overflow-y: auto;
-  border: 1px solid var(--grout);
-  border-radius: var(--r-md);
+  border-bottom: 1px solid var(--grout);
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 10px;
+  padding: 6px 0;
   border-top: 1px solid var(--grout);
   font-size: var(--text-sm);
   min-width: 0;

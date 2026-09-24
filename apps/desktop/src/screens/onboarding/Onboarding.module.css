@@ -127,6 +127,11 @@
   align-self: flex-start;
 }
 
+.fitGhost {
+  align-self: flex-start;
+  margin-left: -14px;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -147,15 +152,15 @@
 }
 
 .codeBlock::after {
-  /* The panel's quarter-arc signature, quietly in the corner. */
+  /* The panel's signature: a solid quarter-disk in the corner, like every item tile. */
   content: "";
   position: absolute;
-  right: -34px;
-  top: -34px;
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  border: 6px solid var(--cobalt-soft-2);
+  right: 0;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  border-bottom-left-radius: 34px;
+  background: var(--cobalt-soft-2);
   pointer-events: none;
 }
 

@@ -192,7 +192,6 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(fu
       mono={shown}
       trailing={
         <>
-          {trailing}
           {revealable && (
             <IconButton
               small
@@ -204,6 +203,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(fu
               {shown ? <EyeSlash size={16} /> : <Eye size={16} />}
             </IconButton>
           )}
+          {trailing}
         </>
       }
       {...rest}

@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowsDownUp, Check, Key, MagnifyingGlass, Paperclip, Star, Trash, X } from "@phosphor-icons/react";
 import { ItemTile } from "../../components/tile/Tile";
@@ -113,6 +113,7 @@ export function ListPane({ searchRef }: { searchRef: React.RefObject<HTMLInputEl
   const visible = useMemo(() => selectVisible({ items, index, view, query, sort, usage }), [items, index, view, query, sort, usage]);
   const trashCount = useMemo(() => items.filter((i) => i.trashedAt != null).length, [items]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
   const rowHeight = compact ? 44 : 56;
   const virt = useVirtualizer({ count: visible.length, getScrollElement: () => scrollRef.current, estimateSize: () => rowHeight, overscan: 12 });
 
@@ -191,7 +192,7 @@ export function ListPane({ searchRef }: { searchRef: React.RefObject<HTMLInputEl
         </div>
       </div>
 
-      <header className={s.header}>
+      <header className={s.header} data-scrolled={scrolled || undefined}>
         <div className={s.headerText}>
           <h2 className={s.title}>{query ? "Resultados" : title}</h2>
           <span className={s.count}>{visible.length.toLocaleString("pt-BR")}</span>
@@ -229,6 +230,7 @@ export function ListPane({ searchRef }: { searchRef: React.RefObject<HTMLInputEl
         aria-label={title}
         aria-activedescendant={selectedId ? `row-${selectedId}` : undefined}
         tabIndex={0}
+        onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 2)}
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();
