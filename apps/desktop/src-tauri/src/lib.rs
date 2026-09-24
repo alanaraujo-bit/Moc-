@@ -221,6 +221,7 @@ pub fn run() {
             commands::app_visibility,
             commands::app_background,
             commands::app_insets,
+            commands::app_print,
             devseed::dev_seed,
             native::quick_hide,
             cloud::cloud_status,

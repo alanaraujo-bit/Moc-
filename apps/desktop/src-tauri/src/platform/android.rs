@@ -120,3 +120,12 @@ pub struct Insets {
 pub fn insets() -> Option<Insets> {
     call::<Insets>("insets", ()).ok()
 }
+
+#[derive(Serialize)]
+struct Print<'a> {
+    title: &'a str,
+}
+
+pub fn print(title: &str) -> Result<(), String> {
+    call::<Empty>("print", Print { title }).map(|_| ())
+}

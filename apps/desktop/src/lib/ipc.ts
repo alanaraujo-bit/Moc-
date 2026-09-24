@@ -151,6 +151,7 @@ export const api = {
   appVisibility: (visible: boolean) => call<void>("app_visibility", { visible }),
   appBackground: () => call<void>("app_background"),
   appInsets: () => call<[number, number] | null>("app_insets"),
+  appPrint: (title: string) => call<void>("app_print", { title }),
 };
 
 export function errorMessage(e: unknown): string {

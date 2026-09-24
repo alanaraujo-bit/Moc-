@@ -153,4 +153,27 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
             )
         }
     }
+
+    private var webView: android.webkit.WebView? = null
+
+    override fun load(webView: android.webkit.WebView) {
+        this.webView = webView
+    }
+
+    /** The system print dialog for the page's print layout ("Salvar como PDF" included). */
+    @Command
+    fun print(invoke: Invoke) {
+        val title = invoke.getArgs().optString("title", "Mocó")
+        activity.runOnUiThread {
+            val wv = webView
+            if (wv == null) {
+                invoke.reject("impressão indisponível")
+                return@runOnUiThread
+            }
+            val pm = activity.getSystemService(Context.PRINT_SERVICE) as android.print.PrintManager
+            val attrs = android.print.PrintAttributes.Builder().setMediaSize(android.print.PrintAttributes.MediaSize.ISO_A4).build()
+            pm.print(title, wv.createPrintDocumentAdapter(title), attrs)
+            invoke.resolve()
+        }
+    }
 }

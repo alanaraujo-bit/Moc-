@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/primitives";
 import { toast } from "../../components/ui/toast";
 import { api, errorMessage } from "../../lib/ipc";
 import { PrintPortal, RecoverySheetPrint } from "./Printable";
+import { isMobile } from "../../lib/platform";
 import s from "./Onboarding.module.css";
 
 export function CodeBlock({ value, label }: { value: string; label: string }) {
@@ -23,6 +24,13 @@ export function CodeBlock({ value, label }: { value: string; label: string }) {
 
 export function printNow(setPrinting: (v: boolean) => void) {
   setPrinting(true);
+  if (isMobile) {
+    // Android's WebView ignores window.print(): open the system print dialog (which can
+    // also save a PDF). It lays the page out asynchronously and sends no afterprint, so
+    // the printable sheet stays mounted while this screen is open.
+    window.setTimeout(() => void api.appPrint("Mocó").catch(() => {}), 150);
+    return;
+  }
   const done = () => {
     window.removeEventListener("afterprint", done);
     setPrinting(false);

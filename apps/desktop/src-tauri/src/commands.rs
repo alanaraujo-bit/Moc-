@@ -743,3 +743,13 @@ pub async fn app_insets() -> AppResult<Option<(f64, f64)>> {
     #[cfg(not(target_os = "android"))]
     Ok(None)
 }
+
+/// Opens the system print dialog on phones (WebViews there ignore window.print()).
+#[tauri::command]
+pub async fn app_print(title: String) -> AppResult<()> {
+    #[cfg(target_os = "android")]
+    platform::print(&title).map_err(|e| AppError::new("print", format!("Não deu para abrir a impressão: {e}.")))?;
+    #[cfg(not(target_os = "android"))]
+    let _ = title;
+    Ok(())
+}
