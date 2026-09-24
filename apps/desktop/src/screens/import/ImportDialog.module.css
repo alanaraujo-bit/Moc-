@@ -114,7 +114,7 @@
   height: 30px;
   border-radius: var(--r-sm);
   border: 1px solid var(--grout-strong);
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   padding: 0 8px;
   min-width: 160px;
 }

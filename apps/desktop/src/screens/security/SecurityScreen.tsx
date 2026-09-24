@@ -288,7 +288,15 @@ export function SecurityScreen() {
               ok={settings.autoLockMinutes > 0 && settings.autoLockMinutes <= 60}
               icon={<LockSimple size={18} />}
               title={settings.autoLockMinutes === 0 ? "Nunca tranca sozinho" : `Tranca após ${settings.autoLockMinutes} min sem uso`}
-              detail={settings.lockOnSessionLock ? "Também tranca quando o Windows é bloqueado." : "Não tranca quando o Windows é bloqueado."}
+              detail={
+                settings.autoLockMinutes === 0
+                  ? "Se você esquecer o computador aberto, o Mocó fica aberto também. Escolha um tempo em Configurações › Segurança."
+                  : settings.autoLockMinutes > 60
+                    ? "É bastante tempo com o cofre aberto sem ninguém por perto. Considere 10 ou 30 minutos."
+                    : settings.lockOnSessionLock
+                      ? "Também tranca quando o Windows é bloqueado."
+                      : "Não tranca quando o Windows é bloqueado."
+              }
               action={settings.autoLockMinutes === 0 || settings.autoLockMinutes > 60 ? { label: "Ajustar", run: () => setScreen("settings") } : undefined}
             />
             <Check

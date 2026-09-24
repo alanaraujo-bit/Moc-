@@ -16,8 +16,10 @@
   isolation: isolate;
 }
 
+/* In dark mode the glaze tokens are lifted for text; a card needs the deep glaze instead. */
 :global([data-theme="dark"]) .card {
-  color: #0c0f15;
+  background: color-mix(in srgb, var(--g) 42%, #0c0f15);
+  color: #ffffff;
   box-shadow: 0 10px 22px rgb(0 0 0 / 45%);
 }
 

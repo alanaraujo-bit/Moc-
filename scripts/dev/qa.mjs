@@ -10,7 +10,8 @@ const port = process.env.QA_PORT ?? "9222";
 
 const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
 const ctx = browser.contexts()[0];
-const page = ctx.pages().find((p) => !p.url().startsWith("devtools")) ?? ctx.pages()[0];
+const pages = ctx.pages().filter((p) => !p.url().startsWith("devtools"));
+const page = (process.env.QA_WINDOW === "quick" ? pages.find((p) => p.url().includes("w=quick")) : pages.find((p) => !p.url().includes("w=quick"))) ?? pages[0];
 page.setDefaultTimeout(8000);
 
 const shot = async (name, opts = {}) => {

@@ -80,7 +80,7 @@
 
 .vaultPick select {
   border: 0;
-  background: transparent;
+  background-color: transparent;
   font-weight: 600;
   color: var(--ink-2);
   padding: 2px 2px;
@@ -193,7 +193,7 @@
   border-radius: var(--r-sm);
   border: 1px solid var(--grout-strong);
   box-shadow: inset 0 -1px 0 var(--grout-strong);
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   padding: 0 8px;
   font-size: var(--text-md);
   color: var(--ink);
