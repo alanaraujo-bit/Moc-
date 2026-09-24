@@ -68,6 +68,7 @@ pub enum Purpose {
     LocalState = 0x0D,
     Export = 0x0E,
     Attachment = 0x0F,
+    AuthKey = 0x10,
 }
 
 impl Purpose {
@@ -89,6 +90,7 @@ impl Purpose {
             0x0D => LocalState,
             0x0E => Export,
             0x0F => Attachment,
+            0x10 => AuthKey,
             _ => return None,
         })
     }

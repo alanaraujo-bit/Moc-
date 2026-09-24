@@ -29,9 +29,12 @@ use crate::model::{
 };
 use crate::store::{HistoryRow, ItemRow, Store, VaultRow};
 
+pub mod sync;
+
 const ACCOUNT_META: &str = "account";
 const LOCAL_STATE_META: &str = "local-state";
 const DEVICE_KEY_PREFIX: &str = "device-key:";
+const AUTH_SEED_META: &str = "auth-seed";
 const HISTORY_KEEP: usize = 20;
 const PASSWORD_HISTORY_KEEP: usize = 30;
 pub const TRASH_RETENTION_DAYS: i64 = 30;
@@ -57,6 +60,9 @@ struct AccountRecord {
     public_identity: PublicIdentity,
     #[serde(with = "crate::util::b64")]
     encrypted_identity: Vec<u8>,
+    /// Public half of the login key (changes with the password).
+    #[serde(default, with = "opt_b64")]
+    auth_public_key: Option<Vec<u8>>,
 }
 
 mod opt_b64 {
@@ -161,6 +167,7 @@ struct Session {
     record: AccountRecord,
     ak: SymmetricKey,
     identity: IdentityKeys,
+    login: Option<LoginKey>,
     vaults: HashMap<Uuid, VaultState>,
     items: HashMap<Uuid, CachedItem>,
     local: LocalState,
@@ -183,11 +190,48 @@ fn label(prefix: &str, account: &Uuid) -> Vec<u8> {
 
 /// MUK from password + Secret Key (2SKD). The raw 16 Secret Key bytes are the HKDF salt.
 fn derive_unlock_key(password: &str, secret_key: &SecretKey, params: &KdfParams, account: &Uuid) -> Result<SymmetricKey> {
+    Ok(derive_password_keys(password, secret_key, params, account)?.unlock)
+}
+
+/// Both keys a password produces, from a single Argon2id run.
+pub struct PasswordKeys {
+    pub unlock: SymmetricKey,
+    /// Ed25519 key proving knowledge of password + Secret Key to the sync server
+    /// (security review S1). The server only ever sees the public half.
+    pub login: LoginKey,
+}
+
+pub struct LoginKey(Zeroizing<[u8; 32]>);
+
+impl LoginKey {
+    fn signing(&self) -> ed25519_dalek::SigningKey {
+        ed25519_dalek::SigningKey::from_bytes(&self.0)
+    }
+    pub fn public(&self) -> [u8; 32] {
+        self.signing().verifying_key().to_bytes()
+    }
+    pub fn sign(&self, message: &[u8]) -> [u8; 64] {
+        use ed25519_dalek::Signer;
+        self.signing().sign(message).to_bytes()
+    }
+}
+
+pub fn derive_password_keys(password: &str, secret_key: &SecretKey, params: &KdfParams, account: &Uuid) -> Result<PasswordKeys> {
     let pw = kdf::derive_password_key(password, params)?;
     let hk = Hkdf::<Sha256>::new(Some(secret_key.as_bytes()), pw.as_ref());
     let mut unlock = Zeroizing::new([0u8; 32]);
+    let mut login = Zeroizing::new([0u8; 32]);
     hk.expand(&label("moco/v1/unlock", account), unlock.as_mut()).expect("valid length");
-    Ok(SymmetricKey::from_bytes(*unlock))
+    hk.expand(&label("moco/v1/auth-ed25519", account), login.as_mut()).expect("valid length");
+    Ok(PasswordKeys { unlock: SymmetricKey::from_bytes(*unlock), login: LoginKey(login) })
+}
+
+/// Message a device signs to log in: domain label, server nonce, account id.
+pub fn login_message(nonce: &[u8], account: &Uuid) -> Vec<u8> {
+    let mut m = b"moco/v1/login".to_vec();
+    m.extend_from_slice(nonce);
+    m.extend_from_slice(account.as_bytes());
+    m
 }
 
 /// Recovery wrapping key. Needs the Secret Key too, so a lost recovery sheet alone can't
@@ -312,7 +356,8 @@ impl Account {
         }
         check_master_password(password)?;
         let id = Uuid::new_v4();
-        let muk = derive_unlock_key(password, secret_key, &kdf_params, &id)?;
+        let keys = derive_password_keys(password, secret_key, &kdf_params, &id)?;
+        let muk = keys.unlock;
         let ak = SymmetricKey::generate();
         let identity = IdentityKeys::generate();
         let code = RecoveryCode::generate();
@@ -330,6 +375,7 @@ impl Account {
             recovery_created_at: Some(now),
             public_identity: identity.public(),
             encrypted_identity: Vec::new(),
+            auth_public_key: Some(keys.login.public().to_vec()),
         };
         record.wrapped_ak_password = aead::wrap_key(&muk, &ak_wrap_header(Purpose::AkByPassword, &record, id), &ak);
         record.wrapped_ak_recovery = Some(aead::wrap_key(
@@ -352,17 +398,20 @@ impl Account {
             record,
             ak,
             identity,
+            login: None,
             vaults: HashMap::new(),
             items: HashMap::new(),
             local: LocalState::default(),
         });
+        self.remember_login(keys.login)?;
         self.create_vault(first_vault)?;
         Ok(code)
     }
 
     pub fn unlock(&mut self, password: &str, secret_key: &SecretKey) -> Result<()> {
         let record = self.require_record()?;
-        let muk = derive_unlock_key(password, secret_key, &record.kdf, &record.id)?;
+        let keys = derive_password_keys(password, secret_key, &record.kdf, &record.id)?;
+        let muk = keys.unlock;
         let expect = Expect::purpose(Purpose::AkByPassword).account(record.id).object(record.id);
         let ak = match aead::unwrap_key(&muk, &record.wrapped_ak_password, &expect) {
             Ok((_, k)) => k,
@@ -374,6 +423,7 @@ impl Account {
         };
         let weak = kdf_is_weaker(&record.kdf, &KdfParams::recommended());
         self.finish_unlock(record, ak, "unlock.password")?;
+        self.remember_login(keys.login)?;
         if weak && self.upgrade_kdf_on_unlock {
             self.set_password(password, secret_key)?;
             self.store.log_event("kdf.upgraded", None)?;
@@ -435,7 +485,13 @@ impl Account {
             None => LocalState::default(),
         };
 
-        self.session = Some(Session { record, ak, identity, vaults, items, local });
+        let login = self
+            .store
+            .meta_get(AUTH_SEED_META)?
+            .and_then(|blob| aead::open(&ak, &blob, &Expect::purpose(Purpose::AuthKey).account(acct).object(acct)).ok())
+            .and_then(|(_, pt)| <[u8; 32]>::try_from(&pt[..]).ok())
+            .map(|b| LoginKey(Zeroizing::new(b)));
+        self.session = Some(Session { record, ak, identity, login, vaults, items, local });
         self.store.log_event(event, None)?;
         self.purge_expired_trash()?;
         Ok(())
@@ -471,13 +527,42 @@ impl Account {
         // Fresh salt and current recommended cost on every password change.
         let params = KdfParams::recommended();
         let s = self.session()?;
-        let muk = derive_unlock_key(new, secret_key, &params, &s.record.id)?;
+        let keys = derive_password_keys(new, secret_key, &params, &s.record.id)?;
+        let muk = keys.unlock;
         let s = self.session_mut()?;
         s.record.kdf = params;
+        s.record.auth_public_key = Some(keys.login.public().to_vec());
         s.record.wrapped_ak_password =
             aead::wrap_key(&muk, &ak_wrap_header(Purpose::AkByPassword, &s.record, s.record.id), &s.ak);
         s.record.password_changed_at = now_ms();
-        self.save_record()
+        self.save_record()?;
+        self.remember_login(keys.login)
+    }
+
+    /// Keeps the login key for this session and sealed on disk under the Account Key, so
+    /// sessions unlocked with Windows Hello can still sign in to the sync server.
+    fn remember_login(&mut self, login: LoginKey) -> Result<()> {
+        let s = self.session()?;
+        let acct = s.record.id;
+        let h = Header::new(Purpose::AuthKey, acct).container(acct).object(acct).key(acct, s.record.ak_gen);
+        let blob = aead::seal(&s.ak, &h, &login.0[..]);
+        self.store.meta_set(AUTH_SEED_META, &blob)?;
+        self.session_mut()?.login = Some(login);
+        Ok(())
+    }
+
+    pub fn login_public_key(&self) -> Result<Option<[u8; 32]>> {
+        Ok(self.session()?.login.as_ref().map(LoginKey::public))
+    }
+
+    /// Signs a server login challenge.
+    pub fn sign_login(&self, nonce: &[u8]) -> Result<[u8; 64]> {
+        let s = self.session()?;
+        let login = s
+            .login
+            .as_ref()
+            .ok_or_else(|| CoreError::Invalid("digite a senha mestra uma vez para entrar na sincronização".into()))?;
+        Ok(login.sign(&login_message(nonce, &s.record.id)))
     }
 
     /// Resets the master password with the recovery code (and Secret Key). The code is
@@ -661,8 +746,15 @@ impl Account {
                 }
             }
         }
-        let rev = self.session()?.vaults[&id].revision + 1;
-        self.store.delete_vault(id, rev, now_ms())?;
+        let s = self.session()?;
+        let rev = s.vaults[&id].revision + 1;
+        let acct = s.record.id;
+        let tombstone = aead::seal(
+            &s.ak,
+            &Header::new(Purpose::Tombstone, acct).container(acct).object(id).key(acct, s.record.ak_gen).version(rev),
+            &[],
+        );
+        self.store.delete_vault(id, rev, now_ms(), &tombstone)?;
         self.session_mut()?.vaults.remove(&id);
         Ok(())
     }

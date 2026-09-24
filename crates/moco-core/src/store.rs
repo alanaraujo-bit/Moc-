@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::error::{CoreError, Result};
 use crate::model::Timestamp;
 
-const SCHEMA_VERSION: i64 = 2;
+const SCHEMA_VERSION: i64 = 3;
 
 impl From<rusqlite::Error> for CoreError {
     fn from(e: rusqlite::Error) -> Self {
@@ -171,6 +171,21 @@ impl Store {
                  COMMIT;",
             )?;
         }
+        if version < 3 {
+            // Highest version the server has shown us per object: anything older is a
+            // rollback and gets rejected (security review M2).
+            self.conn.execute_batch(
+                "BEGIN;
+                 CREATE TABLE sync_hwm (
+                   entity  TEXT NOT NULL,
+                   id      TEXT NOT NULL,
+                   version INTEGER NOT NULL,
+                   PRIMARY KEY (entity, id)
+                 );
+                 PRAGMA user_version = 3;
+                 COMMIT;",
+            )?;
+        }
         Ok(())
     }
 
@@ -237,10 +252,11 @@ impl Store {
         self.enqueue(Entity::Vault, v.id, v.revision, Op::Upsert)
     }
 
-    pub fn delete_vault(&self, id: Uuid, revision: u64, at: Timestamp) -> Result<()> {
+    /// Marks a vault deleted, keeping an authenticated tombstone (in `attrs`) for sync.
+    pub fn delete_vault(&self, id: Uuid, revision: u64, at: Timestamp, tombstone: &[u8]) -> Result<()> {
         self.conn.execute(
-            "UPDATE vaults SET deleted = 1, wrapped_key = x'', attrs = x'', updated_at = ?2, revision = ?3 WHERE id = ?1",
-            params![id.to_string(), at, revision as i64],
+            "UPDATE vaults SET deleted = 1, wrapped_key = x'', attrs = ?4, updated_at = ?2, revision = ?3 WHERE id = ?1",
+            params![id.to_string(), at, revision as i64, tombstone],
         )?;
         self.enqueue(Entity::Vault, id, revision, Op::Delete)
     }
@@ -352,6 +368,112 @@ impl Store {
                 params![h.item_id.to_string(), h.revision as i64, h.vault_id.to_string(), h.overview, h.details, h.saved_at],
             )?;
         }
+        Ok(())
+    }
+
+    // ---- sync support -------------------------------------------------------------------
+
+    /// Raw vault row including deleted ones (tombstone in `attrs`).
+    pub fn vault_raw(&self, id: Uuid) -> Result<Option<(VaultRow, bool)>> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT id, wrapped_key, attrs, created_at, updated_at, revision, deleted FROM vaults WHERE id = ?1",
+                [id.to_string()],
+                |r| {
+                    Ok((
+                        VaultRow {
+                            id: uuid_of(r.get(0)?)?,
+                            wrapped_key: r.get(1)?,
+                            attrs: r.get(2)?,
+                            created_at: r.get(3)?,
+                            updated_at: r.get(4)?,
+                            revision: r.get::<_, i64>(5)? as u64,
+                        },
+                        r.get::<_, i64>(6)? != 0,
+                    ))
+                },
+            )
+            .optional()?)
+    }
+
+    /// Applies a vault row received from the server (no outbox entry).
+    pub fn put_vault_remote(&self, v: &VaultRow, deleted: bool) -> Result<()> {
+        self.conn.execute(
+            "INSERT INTO vaults(id, wrapped_key, attrs, created_at, updated_at, revision, deleted)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+             ON CONFLICT(id) DO UPDATE SET wrapped_key = excluded.wrapped_key, attrs = excluded.attrs,
+               updated_at = excluded.updated_at, revision = excluded.revision, deleted = excluded.deleted",
+            params![v.id.to_string(), v.wrapped_key, v.attrs, v.created_at, v.updated_at, v.revision as i64, deleted as i64],
+        )?;
+        Ok(())
+    }
+
+    /// Raw item row including tombstones (tombstone envelope in `overview`, empty details).
+    pub fn item_raw(&self, id: Uuid) -> Result<Option<(ItemRow, bool)>> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT id, vault_id, revision, overview, COALESCE(details, x''), created_at, updated_at, deleted FROM items WHERE id = ?1",
+                [id.to_string()],
+                |r| Ok((Self::item_from(r)?, r.get::<_, i64>(7)? != 0)),
+            )
+            .optional()?)
+    }
+
+    /// Applies an item row received from the server (no outbox entry).
+    pub fn put_item_remote(&self, i: &ItemRow, deleted: bool) -> Result<()> {
+        let details: Option<&[u8]> = if deleted { None } else { Some(&i.details) };
+        self.conn.execute(
+            "INSERT INTO items(id, vault_id, revision, overview, details, created_at, updated_at, deleted)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+             ON CONFLICT(id) DO UPDATE SET vault_id = excluded.vault_id, revision = excluded.revision,
+               overview = excluded.overview, details = excluded.details, updated_at = excluded.updated_at,
+               deleted = excluded.deleted",
+            params![i.id.to_string(), i.vault_id.to_string(), i.revision as i64, i.overview, details, i.created_at, i.updated_at, deleted as i64],
+        )?;
+        if deleted {
+            self.conn.execute("DELETE FROM item_history WHERE item_id = ?1", [i.id.to_string()])?;
+            self.conn.execute("DELETE FROM attachments WHERE item_id = ?1", [i.id.to_string()])?;
+        }
+        Ok(())
+    }
+
+    pub fn hwm(&self, entity: &str, id: Uuid) -> Result<u64> {
+        Ok(self
+            .conn
+            .query_row("SELECT version FROM sync_hwm WHERE entity = ?1 AND id = ?2", params![entity, id.to_string()], |r| r.get::<_, i64>(0))
+            .optional()?
+            .unwrap_or(0) as u64)
+    }
+
+    pub fn set_hwm(&self, entity: &str, id: Uuid, version: u64) -> Result<()> {
+        self.conn.execute(
+            "INSERT INTO sync_hwm(entity, id, version) VALUES (?1, ?2, ?3)
+             ON CONFLICT(entity, id) DO UPDATE SET version = MAX(version, excluded.version)",
+            params![entity, id.to_string(), version as i64],
+        )?;
+        Ok(())
+    }
+
+    /// Distinct (entity, id) with local changes waiting to be pushed, up to `seq`.
+    pub fn outbox_pending(&self) -> Result<(i64, Vec<(String, Uuid)>)> {
+        let max: i64 = self.conn.query_row("SELECT COALESCE(MAX(seq), 0) FROM outbox", [], |r| r.get(0))?;
+        let mut st = self.conn.prepare("SELECT DISTINCT entity, entity_id FROM outbox WHERE seq <= ?1")?;
+        let rows = st.query_map([max], |r| Ok((r.get::<_, String>(0)?, uuid_of(r.get(1)?)?)))?;
+        Ok((max, rows.collect::<rusqlite::Result<_>>()?))
+    }
+
+    pub fn outbox_has(&self, entity: &str, id: Uuid) -> Result<bool> {
+        Ok(self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM outbox WHERE entity = ?1 AND entity_id = ?2)",
+            params![entity, id.to_string()],
+            |r| r.get::<_, i64>(0),
+        )? != 0)
+    }
+
+    pub fn outbox_clear(&self, upto: i64, entity: &str, id: Uuid) -> Result<()> {
+        self.conn.execute("DELETE FROM outbox WHERE seq <= ?1 AND entity = ?2 AND entity_id = ?3", params![upto, entity, id.to_string()])?;
         Ok(())
     }
 

@@ -198,6 +198,10 @@ pub fn lock_now(app: &AppHandle, reason: &str) {
         }
         unlocked
     });
+    // Parsed-but-uncommitted imports hold plaintext: forget them too (D-009).
+    if let Ok(mut g) = st.pending_import.lock() {
+        *g = None;
+    }
     if was_unlocked.unwrap_or(false) {
         let seq = st.clipboard_sequence.swap(0, Ordering::SeqCst);
         if seq != 0 {
