@@ -15,14 +15,9 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 moco-core = { path = "../../../crates/moco-core" }
-tauri = { version = "2", features = ["tray-icon", "image-png"] }
-tauri-plugin-single-instance = "2"
+tauri = { version = "2", features = ["image-png"] }
 tauri-plugin-opener = "2"
-tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
-tauri-plugin-autostart = "2"
-tauri-plugin-global-shortcut = "2"
-tauri-plugin-updater = "2"
 serde.workspace = true
 serde_json.workspace = true
 uuid.workspace = true
@@ -49,3 +44,13 @@ windows = { version = "0.61", features = [
   "Storage_Streams",
   "Foundation",
 ] }
+
+# Desktop only: tray, single instance, window state, launch at login, global shortcut, updates.
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-updater = "2"
+

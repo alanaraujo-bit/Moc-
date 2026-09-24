@@ -1,13 +1,19 @@
 //! Windows integration: the Quick Access window, the global shortcut, launch at startup,
 //! and small window-chrome touches.
 
+#[cfg(desktop)]
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager};
+#[cfg(desktop)]
+use tauri::{WebviewUrl, WebviewWindowBuilder, WindowEvent};
+#[cfg(desktop)]
 use tauri_plugin_autostart::ManagerExt;
+#[cfg(desktop)]
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 use crate::error::{AppError, AppResult};
 use crate::settings::Settings;
+#[cfg(desktop)]
 use crate::state::AppState;
 
 pub const QUICK: &str = "quick";
@@ -34,6 +40,7 @@ pub fn round_corners(w: &tauri::WebviewWindow) {
 #[cfg(not(windows))]
 pub fn round_corners(_: &tauri::WebviewWindow) {}
 
+#[cfg(desktop)]
 fn quick_window(app: &AppHandle) -> tauri::Result<tauri::WebviewWindow> {
     if let Some(w) = app.get_webview_window(QUICK) {
         return Ok(w);
@@ -62,6 +69,7 @@ fn quick_window(app: &AppHandle) -> tauri::Result<tauri::WebviewWindow> {
     Ok(w)
 }
 
+#[cfg(desktop)]
 pub fn toggle_quick(app: &AppHandle) {
     let Ok(w) = quick_window(app) else { return };
     if w.is_visible().unwrap_or(false) {
@@ -74,6 +82,7 @@ pub fn toggle_quick(app: &AppHandle) {
     let _ = w.emit("moco://quick-shown", ());
 }
 
+#[cfg(desktop)]
 pub fn apply_shortcut(app: &AppHandle, s: &Settings) {
     let gs = app.global_shortcut();
     let _ = gs.unregister_all();
@@ -94,6 +103,7 @@ pub fn apply_shortcut(app: &AppHandle, s: &Settings) {
     }
 }
 
+#[cfg(desktop)]
 pub fn apply_autostart(app: &AppHandle, s: &Settings) {
     let al = app.autolaunch();
     let enabled = al.is_enabled().unwrap_or(false);
@@ -128,3 +138,11 @@ pub async fn quick_toggle(app: AppHandle) -> AppResult<()> {
     toggle_quick(&app);
     Ok(())
 }
+
+// Phones have no Quick Access window, global shortcut or launch-at-login.
+#[cfg(mobile)]
+pub fn toggle_quick(_: &AppHandle) {}
+#[cfg(mobile)]
+pub fn apply_shortcut(_: &AppHandle, _: &Settings) {}
+#[cfg(mobile)]
+pub fn apply_autostart(_: &AppHandle, _: &Settings) {}

@@ -1,3 +1,6 @@
+// Desktop-only helpers (Hello, updater, quick window) are compiled but unused on phones.
+#![cfg_attr(mobile, allow(dead_code))]
+
 mod autolock;
 mod cloud;
 mod breach;
@@ -14,17 +17,23 @@ mod state;
 mod transfer;
 mod updates;
 
+#[cfg(windows)]
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
+#[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+#[cfg(desktop)]
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager, WindowEvent};
+use tauri::{AppHandle, Manager};
+#[cfg(desktop)]
+use tauri::WindowEvent;
 
 use settings::Settings;
 use state::AppState;
 
 pub(crate) fn show_main(app: &AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
+        #[cfg(desktop)]
         let _ = w.unminimize();
         let _ = w.show();
         let _ = w.set_focus();
@@ -43,6 +52,7 @@ pub(crate) fn apply_settings(app: &AppHandle, s: &Settings) {
     native::apply_autostart(app, s);
 }
 
+#[cfg(desktop)]
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Abrir o Mocó", true, None::<&str>)?;
     let quick = MenuItem::with_id(app, "quick", "Acesso rápido", true, Some("CommandOrControl+Shift+Space"))?;
@@ -73,9 +83,9 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    let mut builder = tauri::Builder::default();
+/// Plugins and window behavior that only make sense on a computer.
+#[cfg(desktop)]
+fn desktop_plugins(mut builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
     // Debug runs with their own profile (QA of multi-device sync) may run side by side.
     let isolated_profile = cfg!(debug_assertions) && std::env::var("MOCO_DATA_DIR").is_ok();
     if !isolated_profile {
@@ -86,8 +96,6 @@ pub fn run() {
         }));
     }
     builder
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_autostart::init(
@@ -103,6 +111,37 @@ pub fn run() {
                 )
                 .build(),
         )
+        .on_window_event(|window, event| {
+            if window.label() != "main" {
+                return;
+            }
+            let app = window.app_handle();
+            let settings = app.state::<Arc<AppState>>().settings();
+            match event {
+                WindowEvent::CloseRequested { api, .. } if settings.close_to_tray => {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+                WindowEvent::Resized(_) if settings.lock_on_minimize => {
+                    if window.is_minimized().unwrap_or(false) {
+                        commands::lock_now(app, "minimize");
+                    }
+                }
+                _ => {}
+            }
+        })
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    let builder = tauri::Builder::default();
+    #[cfg(desktop)]
+    let builder = desktop_plugins(builder);
+    #[cfg(mobile)]
+    let builder = builder.plugin(platform::mobile_plugin());
+    builder
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let mut dir = app.path().app_local_data_dir()?;
             // Development runs can point at a throwaway profile.
@@ -127,29 +166,11 @@ pub fn run() {
                 }
             }
             apply_settings(app.handle(), &state.settings());
+            #[cfg(desktop)]
             build_tray(app.handle())?;
             autolock::spawn(app.handle().clone());
             cloud::spawn_loop(app.handle().clone());
             Ok(())
-        })
-        .on_window_event(|window, event| {
-            if window.label() != "main" {
-                return;
-            }
-            let app = window.app_handle();
-            let settings = app.state::<Arc<AppState>>().settings();
-            match event {
-                WindowEvent::CloseRequested { api, .. } if settings.close_to_tray => {
-                    api.prevent_close();
-                    let _ = window.hide();
-                }
-                WindowEvent::Resized(_) if settings.lock_on_minimize => {
-                    if window.is_minimized().unwrap_or(false) {
-                        commands::lock_now(app, "minimize");
-                    }
-                }
-                _ => {}
-            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::app_info,

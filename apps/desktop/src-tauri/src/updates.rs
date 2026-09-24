@@ -4,7 +4,10 @@
 
 use serde::Serialize;
 use std::sync::{Arc, Mutex};
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, State};
+#[cfg(desktop)]
+use tauri::Emitter;
+#[cfg(desktop)]
 use tauri_plugin_updater::{Update, UpdaterExt};
 
 use crate::error::{AppError, AppResult};
@@ -12,8 +15,12 @@ use crate::state::AppState;
 
 const REPO: &str = "https://github.com/alanaraujo-bit/Moc-";
 
+#[cfg(desktop)]
 pub type PendingUpdate = Mutex<Option<Update>>;
+#[cfg(mobile)]
+pub type PendingUpdate = Mutex<Option<()>>;
 
+#[cfg(desktop)]
 fn endpoint(channel: &str) -> String {
     match channel {
         "beta" => format!("{REPO}/releases/download/beta/latest.json"),
@@ -31,6 +38,7 @@ pub struct UpdateInfo {
     pub critical: bool,
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn update_check(app: AppHandle, state: State<'_, Arc<AppState>>) -> AppResult<Option<UpdateInfo>> {
     let channel = state.settings().update_channel;
@@ -62,12 +70,14 @@ pub async fn update_check(app: AppHandle, state: State<'_, Arc<AppState>>) -> Ap
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg(desktop)]
 struct Progress {
     downloaded: u64,
     total: Option<u64>,
 }
 
 /// Downloads, verifies the signature, installs and restarts.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn update_install(app: AppHandle, state: State<'_, Arc<AppState>>) -> AppResult<()> {
     let update = state
@@ -91,4 +101,17 @@ pub async fn update_install(app: AppHandle, state: State<'_, Arc<AppState>>) -> 
     // Lock before restarting so keys don't linger across the swap.
     crate::commands::lock_now(&app, "update");
     app.restart();
+}
+
+// On phones updates come from the app store (or a new APK), not from the app itself.
+#[cfg(mobile)]
+#[tauri::command]
+pub async fn update_check(_app: AppHandle, _state: State<'_, Arc<AppState>>) -> AppResult<Option<UpdateInfo>> {
+    Ok(None)
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+pub async fn update_install(_app: AppHandle, _state: State<'_, Arc<AppState>>) -> AppResult<()> {
+    Err(AppError::new("no_update", "Atualize o Mocó pela loja de aplicativos."))
 }

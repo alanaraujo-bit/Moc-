@@ -10,6 +10,7 @@
 use moco_core::crypto::kdf::hkdf_key;
 use moco_core::crypto::{random, SymmetricKey};
 use uuid::Uuid;
+#[cfg(windows)]
 use zeroize::Zeroizing;
 
 use crate::error::{AppError, AppResult};
