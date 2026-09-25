@@ -69,8 +69,8 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 
 ### Próximos (ordem)
 0. Android: APK publicado (anexo `Moco-android.apk` no release, gerado pelo job `android` do
-   release.yml a cada tag; execução manual gera só o APK como artefato). Faltam: desbloqueio por biometria ligado à
-   chave (BiometricPrompt + CryptoObject, não um sim/não), Serviço de Preenchimento Automático,
+   release.yml a cada tag; execução manual gera só o APK como artefato). Biometria feita (D-016). Faltam:
+   Serviço de Preenchimento Automático,
    anexos/importação/exportação no celular, compartilhamento e publicação (BLOCKERS 8).
 1. Compartilhamento: núcleo e servidor prontos (no ar). Falta o desktop — cuidados:
    - anexos de itens compartilhados vão por `/v1/shared/{dono}/{cofre}/attachments` (hoje

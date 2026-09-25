@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { deviceNoun } from "../../lib/platform";
+import { deviceNoun, isMobile } from "../../lib/platform";
 import { ArrowRight, Fingerprint, Key, Question } from "@phosphor-icons/react";
 import { MocoMark } from "../../components/brand/Brand";
 import { Button, IconButton, PasswordField, Spinner, TextField } from "../../components/ui/primitives";
@@ -42,6 +42,8 @@ export function LockScreen({ reason }: { reason?: string | null }) {
     } catch (e) {
       const code = errorCode(e);
       if (code !== "hello_canceled") setError(errorMessage(e));
+      // The enrollment was dropped (see account_unlock_hello): hide the button.
+      if (code === "hello_missing") void useApp.getState().boot();
       pwRef.current?.focus();
     } finally {
       setHelloBusy(false);
@@ -49,15 +51,27 @@ export function LockScreen({ reason }: { reason?: string | null }) {
   }, []);
 
   useEffect(() => {
-    if (helloReady && !helloTried.current && reason !== "manual") {
+    if (!helloReady || reason === "manual") return;
+    // Only ask while the app is on screen (a lock can happen in the background, where
+    // Android can't show the prompt). On phones, coming back to a locked Mocó asks again.
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") {
+        if (isMobile) helloTried.current = false;
+        return;
+      }
+      if (helloTried.current) return;
       helloTried.current = true;
       void tryHello();
-    }
+    };
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [helloReady, tryHello, reason]);
 
   useEffect(() => {
-    pwRef.current?.focus();
-  }, [needSecretKey, recovering]);
+    // On a phone, focusing would pop the keyboard over the biometric prompt.
+    if (!(isMobile && helloReady)) pwRef.current?.focus();
+  }, [needSecretKey, recovering, helloReady]);
 
   const submit = async () => {
     const password = pwRef.current?.value ?? "";
@@ -162,7 +176,7 @@ export function LockScreen({ reason }: { reason?: string | null }) {
 
         {helloReady && (
           <Button variant="secondary" size="lg" full icon={<Fingerprint size={18} />} loading={helloBusy} onClick={tryHello}>
-            Usar o Windows Hello
+            {isMobile ? "Usar a biometria" : "Usar o Windows Hello"}
           </Button>
         )}
         <div className={s.foot}>

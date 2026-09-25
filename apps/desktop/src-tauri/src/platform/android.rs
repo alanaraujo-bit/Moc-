@@ -158,3 +158,62 @@ struct BarStyle {
 pub fn bar_style(dark: bool) {
     let _ = call::<Empty>("barStyle", BarStyle { dark });
 }
+
+// ---- Biometric unlock (see MocoPlugin.bioMac and hello.rs) ----------------------------
+
+#[derive(Deserialize)]
+struct BioAvailable {
+    available: bool,
+}
+
+pub fn biometric_available() -> bool {
+    call::<BioAvailable>("bioAvailable", ()).map(|r| r.available).unwrap_or(false)
+}
+
+#[derive(Serialize)]
+struct BioMac<'a> {
+    alias: &'a str,
+    data: String,
+    create: bool,
+    title: &'a str,
+    subtitle: &'a str,
+}
+
+#[derive(Deserialize)]
+struct Mac {
+    mac: String,
+}
+
+/// Why a biometric request didn't produce a MAC: (code, message) from the plugin.
+pub struct BioError {
+    pub code: String,
+    pub message: String,
+}
+
+/// Shows the biometric prompt and returns HMAC(biometric-bound key, data).
+pub fn biometric_mac(alias: &str, data: &[u8], create: bool, title: &str, subtitle: &str) -> Result<Zeroizing<Vec<u8>>, BioError> {
+    let handle = HANDLE.get().ok_or(BioError { code: "failed".into(), message: "plataforma não iniciada".into() })?;
+    let payload = BioMac { alias, data: BASE64.encode(data), create, title, subtitle };
+    match handle.run_mobile_plugin::<Mac>("bioMac", payload) {
+        Ok(r) => {
+            let encoded = Zeroizing::new(r.mac);
+            BASE64
+                .decode(encoded.as_bytes())
+                .map(Zeroizing::new)
+                .map_err(|e| BioError { code: "failed".into(), message: e.to_string() })
+        }
+        Err(tauri::plugin::mobile::PluginInvokeError::InvokeRejected(r)) => {
+            Err(BioError { code: r.code.unwrap_or_else(|| "failed".into()), message: r.message.unwrap_or_default() })
+        }
+        Err(e) => Err(BioError { code: "failed".into(), message: e.to_string() }),
+    }
+}
+
+#[derive(Serialize)]
+struct Alias<'a> {
+    alias: &'a str,
+}
+
+pub fn biometric_remove(alias: &str) {
+    let _ = call::<Empty>("bioRemove", Alias { alias });
+}

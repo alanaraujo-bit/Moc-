@@ -698,7 +698,8 @@ impl Account {
 
     pub fn device_key_labels(&self) -> Result<Vec<String>> {
         let mut labels = Vec::new();
-        for candidate in ["windows-hello"] {
+        // Labels the apps enroll: Windows Hello on the desktop, biometrics on Android.
+        for candidate in ["windows-hello", "android-biometric"] {
             if self.has_device_key(candidate)? {
                 labels.push(candidate.to_string());
             }

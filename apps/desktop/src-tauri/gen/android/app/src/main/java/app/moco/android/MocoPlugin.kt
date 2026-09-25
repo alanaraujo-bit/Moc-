@@ -210,4 +210,120 @@ class MocoPlugin(private val activity: Activity) : Plugin(activity) {
             invoke.resolve()
         }
     }
+
+    // ---- Biometric unlock ----------------------------------------------------------------
+    //
+    // Same shape as Windows Hello on the desktop: a Keystore HMAC key that only works right
+    // after a strong biometric (fingerprint/face class 3), is invalidated when a new
+    // biometric is enrolled, and never leaves the secure hardware. The prompt releases it
+    // through a CryptoObject and it MACs a fixed per-account challenge; the result derives
+    // the key that unwraps the Account Key (hello.rs). No biometric, no key — not a yes/no.
+
+    private fun bioStatus(): Int =
+        androidx.biometric.BiometricManager.from(activity)
+            .canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)
+
+    @Command
+    fun bioAvailable(invoke: Invoke) {
+        val s = bioStatus()
+        invoke.resolve(
+            JSObject()
+                .put("available", s == androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS)
+                .put("hardware", s != androidx.biometric.BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE && s != androidx.biometric.BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE)
+        )
+    }
+
+    private fun createMacKey(alias: String) {
+        val b = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN)
+            .setDigests(KeyProperties.DIGEST_SHA256)
+            .setUserAuthenticationRequired(true)
+            .setInvalidatedByBiometricEnrollment(true)
+        if (Build.VERSION.SDK_INT >= 30) {
+            b.setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
+        } else {
+            @Suppress("DEPRECATION")
+            b.setUserAuthenticationValidityDurationSeconds(-1)
+        }
+        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore").run {
+            init(b.build())
+            generateKey()
+        }
+    }
+
+    @Command
+    fun bioMac(invoke: Invoke) {
+        val args = invoke.getArgs()
+        val alias = args.getString("alias")
+        val data = b64(args.getString("data"))
+        val create = args.optBoolean("create", false)
+        val title = args.optString("title", "Abrir o Mocó")
+        val subtitle = args.optString("subtitle", "")
+        activity.runOnUiThread {
+            val mac: javax.crypto.Mac
+            try {
+                val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+                if (create) {
+                    ks.deleteEntry(alias)
+                    createMacKey(alias)
+                }
+                val key = ks.getKey(alias, null) as? SecretKey
+                if (key == null) {
+                    invoke.reject("A biometria não está ativada neste celular.", "missing")
+                    return@runOnUiThread
+                }
+                mac = javax.crypto.Mac.getInstance("HmacSHA256")
+                mac.init(key)
+            } catch (e: android.security.keystore.KeyPermanentlyInvalidatedException) {
+                invoke.reject("Uma digital ou rosto novo foi cadastrado no celular. Use a senha mestra e ative a biometria de novo.", "invalidated")
+                return@runOnUiThread
+            } catch (e: Exception) {
+                invoke.reject(e.message ?: "keystore", "failed")
+                return@runOnUiThread
+            }
+            val prompt = androidx.biometric.BiometricPrompt(
+                activity as androidx.fragment.app.FragmentActivity,
+                androidx.core.content.ContextCompat.getMainExecutor(activity),
+                object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                        try {
+                            val out = result.cryptoObject!!.mac!!.doFinal(data)
+                            invoke.resolve(JSObject().put("mac", b64(out)))
+                            out.fill(0)
+                        } catch (e: Exception) {
+                            invoke.reject(e.message ?: "mac", "failed")
+                        }
+                    }
+
+                    override fun onAuthenticationError(code: Int, msg: CharSequence) {
+                        val c = when (code) {
+                            androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED,
+                            androidx.biometric.BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+                            androidx.biometric.BiometricPrompt.ERROR_CANCELED -> "canceled"
+                            androidx.biometric.BiometricPrompt.ERROR_LOCKOUT,
+                            androidx.biometric.BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> "locked"
+                            else -> "failed"
+                        }
+                        invoke.reject(msg.toString(), c)
+                    }
+                    // A wrong finger just lets the person try again inside the prompt.
+                },
+            )
+            val info = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                .setTitle(title)
+                .apply { if (subtitle.isNotEmpty()) setSubtitle(subtitle) }
+                .setNegativeButtonText("Usar a senha mestra")
+                .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                .setConfirmationRequired(false)
+                .build()
+            prompt.authenticate(info, androidx.biometric.BiometricPrompt.CryptoObject(mac))
+        }
+    }
+
+    @Command
+    fun bioRemove(invoke: Invoke) {
+        try {
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(invoke.getArgs().getString("alias"))
+        } catch (e: Exception) {}
+        invoke.resolve()
+    }
 }

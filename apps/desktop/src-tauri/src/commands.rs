@@ -106,6 +106,8 @@ pub async fn account_create(state: S<'_>, args: CreateAccountArgs) -> AppResult<
             Ok((code, acct.account_id()?))
         })?;
         st.store_secret_key(account_id, &sk)?;
+        // The password was just typed: the "type it now and then" clock starts here.
+        st.note_password_unlock();
         Ok(CreatedAccount { secret_key: sk.to_display().to_string(), recovery_code: code.to_display().to_string() })
     })
     .await
@@ -354,7 +356,10 @@ pub async fn hello_enable(state: S<'_>, args: PasswordArgs) -> AppResult<()> {
         let key = crate::hello::enroll(account, &salt)?;
         st.with_account(|a| Ok(a.enroll_device_key(crate::hello::LABEL, &key)?))?;
         dev.hello_salt = salt.to_vec();
-        st.save_device(&dev)
+        st.save_device(&dev)?;
+        // The master password was just confirmed.
+        st.note_password_unlock();
+        Ok(())
     })
     .await
 }
@@ -381,12 +386,23 @@ pub async fn account_unlock_hello(app: AppHandle, state: S<'_>) -> AppResult<()>
         let account = account_id_of(&st)?;
         let salt = st.device().hello_salt;
         if salt.is_empty() {
-            return Err(AppError::new("hello_missing", "O Windows Hello não está ativado neste computador."));
+            return Err(AppError::new("hello_missing", "O desbloqueio rápido não está ativado neste aparelho."));
         }
-        let key = crate::hello::unlock_key(account, &salt)?;
+        let key = match crate::hello::unlock_key(account, &salt) {
+            Ok(k) => k,
+            Err(e) => {
+                // The platform key is gone for good (new fingerprint enrolled, Hello PIN
+                // reset): forget the enrollment so the app stops offering it.
+                if e.code == "hello_missing" {
+                    let _ = st.with_account(|a| Ok(a.remove_device_key(crate::hello::LABEL)?));
+                    crate::hello::remove(account);
+                }
+                return Err(e);
+            }
+        };
         st.with_account(|a| {
             a.unlock_with_device_key(crate::hello::LABEL, &key).map_err(|_| {
-                AppError::new("hello_failed", "O Windows Hello não conseguiu abrir o Mocó. Use a senha mestra e ative de novo.")
+                AppError::new("hello_failed", "O desbloqueio rápido não conseguiu abrir o Mocó. Use a senha mestra e ative de novo.")
             })
         })
     })

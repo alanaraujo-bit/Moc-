@@ -266,3 +266,10 @@ recomendações. Estado:
   (conteúdo marcado como sensível). A tela de configurações diz isso.
 - **Anexos no celular** ficam escondidos por enquanto: o seletor do Android devolve
   `content://`, que `files.rs` ainda não lê.
+- **Biometria (feito):** mesmo desenho do Windows Hello. Uma chave HMAC-SHA256 no Keystore,
+  liberada só por biometria forte (`setUserAuthenticationRequired`, `AUTH_BIOMETRIC_STRONG`),
+  invalidada quando uma digital/rosto novo é cadastrado. O `BiometricPrompt` entrega a chave
+  por `CryptoObject` e ela calcula o HMAC de um desafio fixo por conta; HKDF(HMAC, sal do
+  aparelho) é a chave que desembrulha a Chave da Conta. Sem a biometria, a chave não existe —
+  não é um sim/não. Chave invalidada → o app apaga o cadastro e pede a senha mestra. A tela de
+  bloqueio só pergunta com o app visível e pergunta de novo a cada volta ao app.

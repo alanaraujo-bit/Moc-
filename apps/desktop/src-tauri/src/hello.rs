@@ -6,6 +6,10 @@
 //! time — the key that wraps a copy of the Account Key on this device. The private key
 //! never leaves the TPM and every signature requires the user's biometric/PIN gesture.
 //! Enrollment signs twice and refuses to continue if the signatures differ.
+//!
+//! Android: the same scheme with a Keystore HMAC-SHA256 key bound to a strong biometric
+//! (released per use through BiometricPrompt's CryptoObject, invalidated when a new
+//! fingerprint/face is enrolled). HMAC is deterministic, so one prompt is enough.
 
 use moco_core::crypto::kdf::hkdf_key;
 use moco_core::crypto::{random, SymmetricKey};
@@ -15,7 +19,10 @@ use zeroize::Zeroizing;
 
 use crate::error::{AppError, AppResult};
 
+#[cfg(not(target_os = "android"))]
 pub const LABEL: &str = "windows-hello";
+#[cfg(target_os = "android")]
+pub const LABEL: &str = "android-biometric";
 
 fn challenge(account: Uuid) -> Vec<u8> {
     let mut c = b"moco/v1/hello".to_vec();
@@ -118,7 +125,54 @@ mod imp {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "android")]
+mod imp {
+    use super::*;
+    use crate::platform::{self, BioError};
+
+    fn alias(account: Uuid) -> String {
+        format!("moco-bio-{account}")
+    }
+
+    fn error(e: BioError) -> AppError {
+        match e.code.as_str() {
+            "canceled" => AppError::new("hello_canceled", "Biometria cancelada."),
+            "locked" => AppError::new("hello_locked", "A biometria está bloqueada por muitas tentativas. Use a senha mestra."),
+            "invalidated" | "missing" => AppError::new(
+                "hello_missing",
+                "Uma digital ou rosto novo foi cadastrado neste celular (ou a biometria foi removida). Use a senha mestra e ative de novo.",
+            ),
+            _ => AppError::new("hello_failed", format!("A biometria não respondeu ({}). Use a senha mestra.", e.message)),
+        }
+    }
+
+    pub fn available() -> bool {
+        platform::biometric_available()
+    }
+
+    pub fn enroll(account: Uuid, salt: &[u8]) -> AppResult<SymmetricKey> {
+        if !available() {
+            return Err(AppError::new("hello_unavailable", "Cadastre uma digital ou rosto nas configurações do Android primeiro."));
+        }
+        let mac = platform::biometric_mac(&alias(account), &challenge(account), true, "Ativar a biometria", "Confirme para abrir o Mocó assim da próxima vez")
+            .map_err(|e| {
+                platform::biometric_remove(&alias(account));
+                error(e)
+            })?;
+        Ok(derive(&mac, salt, account))
+    }
+
+    pub fn unlock_key(account: Uuid, salt: &[u8]) -> AppResult<SymmetricKey> {
+        let mac = platform::biometric_mac(&alias(account), &challenge(account), false, "Abrir o Mocó", "").map_err(error)?;
+        Ok(derive(&mac, salt, account))
+    }
+
+    pub fn remove(account: Uuid) {
+        platform::biometric_remove(&alias(account));
+    }
+}
+
+#[cfg(not(any(windows, target_os = "android")))]
 mod imp {
     use super::*;
     pub fn available() -> bool {

@@ -29,8 +29,8 @@ const ALL_SECTIONS = [
   { id: "sobre", label: "Sobre o Mocó", icon: <Info size={16} /> },
 ];
 
-// Hello, Windows integration and file import/export are desktop features for now.
-const SECTIONS = isMobile ? ALL_SECTIONS.filter((x) => !["desbloqueio", "windows", "dados"].includes(x.id)) : ALL_SECTIONS;
+// Windows integration and file import/export are desktop features for now.
+const SECTIONS = isMobile ? ALL_SECTIONS.filter((x) => !["windows", "dados"].includes(x.id)) : ALL_SECTIONS;
 
 function Row({ title, detail, children, htmlFor }: { title: ReactNode; detail?: ReactNode; children: ReactNode; htmlFor?: string }) {
   return (
@@ -196,11 +196,10 @@ export function SettingsScreen() {
           </Row>
         </section>
 
-{!isMobile && (<>
         <section id="desbloqueio" className={s.section}>
           <h2>Desbloqueio</h2>
           <HelloSetting status={status} onChange={reloadStatus} />
-          <Row title="Pedir a senha mestra de vez em quando" detail="Mesmo com o Windows Hello — para você não esquecer a senha.">
+          <Row title="Pedir a senha mestra de vez em quando" detail={isMobile ? "Mesmo com a biometria — para você não esquecer a senha." : "Mesmo com o Windows Hello — para você não esquecer a senha."}>
             <Select<number>
               label="Frequência"
               value={settings.requirePasswordDays}
@@ -214,7 +213,6 @@ export function SettingsScreen() {
             />
           </Row>
         </section>
-</>)}
 
         <section id="conta" className={s.section}>
           <h2>Conta e recuperação</h2>
