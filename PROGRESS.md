@@ -68,7 +68,7 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
 - DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
-0. Android: APK publicado (anexo `Moco-android.apk` no release; o pipeline ainda não gera o APK —
+0. Android: APK publicado (anexo `Moco-android.apk` no release, gerado pelo job `android` do
    subir à mão com `gh release upload`). Faltam: desbloqueio por biometria ligado à
    chave (BiometricPrompt + CryptoObject, não um sim/não), Serviço de Preenchimento Automático,
    anexos/importação/exportação no celular, compartilhamento e publicação (BLOCKERS 8).

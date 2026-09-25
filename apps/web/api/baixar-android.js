@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const r = await fetch(RELEASES, { headers: { Accept: "application/vnd.github+json", "User-Agent": "moco-site" } });
     const releases = await r.json();
     const apk = (Array.isArray(releases) ? releases : [])
-      .filter((rel) => !rel.draft)
+      .filter((rel) => !rel.draft && !rel.prerelease) // stable only; betas live in the app's beta channel
       .flatMap((rel) => rel.assets ?? [])
       .find((a) => a.name.endsWith(".apk"));
     res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=86400");

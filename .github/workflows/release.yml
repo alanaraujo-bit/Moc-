@@ -8,12 +8,15 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # Manual run: builds the Android APK only (as a workflow artifact), publishing nothing.
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   windows:
+    if: github.event_name == 'push'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,3 +66,63 @@ jobs:
           gh release download "${{ github.ref_name }}" -p latest.json -D feed
           gh release view beta >/dev/null 2>&1 || gh release create beta --prerelease --title "Canal beta" --notes "Feed do canal beta do Mocó. Não baixe daqui: use o app."
           gh release upload beta feed/latest.json --clobber
+
+  # Signed Android APK (arm64 + armv7), attached to the same release as Moco-android.apk.
+  android:
+    needs: windows
+    if: ${{ !cancelled() && (needs.windows.result == 'success' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> ../moco-target"
+      - run: pnpm install --frozen-lockfile
+
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/android-release.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/android-release.jks"
+            echo "keyAlias=moco"
+            echo "password=$KEYSTORE_PASSWORD"
+          } > apps/desktop/src-tauri/gen/android/keystore.properties
+
+      - name: Build APK
+        working-directory: apps/desktop
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/../moco-target
+        run: |
+          export NDK_HOME="$ANDROID_NDK_LATEST_HOME"
+          pnpm tauri android build --apk --target aarch64 --target armv7
+          cp src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk "$RUNNER_TEMP/Moco-android.apk"
+          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$RUNNER_TEMP/Moco-android.apk" | head -3
+
+      - name: Attach to the release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "$RUNNER_TEMP/Moco-android.apk" --clobber
+
+      - name: Keep as artifact (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Moco-android
+          path: ${{ runner.temp }}/Moco-android.apk
+          retention-days: 7
