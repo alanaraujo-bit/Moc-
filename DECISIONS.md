@@ -253,8 +253,7 @@ recomendações. Estado:
   essa pilha; no topo, o app vai para segundo plano (fechar a activity derrubava o WebView).
 - **Trancar:** não existe "ocioso" no celular; conta o tempo em segundo plano
   (`autoLockMinutes`). Capturas de tela bloqueadas (FLAG_SECURE) no release.
-- **Fora desta etapa:** biometria (precisa ser ligada à chave com CryptoObject, como o
-  Hello, nunca um sim/não), preenchimento automático (Autofill Service), anexos e
+- **Fora desta etapa:** preenchimento automático (Autofill Service), anexos e
   importação/exportação no celular.
 - **Barras do sistema:** o app desenha de ponta a ponta e lê do Android as medidas reais da
   barra de status, da barra de navegação (gestos ou três botões), do recorte da câmera e do
