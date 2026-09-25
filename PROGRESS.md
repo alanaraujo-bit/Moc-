@@ -62,12 +62,14 @@ Dados de demonstração: `window.__TAURI_INTERNALS__.invoke("dev_seed")` (só em
   (instalação limpa → "Já uso o Mocó" → itens de volta). APK assinado:
   `D:PROJETOSmoco-releasesMoco-0.2.0-android.apk`. Build: `pnpm tauri android build --apk`
   (NDK_HOME, ANDROID_HOME, CARGO_TARGET_DIR=D:moco-target).
-- Site público: https://moco-one.vercel.app (`apps/web`, `/baixar` → instalador mais recente; páginas de segurança e novidades geradas por `node scripts/web/build.mjs`).
+- Site público: https://moco-one.vercel.app (`apps/web`, `/baixar` → instalador mais recente, ou o APK
+  num celular Android; `/baixar/android` → APK mais recente entre os releases; páginas de segurança e novidades geradas por `node scripts/web/build.mjs`).
 - Atualização real validada: 0.1.0 instalado → buscou o feed, baixou, conferiu a assinatura, instalou e reabriu como 0.2.0.
 - DESIGN.md do app (`apps/desktop/DESIGN.md` + `.impeccable/design.json`).
 
 ### Próximos (ordem)
-0. Android: app no ar em debug e release (ver Feito). Faltam: desbloqueio por biometria ligado à
+0. Android: APK publicado (anexo `Moco-android.apk` no release; o pipeline ainda não gera o APK —
+   subir à mão com `gh release upload`). Faltam: desbloqueio por biometria ligado à
    chave (BiometricPrompt + CryptoObject, não um sim/não), Serviço de Preenchimento Automático,
    anexos/importação/exportação no celular, compartilhamento e publicação (BLOCKERS 8).
 1. Compartilhamento: núcleo e servidor prontos (no ar). Falta o desktop — cuidados:

@@ -1,7 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "rewrites": [{ "source": "/baixar", "destination": "/api/baixar" }],
+  "rewrites": [
+    { "source": "/baixar", "destination": "/api/baixar" },
+    { "source": "/baixar/android", "destination": "/api/baixar-android" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

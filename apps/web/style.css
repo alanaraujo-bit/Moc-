@@ -654,3 +654,40 @@ footer a {
 .intro.tight { margin-bottom: 24px; }
 .fine.after { margin-top: 22px; }
 .release .title { font-weight: 600; font-size: 20px; margin: 0; padding: 0; border: 0; letter-spacing: -0.015em; }
+
+/* Second download (Android): same weight, quieter fill. */
+.btn.alt {
+  background: var(--bg, #fff);
+  color: var(--cobalt) !important;
+  box-shadow: inset 0 0 0 1.5px var(--cobalt);
+}
+
+.btn.alt:hover {
+  background: #e7ecfb;
+}
+
+.final .btn.alt {
+  background: transparent;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 80%);
+}
+
+.final .btn.alt:hover {
+  background: rgb(255 255 255 / 12%);
+}
+
+.fine.after-cta {
+  margin-top: 14px;
+  max-width: 52ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn.alt {
+    background: transparent;
+    color: #aebdf7 !important;
+    box-shadow: inset 0 0 0 1.5px #8aa0f5;
+  }
+  .btn.alt:hover {
+    background: rgb(138 160 245 / 12%);
+  }
+}

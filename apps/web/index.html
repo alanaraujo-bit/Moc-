@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Mocó — gerenciador de senhas para Windows</title>
-    <meta name="description" content="Mocó guarda senhas, documentos, cartões e tudo que importa, cifrado no seu computador com uma chave que só você tem. Para Windows." />
+    <title>Mocó — gerenciador de senhas para Windows e Android</title>
+    <meta name="description" content="Mocó guarda senhas, documentos, cartões e tudo que importa, cifrado no seu aparelho com uma chave que só você tem. Para Windows e Android." />
     <link rel="icon" href="/img/moco.svg" type="image/svg+xml" />
     <meta property="og:title" content="Mocó — pode esquecer, o Mocó lembra" />
-    <meta property="og:description" content="Um cantinho seguro para suas senhas, documentos e cartões. Cifrado no seu computador." />
+    <meta property="og:description" content="Um cantinho seguro para suas senhas, documentos e cartões. Cifrado no seu computador e no seu celular." />
     <meta property="og:image" content="https://moco-one.vercel.app/img/app-claro.png" />
     <link rel="stylesheet" href="/style.css" />
   </head>
@@ -43,8 +43,12 @@
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.5 1.3L21 21v-8.5h-9.5zm0-15.6v7.3H21V3z" /></svg>
                 Baixar para Windows
               </a>
-              <span class="fine">Grátis · Windows 10 e 11 · 5 MB</span>
+              <a class="btn alt" href="/baixar/android">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10.5 18.5h3" /></svg>
+                Baixar para Android
+              </a>
             </div>
+            <p class="fine after-cta">Grátis · Windows 10 e 11 (5 MB) · Android 9 ou mais novo (30 MB). No Android, o celular pede para permitir a instalação — é só confirmar.</p>
           </div>
           <figure class="shot">
             <img src="/img/app-claro.png" alt="O Mocó aberto: barra lateral com cofres, lista de itens com azulejos coloridos e o detalhe de um login com código de verificação." width="1180" height="760" />
@@ -140,7 +144,8 @@
           <p>Leva uns dois minutos para criar o seu Mocó. Depois, é só lembrar de uma senha.</p>
           <div class="cta">
             <a class="btn" href="/baixar">Baixar para Windows</a>
-            <span class="fine">Grátis · Windows 10 e 11</span>
+            <a class="btn alt" href="/baixar/android">Baixar para Android</a>
+            <span class="fine">Grátis · Windows 10 e 11 · Android 9+</span>
           </div>
         </div>
       </section>
@@ -155,5 +160,6 @@
       </div>
     </footer>
     <script src="/wall.js" defer></script>
+    <script src="/platform.js" defer></script>
   </body>
 </html>
